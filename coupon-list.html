@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>抽奖券管理 - 订阅管理系统</title>
+  <link rel="stylesheet" href="https://unpkg.com/ant-design-vue@3.2.20/dist/antd.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: #f5f5f5; color: #333;
+    }
+    #app { min-height: 100vh; }
+
+    .app-header {
+      height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03); z-index: 100;
+      position: sticky; top: 0;
+    }
+    .app-header .header-left { display: flex; align-items: center; gap: 4px; }
+    .header-left .menu-fold-btn {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s;
+    }
+    .header-left .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .header-left .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; user-select: none; }
+    .app-header .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .header-right .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+    .layout-body { display: flex; height: calc(100vh - 48px); }
+    .app-sider {
+      width: 200px; background: #fff; border-right: 1px solid #f0f0f0;
+      transition: width .2s; overflow: hidden; flex-shrink: 0;
+    }
+    .app-sider.collapsed { width: 60px; }
+    .sider-logo { height: 48px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+    .sider-logo .logo-icon { font-size: 22px; color: #ff4d88; }
+    .sider-logo .logo-text { font-size: 14px; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+    .sider-menu { padding: 8px 0; }
+    .sider-menu-item {
+      display: flex; align-items: center; height: 44px; padding: 0 16px;
+      font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none;
+      transition: all .15s; cursor: pointer; white-space: nowrap;
+    }
+    .sider-menu-item:hover { background: #fff0f6; color: #ff4d88; }
+    .sider-menu-item.active { color: #fff; background: #ff4d88; }
+    .sider-menu-item .menu-icon { margin-right: 8px; font-size: 15px; }
+    .sider-menu-item .menu-label { /* label on its own */ }
+    .sider-menu-item .menu-arrow { margin-left: auto; font-size: 11px; transition: transform .2s; }
+    .sider-menu-item .menu-arrow.open { transform: rotate(90deg); }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .sider-submenu { overflow: hidden; transition: max-height .25s ease; }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; }
+    .sider-submenu .sider-menu-item.active { background: #ff4d88; color: #fff; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: #fff0f6; color: #ff4d88; }
+
+    .app-content {
+      flex: 1; overflow-y: auto; padding: 20px;
+    }
+    .page-card { background: #fff; border-radius: 6px; padding: 20px 24px; }
+
+    .search-bar {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+    }
+    .search-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #333; }
+    .search-item .search-label { white-space: nowrap; }
+    .input-field {
+      height: 32px; border: 1px solid #d9d9d9; border-radius: 4px; padding: 0 10px;
+      font-size: 13px; color: #333; outline: none; transition: border-color .15s;
+      width: 160px;
+    }
+    .input-field:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    select.input-field { appearance: auto; cursor: pointer; }
+    .search-item .input-field.short { width: 100px; }
+
+    .btn { height: 32px; padding: 0 16px; border-radius: 4px; font-size: 13px; cursor: pointer;
+      transition: all .15s; display: inline-flex; align-items: center; gap: 4px; border: 1px solid transparent;
+    }
+    .btn-primary { background: #ff4d88; color: #fff; border-color: #ff4d88; }
+    .btn-primary:hover { background: #ff6b9d; border-color: #ff6b9d; }
+    .btn-default { background: #fff; color: #333; border-color: #d9d9d9; }
+    .btn-default:hover { color: #ff4d88; border-color: #ff4d88; }
+    .btn-link { color: #1677ff; background: none; border: none; padding: 0 8px; }
+    .btn-link:hover { color: #4096ff; }
+    .btn-link.danger { color: #ff4d88; }
+    .btn-link.danger:hover { color: #ff7875; }
+
+    .data-table-wrap { overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th {
+      background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 500;
+      color: rgba(0,0,0,.85); border-bottom: 1px solid #f0f0f0; white-space: nowrap;
+    }
+    .data-table td {
+      padding: 10px 12px; border-bottom: 1px solid #f0f0f0; color: rgba(0,0,0,.65);
+    }
+    .data-table tbody tr:hover td { background: #fafafa; }
+
+    .status-tag {
+      display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px;
+    }
+    .status-tag.active { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .status-tag.ended { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+
+    .pagination-bar {
+      display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+      margin-top: 16px; padding-top: 12px; font-size: 13px; color: #666;
+    }
+    .pagination-bar .page-btn {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; cursor: pointer;
+      font-size: 13px; transition: all .15s;
+    }
+    .pagination-bar .page-btn:hover { color: #ff4d88; border-color: #ff4d88; }
+    .pagination-bar .page-btn.active { background: #ff4d88; color: #fff; border-color: #ff4d88; }
+    .pagination-bar .page-btn:disabled { color: #d9d9d9; cursor: not-allowed; }
+    .pagination-bar .page-info { margin: 0 4px; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-box {
+      background: #fff; border-radius: 6px; box-shadow: 0 4px 24px rgba(0,0,0,.15);
+      width: 620px; max-height: 80vh; overflow-y: auto; display: flex; flex-direction: column;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid #f0f0f0;
+    }
+    .modal-header .modal-title { font-size: 16px; font-weight: 600; color: #333; }
+    .modal-header .modal-close {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; font-size: 16px; color: #999; transition: all .15s;
+    }
+    .modal-header .modal-close:hover { background: #f5f5f5; color: #ff4d88; }
+    .modal-body { padding: 24px; flex: 1; }
+    .modal-footer {
+      padding: 12px 24px; border-top: 1px solid #f0f0f0;
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+    .form-row {
+      display: flex; align-items: flex-start; margin-bottom: 16px;
+    }
+    .form-label {
+      width: 110px; padding-right: 12px; text-align: right; font-size: 13px;
+      color: rgba(0,0,0,.85); line-height: 32px; flex-shrink: 0; white-space: nowrap;
+    }
+    .form-label.required::before { content: '* '; color: #ff4d88; }
+    .form-control { flex: 1; min-width: 0; }
+
+    .btn-cancel {
+      height: 32px; padding: 0 16px; border-radius: 4px; border: 1px solid #d9d9d9;
+      background: #fff; cursor: pointer; font-size: 13px; color: #333; transition: all .15s;
+    }
+    .btn-cancel:hover { color: #ff4d88; border-color: #ff4d88; }
+
+    /* Date range */
+    .date-range-wrap { display: flex; align-items: center; gap: 6px; }
+    .date-range-wrap .date-sep { color: #999; font-size: 13px; }
+
+    /* Help icon + tooltip */
+    .help-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border: 1px solid #bbb; border-radius: 50%;
+      font-size: 11px; color: #999; cursor: help; position: relative; vertical-align: middle;
+      margin-left: 4px; line-height: 1; user-select: none;
+    }
+    .help-icon:hover { border-color: #ff4d88; color: #ff4d88; }
+    .help-tooltip {
+      display: none; position: absolute; top: 100%; left: 0;
+      margin-top: 6px; background: #333; color: #fff; font-size: 12px;
+      padding: 8px 12px; border-radius: 4px; white-space: pre-line;
+      line-height: 1.6; z-index: 1100; min-width: 280px;
+      text-align: left;
+    }
+    .help-tooltip::after {
+      content: ''; position: absolute; bottom: 100%; left: 12px;
+      border: 5px solid transparent; border-bottom-color: #333;
+    }
+    .help-icon:hover .help-tooltip { display: block; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 40px; color: #999; font-size: 13px; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- 顶部导航 -->
+  <header class="app-header">
+    <div class="header-left">
+      <span class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed">☰</span>
+      <span class="brand">订阅管理系统</span>
+    </div>
+    <div class="header-right">
+      <span class="user-info">
+        <span class="user-avatar">张</span>
+        <span>张家敏</span>
+        <span style="font-size:10px;">▾</span>
+      </span>
+    </div>
+  </header>
+
+  <div class="layout-body">
+    <!-- 侧边栏 -->
+    <aside class="app-sider" :class="{ collapsed: siderCollapsed }">
+      <div class="sider-logo" v-show="!siderCollapsed">
+        <span class="logo-icon">♥</span>
+        <span class="logo-text">导航菜单</span>
+      </div>
+      <div class="sider-menu" v-show="!siderCollapsed">
+        <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📋</span><span class="menu-label">订单管理</span></a>
+        <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">👥</span><span class="menu-label">用户管理</span></a>
+        <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🖼️</span><span class="menu-label">素材管理</span></a>
+        <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🔗</span><span class="menu-label">拼团管理</span></a>
+        <div class="sider-menu-item parent-open" @click="opToolsOpen = !opToolsOpen">
+          <span class="menu-icon">🔧</span>
+          <span class="menu-label">运营工具</span>
+          <span class="menu-arrow" :class="{ open: opToolsOpen }">▶</span>
+        </div>
+        <div class="sider-submenu" :style="{ maxHeight: opToolsOpen ? subMenuMaxHeight : '0' }">
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-label">弹窗</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-label">兑换码</span></a>
+          <a class="sider-menu-item" href="gift-strategy-list.html"><span class="menu-label">赠礼发放策略</span></a>
+          <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">限时促销策略</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-label">赠礼物流管理</span></a>
+          <a class="sider-menu-item" href="event-pricing-strategy-list.html"><span class="menu-label">活动价格策略</span></a>
+          <a class="sider-menu-item" href="event-operations-strategy-list.html"><span class="menu-label">活动投放策略</span></a>
+        </div>
+        <div class="sider-menu-item parent-open" @click="deployOpen = !deployOpen">
+          <span class="menu-icon">📢</span>
+          <span class="menu-label">运营位投放策略</span>
+          <span class="menu-arrow" :class="{ open: deployOpen }">▶</span>
+        </div>
+        <div class="sider-submenu" :style="{ maxHeight: deployOpen ? subMenuMaxHeight : '0' }">
+          <a class="sider-menu-item" href="rights-pay-list.html"><span class="menu-label">投放策略</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-label">页面模块展示</span></a>
+        </div>
+        <div class="sider-menu-item parent-open" @click="priceManageOpen = !priceManageOpen">
+          <span class="menu-icon">💰</span>
+          <span class="menu-label">价格管理</span>
+          <span class="menu-arrow" :class="{ open: priceManageOpen }">▶</span>
+        </div>
+        <div class="sider-submenu" :style="{ maxHeight: priceManageOpen ? subMenuMaxHeight : '0' }">
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-label">价格套餐</span></a>
+          <a class="sider-menu-item" href="price-strategy-list.html"><span class="menu-label">价格策略</span></a>
+          <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">促销套餐</span></a>
+        </div>
+        <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label">产品管理</span></a>
+        <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
+          <span class="menu-icon">🎯</span>
+          <span class="menu-label">抽奖管理</span>
+          <span class="menu-arrow" :class="{ open: lotteryManageOpen }">▶</span>
+        </div>
+        <div class="sider-submenu" :style="{ maxHeight: lotteryManageOpen ? subMenuMaxHeight : '0' }">
+          <a class="sider-menu-item" href="prize-list.html"><span class="menu-label">奖品管理</span></a>
+          <a class="sider-menu-item active" href="coupon-list.html"><span class="menu-label">抽奖券管理</span></a>
+        </div>
+        <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label">中奖管理</span></a>
+        <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label">订阅管理</span></a>
+        <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📁</span><span class="menu-label">素材库</span></a>
+        <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">⚙️</span><span class="menu-label">设置管理</span></a>
+        <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏪</span><span class="menu-label">第三方商户管理</span></a>
+        <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📚</span><span class="menu-label">知识库</span></a>
+      </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="app-content">
+      <div class="page-card">
+        <!-- 搜索栏 -->
+        <div class="search-bar">
+          <div class="search-item">
+            <span class="search-label">抽奖券名称:</span>
+            <input class="input-field" v-model="searchForm.name" placeholder="请输入" />
+          </div>
+          <div class="search-item">
+            <span class="search-label">抽奖券ID:</span>
+            <input class="input-field short" v-model="searchForm.couponId" placeholder="请输入抽奖券ID" />
+          </div>
+          <div class="search-item">
+            <span class="search-label">状态:</span>
+            <select class="input-field short" v-model="searchForm.status">
+              <option value="">全部</option>
+              <option value="进行中">进行中</option>
+              <option value="已结束">已结束</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" @click="handleSearch">查 询</button>
+          <button class="btn btn-primary" @click="openAddModal">添 加</button>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>抽奖券ID</th>
+                <th>抽奖券名称</th>
+                <th>状态</th>
+                <th>有效期</th>
+                <th>更新时间</th>
+                <th>操作人</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in pageData" :key="row.id">
+                <td>{{ row.id }}</td>
+                <td>{{ row.name }}</td>
+                <td>
+                  <span class="status-tag" :class="row.status === '进行中' ? 'active' : 'ended'">{{ row.status }}</span>
+                </td>
+                <td>
+                  <span>{{ row.startTime }}</span>
+                  <span style="color:#999;"> - </span>
+                  <span>{{ row.endTime }}</span>
+                </td>
+                <td>{{ row.updatedAt }}</td>
+                <td>{{ row.operator || '-' }}</td>
+                <td>
+                  <button class="btn btn-link" @click="openEditModal(row)">编辑</button>
+                  <button class="btn btn-link danger" v-if="row.status === '进行中'" @click="handleOffline(row)">下线</button>
+                  <button class="btn btn-link" @click="handleSceneEdit(row)">应用场景编辑</button>
+                  <button class="btn btn-link" v-if="row.status === '进行中'" @click="handleManualSend(row)">手动发放</button>
+                  <button class="btn btn-link" @click="handleDetail(row)">明细</button>
+                </td>
+              </tr>
+              <tr v-if="pageData.length === 0">
+                <td colspan="7" class="empty-state">暂无数据</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pagination-bar" v-if="totalCount > 0">
+          <span>共 {{ totalCount }} 条</span>
+          <button class="page-btn" :disabled="currentPage <= 1" @click="goPage(currentPage - 1)">◀</button>
+          <button
+            class="page-btn" v-for="p in visiblePages" :key="p"
+            :class="{ active: p === currentPage }"
+            @click="goPage(p)"
+          >{{ p }}</button>
+          <button class="page-btn" :disabled="currentPage >= maxPage" @click="goPage(currentPage + 1)">▶</button>
+          <span class="page-info">第 {{ currentPage }}/{{ maxPage }} 页</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 添加抽奖券弹窗 -->
+  <div class="modal-overlay" v-if="addModalVisible" @click.self="closeAddModal">
+    <div class="modal-box" style="width:560px;">
+      <div class="modal-header">
+        <span class="modal-title">添加抽奖券</span>
+        <span class="modal-close" @click="closeAddModal">✕</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <span class="form-label required">奖券码:</span>
+          <div class="form-control">
+            <input class="input-field" v-model="addForm.couponCode" placeholder="请输入奖券码" style="width:100%;" />
+            <div class="form-error" v-if="addErrors.couponCode" style="color:#ff4d88;font-size:12px;margin-top:4px;">{{ addErrors.couponCode }}</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label required">名称:</span>
+          <div class="form-control">
+            <input class="input-field" v-model="addForm.name" placeholder="最多10个字" style="width:100%;" maxlength="10" />
+            <div class="form-error" v-if="addErrors.name" style="color:#ff4d88;font-size:12px;margin-top:4px;">{{ addErrors.name }}</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label required">有效期:</span>
+          <div class="form-control">
+            <div class="date-range-wrap">
+              <input class="input-field" type="datetime-local" v-model="addForm.startTime" style="width:190px;" placeholder="开始日期" />
+              <span class="date-sep">~</span>
+              <input class="input-field" type="datetime-local" v-model="addForm.endTime" style="width:190px;" placeholder="结束日期" />
+            </div>
+            <div class="form-error" v-if="addErrors.time" style="color:#ff4d88;font-size:12px;margin-top:4px;">{{ addErrors.time }}</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">风控场景标识:<span class="help-icon">?<span class="help-tooltip">1、未配置默认兜底风控场景标识
+2、配置后按配置的标识来接入风控</span></span></span>
+          <div class="form-control">
+            <input class="input-field" v-model="addForm.riskSceneId" placeholder="最多100个字" style="width:100%;" maxlength="100" />
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">钱包展示名称:<span class="help-icon">?<span class="help-tooltip">1、用于金豆/现金，在收支明细展示流水名称（未配置默认取租户配置）
+2、示例：会员周年庆活动</span></span></span>
+          <div class="form-control">
+            <input class="input-field" v-model="addForm.activityName" placeholder="最多10个字" style="width:100%;" maxlength="10" />
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">金豆key:<span class="help-icon">?<span class="help-tooltip">1、用于金豆的key，请与资产产品确认后配置（未配置默认取租户配置）
+2、示例：key填写=VipPromotion26th618
+则 key：VipPromotion26th618</span></span></span>
+          <div class="form-control">
+            <input class="input-field" v-model="addForm.goldBeanKey" placeholder="最多50个字" style="width:100%;" maxlength="50" />
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">现金key:<span class="help-icon">?<span class="help-tooltip">1、用于现金的access_key请与资产产品确认后配置（未配置默认取租户配置）
+2、示例：key填写=da43q@!$#@#$!
+则 "access_key": "da43q@!$#@#$!"</span></span></span>
+          <div class="form-control">
+            <input class="input-field" v-model="addForm.cashKey" placeholder="最多50个字" style="width:100%;" maxlength="50" />
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">现金code:<span class="help-icon">?<span class="help-tooltip">1、用于现金的asset_code、deduct_asset_code，两者的差异为后者多了个"_reduce"，请与资产产品确认后配置（未配置默认取租户配置）
+2、示例：code填写=my_vip_anniversary_celebration_event_activity
+则：
+"asset_code": "my_vip_anniversary_celebration_event_activity",
+"deduct_asset_code": "my_vip_anniversary_celebration_event_activity_reduce"</span></span></span>
+          <div class="form-control">
+            <input class="input-field" v-model="addForm.cashCode" placeholder="最多100个字" style="width:100%;" maxlength="100" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" @click="closeAddModal">取 消</button>
+        <button class="btn btn-primary" @click="submitAdd">确 定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑抽奖券弹窗 -->
+  <div class="modal-overlay" v-if="editModalVisible" @click.self="closeEditModal">
+    <div class="modal-box" style="width:560px;">
+      <div class="modal-header">
+        <span class="modal-title">编辑抽奖券</span>
+        <span class="modal-close" @click="closeEditModal">✕</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <span class="form-label required">ID:</span>
+          <div class="form-control">
+            <input class="input-field" :value="editForm.id" disabled style="width:100%;background:#f5f5f5;color:#999;" />
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">奖券码:</span>
+          <div class="form-control">
+            <input class="input-field" :value="editForm.couponCode" disabled style="width:100%;background:#f5f5f5;color:#999;" />
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label required">名称:</span>
+          <div class="form-control">
+            <input class="input-field" v-model="editForm.name" placeholder="最多10个字" style="width:100%;" maxlength="10" />
+            <div class="form-error" v-if="editErrors.name" style="color:#ff4d88;font-size:12px;margin-top:4px;">{{ editErrors.name }}</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label required">有效期:</span>
+          <div class="form-control">
+            <div class="date-range-wrap">
+              <input class="input-field" type="datetime-local" v-model="editForm.startTime" style="width:190px;" placeholder="开始日期" />
+              <span class="date-sep">~</span>
+              <input class="input-field" type="datetime-local" v-model="editForm.endTime" style="width:190px;" placeholder="结束日期" />
+            </div>
+            <div class="form-error" v-if="editErrors.time" style="color:#ff4d88;font-size:12px;margin-top:4px;">{{ editErrors.time }}</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">风控场景标识:<span class="help-icon">?<span class="help-tooltip">1、未配置默认兜底风控场景标识
+2、配置后按配置的标识来接入风控</span></span></span>
+          <div class="form-control">
+            <input class="input-field" v-model="editForm.riskSceneId" placeholder="最多100个字" style="width:100%;" maxlength="100" />
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">钱包展示名称:<span class="help-icon">?<span class="help-tooltip">1、用于金豆/现金，在收支明细展示流水名称（未配置默认取租户配置）
+2、示例：会员周年庆活动</span></span></span>
+          <div class="form-control">
+            <input class="input-field" v-model="editForm.activityName" placeholder="最多10个字" style="width:100%;" maxlength="10" />
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">金豆key:<span class="help-icon">?<span class="help-tooltip">1、用于金豆的key，请与资产产品确认后配置（未配置默认取租户配置）
+2、示例：key填写=VipPromotion26th618
+则 key：VipPromotion26th618</span></span></span>
+          <div class="form-control">
+            <input class="input-field" v-model="editForm.goldBeanKey" placeholder="最多50个字" style="width:100%;" maxlength="50" />
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">现金key:<span class="help-icon">?<span class="help-tooltip">1、用于现金的access_key请与资产产品确认后配置（未配置默认取租户配置）
+2、示例：key填写=da43q@!$#@#$!
+则 "access_key": "da43q@!$#@#$!"</span></span></span>
+          <div class="form-control">
+            <input class="input-field" v-model="editForm.cashKey" placeholder="最多50个字" style="width:100%;" maxlength="50" />
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">现金code:<span class="help-icon">?<span class="help-tooltip">1、用于现金的asset_code、deduct_asset_code，两者的差异为后者多了个"_reduce"，请与资产产品确认后配置（未配置默认取租户配置）
+2、示例：code填写=my_vip_anniversary_celebration_event_activity
+则：
+"asset_code": "my_vip_anniversary_celebration_event_activity",
+"deduct_asset_code": "my_vip_anniversary_celebration_event_activity_reduce"</span></span></span>
+          <div class="form-control">
+            <input class="input-field" v-model="editForm.cashCode" placeholder="最多100个字" style="width:100%;" maxlength="100" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" @click="closeEditModal">取 消</button>
+        <button class="btn btn-primary" @click="submitEdit">确 定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+<script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
+<script>
+  const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+  createApp({
+    setup() {
+      // 侧边栏
+      const siderCollapsed = ref(false);
+      const opToolsOpen = ref(false);
+      const deployOpen = ref(false);
+      const priceManageOpen = ref(false);
+      const lotteryManageOpen = ref(true);
+      const subMenuMaxHeight = ref('2000px');
+
+      // 搜索
+      const searchForm = reactive({ name: '', couponId: '', status: '' });
+
+      // Mock 数据
+      const allData = reactive([
+        { id: 2155, name: '32位测试', couponCode: '32位测试', status: '已结束', startTime: '2026-06-08 15:53:46', endTime: '2026-06-11 15:53:48', updatedAt: '2026-06-11 15:54:10', operator: '', riskSceneId: '' },
+        { id: 2117, name: '618月卡奖券', couponCode: '618月卡奖券', status: '进行中', startTime: '2026-05-28 11:45:44', endTime: '2026-07-12 11:45:49', updatedAt: '2026-06-16 15:17:50', operator: '', riskSceneId: '' },
+        { id: 2116, name: '618季卡奖券', couponCode: '618季卡奖券', status: '进行中', startTime: '2026-05-28 11:41:03', endTime: '2026-07-12 11:41:06', updatedAt: '2026-06-16 15:16:21', operator: '杨惠玲', riskSceneId: '' },
+        { id: 2115, name: '618年卡奖券', couponCode: '618年卡奖券', status: '进行中', startTime: '2026-05-31 10:59:27', endTime: '2026-07-03 19:05:32', updatedAt: '2026-06-16 15:17:43', operator: '', riskSceneId: '' },
+        { id: 1799, name: '周年庆存量基础奖券', couponCode: '周年庆存量基础奖券', status: '已结束', startTime: '2026-02-12 10:07:47', endTime: '2026-03-15 10:07:52', updatedAt: '2026-03-15 10:08:10', operator: '', riskSceneId: '' },
+        { id: 1798, name: '周年庆存量长期奖券', couponCode: '周年庆存量长期奖券', status: '已结束', startTime: '2026-02-12 10:05:47', endTime: '2026-03-15 10:06:07', updatedAt: '2026-03-15 10:06:10', operator: '', riskSceneId: '' },
+        { id: 1797, name: '周年庆年卡奖券', couponCode: '周年庆年卡奖券', status: '已结束', startTime: '2026-02-12 09:59:36', endTime: '2026-03-17 00:00:00', updatedAt: '2026-03-17 00:00:10', operator: '林丽婷', riskSceneId: '' },
+        { id: 1796, name: '周年庆季卡奖券', couponCode: '周年庆季卡奖券', status: '已结束', startTime: '2026-02-12 09:59:13', endTime: '2026-03-29 09:59:16', updatedAt: '2026-05-13 17:37:11', operator: '', riskSceneId: '' },
+        { id: 1795, name: '周年庆月卡奖券', couponCode: '周年庆月卡奖券', status: '进行中', startTime: '2026-02-12 09:58:16', endTime: '2026-06-26 09:58:22', updatedAt: '2026-05-27 16:45:52', operator: '游国扬', riskSceneId: '' },
+        { id: 1334, name: 'ddd', couponCode: 'ddd', status: '已结束', startTime: '2025-11-20 11:46:11', endTime: '2025-11-21 11:46:14', updatedAt: '2025-11-21 11:47:10', operator: '余敏', riskSceneId: '' },
+        { id: 1333, name: '222211', couponCode: '222211', status: '已结束', startTime: '2025-11-20 11:44:18', endTime: '2025-11-21 11:44:21', updatedAt: '2025-11-21 11:45:10', operator: '吴梅芳', riskSceneId: '' },
+        { id: 1332, name: '年抽奖奖品', couponCode: '年抽奖奖品', status: '已结束', startTime: '2025-11-20 09:33:13', endTime: '2025-12-04 09:33:16', updatedAt: '2025-12-05 17:10:15', operator: '', riskSceneId: '' },
+        { id: 1331, name: '季抽奖奖品', couponCode: '季抽奖奖品', status: '已结束', startTime: '2025-11-20 09:32:02', endTime: '2025-12-13 17:19:31', updatedAt: '2025-12-13 17:20:10', operator: '', riskSceneId: '' },
+        { id: 1322, name: '测试月1次', couponCode: '测试月1次', status: '已结束', startTime: '2025-11-18 23:44:43', endTime: '2025-11-19 23:44:46', updatedAt: '2025-11-19 23:45:10', operator: '王靖予', riskSceneId: '' },
+        { id: 1321, name: '😍test抽奖券4', couponCode: '😍test抽奖券4', status: '已结束', startTime: '2025-11-21 16:23:49', endTime: '2025-11-21 16:29:36', updatedAt: '2025-11-21 16:30:10', operator: '林丽婷', riskSceneId: '' },
+      ]);
+
+      // 分页
+      const currentPage = ref(1);
+      const pageSize = ref(15);
+
+      const filteredData = computed(() => {
+        return allData.filter(item => {
+          if (searchForm.name && !item.name.toLowerCase().includes(searchForm.name.toLowerCase())) return false;
+          if (searchForm.couponId && !String(item.id).includes(searchForm.couponId)) return false;
+          if (searchForm.status && item.status !== searchForm.status) return false;
+          return true;
+        });
+      });
+
+      const totalCount = computed(() => filteredData.value.length);
+      const maxPage = computed(() => Math.max(1, Math.ceil(totalCount.value / pageSize.value)));
+
+      const visiblePages = computed(() => {
+        const pages = [];
+        const max = maxPage.value;
+        const cur = currentPage.value;
+        let start = Math.max(1, cur - 2);
+        let end = Math.min(max, start + 4);
+        if (end - start < 4) start = Math.max(1, end - 4);
+        for (let i = start; i <= end; i++) pages.push(i);
+        return pages;
+      });
+
+      const pageData = ref([]);
+
+      function fetchList() {
+        const filtered = filteredData.value;
+        const start = (currentPage.value - 1) * pageSize.value;
+        pageData.value = filtered.slice(start, start + pageSize.value);
+      }
+
+      function handleSearch() { currentPage.value = 1; fetchList(); }
+      function goPage(page) { if (page >= 1 && page <= maxPage.value) { currentPage.value = page; fetchList(); } }
+
+      // ====== 添加弹窗 ======
+      const addModalVisible = ref(false);
+      const addForm = reactive({
+        couponCode: '', name: '', startTime: '', endTime: '', riskSceneId: '',
+        activityName: '', goldBeanKey: '', cashKey: '', cashCode: ''
+      });
+      const addErrors = reactive({ couponCode: '', name: '', time: '' });
+
+      function openAddModal() {
+        addForm.couponCode = '';
+        addForm.name = '';
+        addForm.startTime = '';
+        addForm.endTime = '';
+        addForm.riskSceneId = '';
+        addForm.activityName = '';
+        addForm.goldBeanKey = '';
+        addForm.cashKey = '';
+        addForm.cashCode = '';
+        addErrors.couponCode = '';
+        addErrors.name = '';
+        addErrors.time = '';
+        addModalVisible.value = true;
+      }
+      function closeAddModal() { addModalVisible.value = false; }
+      function submitAdd() {
+        let valid = true;
+        if (!addForm.couponCode.trim()) { addErrors.couponCode = '请输入奖券码'; valid = false; } else { addErrors.couponCode = ''; }
+        if (!addForm.name.trim()) { addErrors.name = '请输入名称'; valid = false; } else { addErrors.name = ''; }
+        if (!addForm.startTime || !addForm.endTime) { addErrors.time = '请选择有效期'; valid = false; } else { addErrors.time = ''; }
+        if (!valid) return;
+
+        const maxId = allData.reduce((max, item) => Math.max(max, item.id), 0);
+        const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
+        allData.unshift({
+          id: maxId + 1,
+          name: addForm.name.trim(),
+          couponCode: addForm.couponCode.trim(),
+          status: '进行中',
+          startTime: addForm.startTime.replace('T', ' '),
+          endTime: addForm.endTime.replace('T', ' '),
+          updatedAt: now,
+          operator: '张家敏',
+          riskSceneId: addForm.riskSceneId,
+          activityName: addForm.activityName,
+          goldBeanKey: addForm.goldBeanKey,
+          cashKey: addForm.cashKey,
+          cashCode: addForm.cashCode,
+        });
+        closeAddModal();
+        handleSearch();
+      }
+
+      // ====== 编辑弹窗 ======
+      const editModalVisible = ref(false);
+      const editForm = reactive({
+        id: null, name: '', couponCode: '', startTime: '', endTime: '', riskSceneId: '',
+        activityName: '', goldBeanKey: '', cashKey: '', cashCode: '', _origRow: null
+      });
+      const editErrors = reactive({ name: '', time: '' });
+
+      function openEditModal(row) {
+        editForm.id = row.id;
+        editForm.name = row.name;
+        editForm.couponCode = row.couponCode;
+        editForm.startTime = row.startTime.replace(' ', 'T');
+        editForm.endTime = row.endTime.replace(' ', 'T');
+        editForm.riskSceneId = row.riskSceneId || '';
+        editForm.activityName = row.activityName || '';
+        editForm.goldBeanKey = row.goldBeanKey || '';
+        editForm.cashKey = row.cashKey || '';
+        editForm.cashCode = row.cashCode || '';
+        editForm._origRow = row;
+        editErrors.name = '';
+        editErrors.time = '';
+        editModalVisible.value = true;
+      }
+      function closeEditModal() { editModalVisible.value = false; }
+      function submitEdit() {
+        let valid = true;
+        if (!editForm.name.trim()) { editErrors.name = '请输入名称'; valid = false; } else { editErrors.name = ''; }
+        if (!editForm.startTime || !editForm.endTime) { editErrors.time = '请选择有效期'; valid = false; } else { editErrors.time = ''; }
+        if (!valid) return;
+
+        const row = editForm._origRow;
+        if (!row) return;
+        row.name = editForm.name.trim();
+        row.startTime = editForm.startTime.replace('T', ' ');
+        row.endTime = editForm.endTime.replace('T', ' ');
+        row.riskSceneId = editForm.riskSceneId;
+        row.activityName = editForm.activityName;
+        row.goldBeanKey = editForm.goldBeanKey;
+        row.cashKey = editForm.cashKey;
+        row.cashCode = editForm.cashCode;
+        row.updatedAt = dayjs().format('YYYY-MM-DD HH:mm:ss');
+        row.operator = '张家敏';
+        closeEditModal();
+        handleSearch();
+      }
+
+      // ====== 行操作 ======
+      function handleOffline(row) {
+        if (!confirm(`确定要下线抽奖券「${row.name}」吗？`)) return;
+        row.status = '已结束';
+        row.updatedAt = dayjs().format('YYYY-MM-DD HH:mm:ss');
+        fetchList();
+      }
+      function handleSceneEdit(row) {
+        alert(`应用场景编辑 - 抽奖券「${row.name}」(ID:${row.id})`);
+      }
+      function handleManualSend(row) {
+        alert(`手动发放 - 抽奖券「${row.name}」(ID:${row.id})`);
+      }
+      function handleDetail(row) {
+        alert(`明细 - 抽奖券「${row.name}」(ID:${row.id})`);
+      }
+
+      onMounted(() => { fetchList(); });
+
+      return {
+        siderCollapsed, opToolsOpen, deployOpen, priceManageOpen, lotteryManageOpen, subMenuMaxHeight,
+        searchForm, pageData, currentPage, totalCount, maxPage, visiblePages,
+        handleSearch, goPage,
+        addModalVisible, addForm, addErrors, openAddModal, closeAddModal, submitAdd,
+        editModalVisible, editForm, editErrors, openEditModal, closeEditModal, submitEdit,
+        handleOffline, handleSceneEdit, handleManualSend, handleDetail,
+      };
+    }
+  }).mount('#app');
+</script>
+</body>
+</html>

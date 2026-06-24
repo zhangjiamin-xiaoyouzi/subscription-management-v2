@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>策略详情 - 赠礼发放策略</title>
+  <link rel="stylesheet" href="https://unpkg.com/ant-design-vue@3.2.20/dist/antd.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: #f5f5f5; color: #333; font-size: 14px;
+    }
+    #app { min-height: 100vh; display: flex; flex-direction: column; }
+
+    .app-header {
+      height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03); position: sticky; top: 0; z-index: 100;
+    }
+    .app-header .header-left { display: flex; align-items: center; gap: 4px; }
+    .header-left .menu-fold-btn {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s;
+    }
+    .header-left .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .header-left .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; user-select: none; }
+    .app-header .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .header-right .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
+
+    .main-area { display: flex; flex: 1; }
+    .sider {
+      width: 200px; background: #fff; color: rgba(0,0,0,.8);
+      flex-shrink: 0; overflow-y: auto; transition: width .2s;
+      display: flex; flex-direction: column; border-right: 1px solid #f0f0f0;
+    }
+    .sider.collapsed { width: 48px; }
+    .sider-logo {
+      height: 48px; padding: 0 16px; display: flex; align-items: center;
+      border-bottom: 1px solid #f0f0f0; font-size: 15px; font-weight: 600;
+      color: rgba(0,0,0,.8); gap: 10px; overflow: hidden;
+    }
+    .sider-logo .logo-icon {
+      width: 24px; height: 24px; background: #ff4d88; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 14px; flex-shrink: 0;
+    }
+    .sider-logo .logo-text { white-space: nowrap; }
+    .sider-menu { flex: 1; padding: 4px 0; }
+    .sider-menu-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 16px; height: 40px; font-size: 13px; color: rgba(0,0,0,.6);
+      cursor: pointer; text-decoration: none; transition: all .15s;
+      white-space: nowrap; overflow: hidden; position: relative;
+    }
+    .sider-menu-item .menu-icon { font-size: 14px; width: 16px; text-align: center; flex-shrink: 0; }
+    .sider-menu-item .menu-label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+    .sider-menu-item .menu-arrow { font-size: 10px; color: rgba(0,0,0,.25); flex-shrink: 0; transition: transform .2s; }
+    .sider-menu-item .menu-arrow.open { transform: rotate(90deg); }
+    .sider-menu-item:hover { color: #ff4d88; background: #fff0f6; }
+    .sider-menu-item.active { color: #fff; background: #ff4d88; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .sider-submenu { overflow: hidden; transition: max-height .25s ease; }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; }
+    .sider-submenu .sider-menu-item.active { background: #ff4d88; color: #fff; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: #fff0f6; color: #ff4d88; }
+
+    .content-area { flex: 1; background: #f0f2f5; overflow-x: auto; }
+    .page-body { background: #fff; margin: 0; min-height: 100%; padding: 0 24px 40px; }
+
+    .breadcrumb {
+      padding: 12px 0 0; font-size: 13px; color: #999;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .breadcrumb a { color: #999; text-decoration: none; }
+    .breadcrumb a:hover { color: #ff4d88; }
+    .breadcrumb .sep { color: #ccc; }
+    .breadcrumb .current { color: #333; }
+
+    .detail-wrap { padding: 16px 0 40px; }
+
+    .section-title {
+      font-size: 15px; font-weight: 500; color: rgba(0,0,0,.8);
+      padding-bottom: 12px; margin-bottom: 16px; margin-top: 24px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    /* 描述列表 */
+    .desc-list { }
+    .desc-item {
+      display: flex; align-items: flex-start; margin-bottom: 16px; line-height: 1.6;
+    }
+    .desc-item-label {
+      width: 130px; flex-shrink: 0; font-size: 13px; color: rgba(0,0,0,.65);
+      text-align: right; padding-right: 16px; padding-top: 2px;
+    }
+    .desc-item-value {
+      flex: 1; font-size: 13px; color: rgba(0,0,0,.85);
+      word-break: break-all; min-width: 0;
+    }
+    .desc-item-value .val-tag {
+      display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px;
+    }
+    .val-tag.success { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .val-tag.default { background: #fafafa; color: #999; border: 1px solid #d9d9d9; }
+
+    /* 条件卡片 */
+    .condition-card {
+      border: 1px solid #f0f0f0; border-radius: 6px; padding: 12px 16px;
+      margin-bottom: 10px; background: #fafafa;
+    }
+    .condition-card .card-title { font-weight: 500; font-size: 13px; margin-bottom: 8px; color: rgba(0,0,0,.75); }
+    .condition-card .cond-row { font-size: 13px; color: #666; margin-bottom: 4px; }
+    .cond-row .cond-tag {
+      display: inline-block; padding: 1px 6px; border-radius: 2px; font-size: 12px;
+      background: #fff; border: 1px solid #e8e8e8; margin-right: 6px;
+    }
+
+    /* 页面标签 */
+    .page-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .page-tag {
+      display: inline-block; padding: 2px 10px; font-size: 12px;
+      border-radius: 4px; background: #fff0f6; color: #ff4d88;
+      border: 1px solid #ffadd2;
+    }
+
+    /* 明细表格 */
+    .detail-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .detail-table th {
+      background: #fafafa; padding: 8px 12px; text-align: left;
+      font-weight: 500; color: #666; border-bottom: 1px solid #f0f0f0;
+    }
+    .detail-table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 16px; font-size: 13px;
+      background: #fff; color: #333; border: 1px solid #d9d9d9;
+      border-radius: 4px; cursor: pointer; transition: all .2s; margin-top: 24px;
+    }
+    .btn-back:hover { border-color: #ff4d88; color: #ff4d88; }
+
+    .empty-state { text-align: center; padding: 80px 0; color: #bbb; }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+    @media (max-width: 900px) {
+      .sider { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="header-left">
+        <div class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed" title="折叠/展开">
+          {{ siderCollapsed ? '☰' : '✕' }}
+        </div>
+        <div class="brand">订阅管理系统</div>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <span class="user-avatar">张</span>
+          <span>张三</span>
+          <span style="font-size:10px;">▾</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-area">
+      <aside class="sider" :class="{ collapsed: siderCollapsed }">
+        <div class="sider-logo">
+          <span class="logo-icon">♥</span>
+          <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
+        </div>
+        <div class="sider-menu">
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="sider-menu-item parent-open" :class="{ active: true }">
+            <span class="menu-icon">🔧</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+            <span class="menu-arrow open" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: '2000px' }">
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">弹窗</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">兑换码</span></a>
+            <a class="sider-menu-item active" href="gift-strategy-list.html"><span class="menu-label">赠礼发放策略</span></a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">限时促销策略</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">赠礼物流管理</span></a>
+            <a class="sider-menu-item" href="event-pricing-strategy-list.html"><span class="menu-label">活动价格策略</span></a>
+            <a class="sider-menu-item" href="event-operations-strategy-list.html"><span class="menu-label">活动投放策略</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📢</span><span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span></a>
+          <div class="sider-menu-item parent-open" :class="{ active: priceManageOpen }" @click="priceManageOpen = !priceManageOpen">
+            <span class="menu-icon">💰</span>
+            <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+            <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: priceManageOpen && !siderCollapsed ? '400px' : '0' }">
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">价格套餐</span></a>
+            <a class="sider-menu-item" href="price-strategy-list.html"><span class="menu-label">价格策略</span></a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">促销套餐</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
+          <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
+            <span class="menu-icon">🎯</span>
+            <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? '400px' : '0' }">
+            <a class="sider-menu-item" href="prize-list.html"><span class="menu-label">奖品管理</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">⚙️</span><span class="menu-label" v-show="!siderCollapsed">设置管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏪</span><span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📚</span><span class="menu-label" v-show="!siderCollapsed">知识库</span></a>
+        </div>
+      </aside>
+
+      <main class="content-area">
+        <div class="page-body">
+          <div class="breadcrumb">
+            <a href="gift-strategy-list.html">运营工具</a>
+            <span class="sep">/</span>
+            <a href="gift-strategy-list.html">赠礼发放策略</a>
+            <span class="sep">/</span>
+            <span class="current">策略详情</span>
+          </div>
+
+          <!-- 未找到 -->
+          <div v-if="!record" class="empty-state">
+            <div class="empty-icon">📄</div>
+            <div>未找到该策略 (id={{ urlId }})</div>
+            <button class="btn-back" @click="goBack" style="margin-top:16px;">← 返回列表</button>
+          </div>
+
+          <div class="detail-wrap" v-else>
+            <!-- ===== 基础信息 ===== -->
+            <div class="section-title">基础信息</div>
+            <div class="desc-list">
+              <div class="desc-item">
+                <div class="desc-item-label">策略 ID</div>
+                <div class="desc-item-value">{{ record.id }}</div>
+              </div>
+              <div class="desc-item">
+                <div class="desc-item-label">策略名称</div>
+                <div class="desc-item-value" style="font-weight:500;">{{ record.name }}</div>
+              </div>
+              <div class="desc-item">
+                <div class="desc-item-label">优先级</div>
+                <div class="desc-item-value">{{ record.priority }}</div>
+              </div>
+              <div class="desc-item">
+                <div class="desc-item-label">订阅计划</div>
+                <div class="desc-item-value">{{ planName }}</div>
+              </div>
+              <div class="desc-item">
+                <div class="desc-item-label">状态</div>
+                <div class="desc-item-value">
+                  <span class="val-tag" :class="record.status === 1 ? 'success' : 'default'">
+                    {{ record.status === 1 ? '投放中' : '下线中' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ===== 发放条件 ===== -->
+            <div class="section-title">发放条件</div>
+            <div class="desc-list">
+              <div class="desc-item">
+                <div class="desc-item-label">发放页面</div>
+                <div class="desc-item-value">
+                  <div class="page-tags">
+                    <span class="page-tag" v-for="p in pageNames" :key="p">{{ p }}</span>
+                    <span v-if="pageNames.length === 0" style="color:#bbb;">-</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="desc-item" style="align-items:stretch;" v-if="conditionGroups.length > 0">
+              <div class="desc-item-label">用户条件</div>
+              <div class="desc-item-value">
+                <div class="condition-card" v-for="(g, gi) in conditionGroups" :key="gi">
+                  <div class="card-title">条件组 {{ gi + 1 }}</div>
+                  <div v-if="g.conditions && g.conditions.length > 0">
+                    <div class="cond-row" v-for="(c, ci) in g.conditions" :key="ci">
+                      <span class="cond-tag">{{ getConditionMetaName(c.type) }}</span>
+                      <span>{{ getConditionOpName(c.op) }}</span>
+                      <span style="margin-left:4px;color:#333;">{{ c.val }}</span>
+                    </div>
+                  </div>
+                  <div v-else style="color:#bbb;font-size:13px;">无条件</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ===== 促销内容 ===== -->
+            <div class="section-title">促销内容</div>
+            <div class="desc-list">
+              <div class="desc-item">
+                <div class="desc-item-label">配置方式</div>
+                <div class="desc-item-value">{{ record.configMode === 'package' ? '按订阅套餐' : '按订阅套餐类型' }}</div>
+              </div>
+            </div>
+
+            <!-- 促销组明细 -->
+            <div v-if="promoGroups.length > 0">
+              <table class="detail-table" style="margin-top:0;">
+                <thead>
+                  <tr>
+                    <th style="width:40px;">#</th>
+                    <th style="width:130px;">套餐/类型</th>
+                    <th style="width:100px;">使用有效期</th>
+                    <th>赠礼名称</th>
+                    <th style="width:100px;">赠礼图标</th>
+                    <th style="width:100px;">赠礼标签</th>
+                    <th style="width:100px;">赠礼价格</th>
+                    <th style="width:120px;">赠礼价值</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(g, gi) in promoGroups" :key="gi">
+                    <td>{{ gi + 1 }}</td>
+                    <td>{{ getPromoPlanLabel(g) }}</td>
+                    <td>{{ g.validity === 'follow_plan' ? '跟随订阅计划' : '指定时间' }}</td>
+                    <td>{{ g.giftName || '-' }}</td>
+                    <td>{{ g.giftIcon === 'show' ? '展示' : '隐藏' }}</td>
+                    <td>{{ g.giftTag === 'show' ? '展示 · ' + (g.giftTagText || '') : '隐藏' }}</td>
+                    <td>{{ g.giftPrice === 'show_zero' ? '展示￥0' : '隐藏' }}</td>
+                    <td>{{ g.giftValue === 'show' ? '展示 · ' + (g.giftValueAmount || '￥0') : '隐藏' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else style="color:#bbb;font-size:13px;padding-left:130px;margin-bottom:16px;">暂无促销组配置</div>
+
+            <!-- ===== 元信息 ===== -->
+            <div class="section-title">其他信息</div>
+            <div class="desc-list">
+              <div class="desc-item">
+                <div class="desc-item-label">创建人</div>
+                <div class="desc-item-value">{{ record.creator || '-' }}</div>
+              </div>
+              <div class="desc-item">
+                <div class="desc-item-label">创建时间</div>
+                <div class="desc-item-value">{{ formatTime(record.created_at) }}</div>
+              </div>
+              <div class="desc-item" v-if="record.operator">
+                <div class="desc-item-label">最后修改人</div>
+                <div class="desc-item-value">{{ record.operator }}</div>
+              </div>
+              <div class="desc-item" v-if="record.updated_at">
+                <div class="desc-item-label">最后修改时间</div>
+                <div class="desc-item-value">{{ formatTime(record.updated_at) }}</div>
+              </div>
+            </div>
+
+            <!-- 返回按钮 -->
+            <button class="btn-back" @click="goBack">← 返回列表</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    // ===== 页面映射 =====
+    const PAGE_MAP = {
+      pay_convert: '支付转化页',
+      rights_detail: '权益详情页',
+      h5_pay: 'H5支付页',
+      home_popup: '首页弹窗',
+      me_tab: '我的Tab',
+      student_card: '学生开卡页'
+    };
+
+    const PLAN_MAP = {
+      1: '连续包月-基础版',
+      2: '连续包季-标准版',
+      3: '连续包年-高级版',
+      4: '月度体验卡',
+      6: '季度体验卡',
+      7: '年度体验卡'
+    };
+
+    const CONDITION_META_MAP = {
+      vip_status: '会员状态',
+      platform: '平台',
+      city_level: '城市等级',
+      crowd: '人群包',
+      ab_group: 'AB实验组'
+    };
+
+    const CONDITION_OP_MAP = {
+      eq: '等于',
+      in: '属于',
+      not_in: '不属于',
+      ne: '不等于'
+    };
+
+    // ===== Mock 数据（与列表页一致） =====
+    function generateMockListData() {
+      const statuses = [1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1];
+      const creators = ['张三', '李四', '王五', '赵六', '陈七', '孙八'];
+      const pageOptions = ['pay_convert', 'rights_detail', 'h5_pay', 'home_popup', 'me_tab', 'student_card'];
+      const pageComboOptions = ['pay_convert,rights_detail', 'h5_pay,home_popup', 'me_tab,student_card', 'pay_convert,h5_pay,rights_detail'];
+      const planOptions = [1, 2, 3, 4, 6, 7, null];
+      const names = [
+        '收银台拼年卡-高版本改icon', '学生开卡页_拼团促销', '收银台拼年卡-实验版本',
+        '会员中心限时优惠活动', '首月特惠订阅活动', '学生专属半年卡促销',
+        '育儿会员联合促销方案', '收银台拼年卡-双月卡版', '拼团年卡新版本测试',
+        '限时折扣年卡活动', '会员续费优惠活动', '新会员特惠礼包',
+        '首页弹窗促销活动A', '支付完成页推荐方案', '详情页付费引导弹窗',
+        '收银台拼年卡-B版本', '权益升级引导方案', '会员专享福利发放',
+        '618大促会员礼包', '双十一特惠活动', '年终回馈会员福利',
+        '新手引导赠礼策略', '老客召回优惠方案', '节假日专题促销',
+        '付费会员日专属福利'
+      ];
+      const data = [];
+      let baseTime = new Date('2026-06-01').getTime();
+      const priorities = Array.from({ length: 25 }, (_, i) => i + 1);
+      for (let i = priorities.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [priorities[i], priorities[j]] = [priorities[j], priorities[i]];
+      }
+      for (let i = 0; i < 25; i++) {
+        const createdAt = baseTime - i * 86400000 * 1.5;
+        const pageKeys = i < 18 ? pageOptions[i % pageOptions.length] : pageComboOptions[(i - 18) % pageComboOptions.length];
+        data.push({
+          id: 1000 + i,
+          name: names[i],
+          priority: priorities[i],
+          page_keys: pageKeys,
+          units: i % 3 === 0 ? [] : [{
+            groups: [{
+              conditions: i % 5 === 0 ? [] : [
+                { type: 'vip_status', op: i % 3 === 0 ? 'in' : 'eq', val: i % 4 === 0 ? '1,2' : '1' },
+                ...(i % 2 === 0 ? [{ type: 'platform', op: 'eq', val: 'ios' }] : [])
+              ]
+            }]
+          }],
+          plan_id: planOptions[i % planOptions.length],
+          created_at: createdAt,
+          creator: creators[i % creators.length],
+          status: statuses[i],
+          operator: i % 4 === 0 ? creators[(i + 1) % creators.length] : null,
+          updated_at: createdAt + Math.floor(Math.random() * 86400000 * 3),
+
+          // 详情页扩展字段
+          configMode: i % 2 === 0 ? 'package_type' : 'package',
+          promoGroups: [
+            {
+              planType: 'yearly',
+              planId: 1000 + (i % 5),
+              validity: i % 2 === 0 ? 'follow_plan' : 'specify_time',
+              giftName: ['5元优惠券', '10元优惠券', '3天免费试用', '7天免费试用'][i % 4],
+              giftIcon: 'show',
+              giftTag: i % 2 === 0 ? 'show' : 'hide',
+              giftTagText: i % 2 === 0 ? (['一单回本', '限时福利', '超值优惠'][i % 3]) : '',
+              giftPrice: 'show_zero',
+              giftValue: i % 3 === 0 ? 'show' : 'hide',
+              giftValueAmount: i % 3 === 0 ? '￥' + [5, 10, 15, 20][i % 4] : '￥0',
+              giftSubtitle: ['助力经期更健康', '', '限时特惠活动'][i % 3]
+            }
+          ]
+        });
+      }
+      return data;
+    }
+
+    const ALL_MOCK_DATA = generateMockListData();
+
+    createApp({
+      setup() {
+        const siderCollapsed = ref(false);
+        const priceManageOpen = ref(true);
+        const lotteryManageOpen = ref(true);
+        const urlId = ref('');
+        const record = ref(null);
+
+        onMounted(() => {
+          const params = new URLSearchParams(window.location.search);
+          urlId.value = params.get('id') || '';
+          const id = parseInt(urlId.value);
+          if (!isNaN(id)) {
+            record.value = ALL_MOCK_DATA.find(r => r.id === id) || null;
+            // 扩展 mock：补充字段
+            if (record.value) {
+              if (!record.value.configMode) record.value.configMode = 'package_type';
+              if (!record.value.promoGroups) record.value.promoGroups = [];
+            }
+          }
+        });
+
+        function goBack() {
+          window.location.href = 'gift-strategy-list.html';
+        }
+
+        function formatTime(ts) {
+          if (!ts) return '-';
+          const d = new Date(ts);
+          const pad = n => String(n).padStart(2, '0');
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        }
+
+        const pageNames = computed(() => {
+          if (!record.value || !record.value.page_keys) return [];
+          return record.value.page_keys.split(',').map(k => PAGE_MAP[k] || k);
+        });
+
+        const planName = computed(() => {
+          if (!record.value || record.value.plan_id == null) return '-';
+          return PLAN_MAP[record.value.plan_id] || `计划#${record.value.plan_id}`;
+        });
+
+        const conditionGroups = computed(() => {
+          if (!record.value || !record.value.units || record.value.units.length === 0) return [];
+          const groups = record.value.units[0].groups;
+          return groups || [];
+        });
+
+        const promoGroups = computed(() => {
+          return record.value && record.value.promoGroups ? record.value.promoGroups : [];
+        });
+
+        function getConditionMetaName(type) {
+          return CONDITION_META_MAP[type] || type;
+        }
+
+        function getConditionOpName(op) {
+          return CONDITION_OP_MAP[op] || op;
+        }
+
+        function getPromoPlanLabel(g) {
+          if (record.value && record.value.configMode === 'package_type') {
+            const map = { monthly: '月度套餐', quarterly: '季度套餐', yearly: '年度套餐', trial: '体验套餐' };
+            return map[g.planType] || g.planType || '-';
+          }
+          return g.planId ? (PLAN_MAP[g.planId - 1000 + 1] || `计划#${g.planId}`) : '-';
+        }
+
+        return {
+          siderCollapsed, priceManageOpen, lotteryManageOpen, urlId, record,
+          pageNames, planName, conditionGroups, promoGroups,
+          goBack, formatTime,
+          getConditionMetaName, getConditionOpName, getPromoPlanLabel
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

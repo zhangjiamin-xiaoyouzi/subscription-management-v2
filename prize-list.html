@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>奖品管理 - 订阅管理系统</title>
+  <link rel="stylesheet" href="https://unpkg.com/ant-design-vue@3.2.20/dist/antd.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: #f5f5f5; color: #333;
+    }
+    #app { min-height: 100vh; }
+
+    .app-header {
+      height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03); z-index: 100;
+      position: sticky; top: 0;
+    }
+    .app-header .header-left { display: flex; align-items: center; gap: 4px; }
+    .header-left .menu-fold-btn {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s;
+    }
+    .header-left .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .header-left .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; user-select: none; }
+    .app-header .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .header-right .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+    .layout-body { display: flex; height: calc(100vh - 48px); }
+    .app-sider {
+      width: 200px; background: #fff; border-right: 1px solid #f0f0f0;
+      transition: width .2s; overflow: hidden; flex-shrink: 0;
+    }
+    .app-sider.collapsed { width: 60px; }
+    .sider-logo { height: 48px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+    .sider-logo .logo-icon { font-size: 22px; color: #ff4d88; }
+    .sider-logo .logo-text { font-size: 14px; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+    .sider-menu { padding: 8px 0; }
+    .sider-menu-item {
+      display: flex; align-items: center; height: 44px; padding: 0 16px;
+      font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none;
+      transition: all .15s; cursor: pointer; white-space: nowrap;
+    }
+    .sider-menu-item:hover { background: #fff0f6; color: #ff4d88; }
+    .sider-menu-item.active { color: #fff; background: #ff4d88; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .sider-submenu { overflow: hidden; transition: max-height .25s ease; }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; }
+    .sider-submenu .sider-menu-item.active { background: #ff4d88; color: #fff; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: #fff0f6; color: #ff4d88; }
+
+    .content-area { flex: 1; background: #f0f2f5; overflow-x: auto; }
+    .page-body { background: #fff; padding: 0 24px 24px; min-height: 100%; }
+
+    .toolbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 16px; flex-wrap: wrap; padding-top: 16px; }
+    .toolbar-left { display: flex; align-items: center; gap: 12px; }
+    .toolbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 16px; font-size: 13px;
+      background: #ff4d88; color: #fff; border: 1px solid #ff4d88;
+      border-radius: 4px; cursor: pointer; transition: all .2s;
+    }
+    .btn-primary:hover { background: #ff3875; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-cancel { background: #fff; color: #666; border: 1px solid #d9d9d9; height: 32px; padding: 0 16px; font-size: 13px; border-radius: 4px; cursor: pointer; }
+    .btn-ok { background: #ff4d88; color: #fff; border: none; height: 32px; padding: 0 20px; font-size: 13px; border-radius: 4px; cursor: pointer; margin-left: 8px; }
+    .btn-link { background: none; border: none; color: #ff4d88; font-size: 13px; cursor: pointer; padding: 0 4px; }
+    .btn-link:hover { color: #ff3875; }
+    .btn-link.disabled { color: #ccc; cursor: not-allowed; }
+    .btn-link.disabled:hover { color: #ccc; }
+    .input-field { height: 32px; padding: 0 10px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; }
+    .input-field:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .select-field { height: 32px; padding: 0 8px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; background: #fff; cursor: pointer; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+    .data-table thead th {
+      background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 500;
+      border-bottom: 1px solid #f0f0f0; white-space: nowrap; user-select: none;
+    }
+    .data-table tbody td { padding: 10px 12px; border-bottom: 1px solid #f5f5f5; overflow: hidden; text-overflow: ellipsis; }
+    .data-table tbody tr:hover { background: #fafafa; }
+    .empty-state { text-align: center; padding: 60px 0; color: #bbb; }
+
+    .pagination-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 16px 0; font-size: 13px; color: #666; }
+    .pagination-bar button {
+      height: 28px; padding: 0 12px; font-size: 12px; border: 1px solid #d9d9d9;
+      border-radius: 4px; background: #fff; cursor: pointer;
+    }
+    .pagination-bar button:hover { border-color: #ff4d88; color: #ff4d88; }
+    .pagination-bar button:disabled { opacity: .4; cursor: not-allowed; }
+    .pagination-bar button.active { background: #ff4d88; color: #fff; border-color: #ff4d88; }
+
+    .prize-img-cell { display: flex; align-items: center; gap: 6px; }
+    .prize-img-thumb { width: 32px; height: 32px; border-radius: 4px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+    .value-tag { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 12px; }
+    .value-tag.high { background: #fff0f6; color: #c41d7f; }
+    .value-tag.mid { background: #e6f4ff; color: #1677ff; }
+    .value-tag.low { background: #f6ffed; color: #389e0d; }
+    .value-tag.none { background: #f5f5f5; color: #999; }
+
+    .action-cell { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+    .prize-name-cell { display: flex; align-items: center; gap: 4px; }
+    .prize-name-cell .help-icon { color: #bbb; cursor: help; font-size: 14px; }
+    .prize-name-cell .help-icon:hover { color: #ff4d88; }
+
+    .search-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; padding-top: 16px; }
+    .search-row .search-item { display: flex; align-items: center; gap: 6px; }
+    .search-row .search-item label { font-size: 13px; color: #666; white-space: nowrap; }
+    .date-sep { color: #bbb; margin: 0 4px; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-box {
+      background: #fff; border-radius: 6px; box-shadow: 0 4px 24px rgba(0,0,0,.15);
+      width: 620px; max-height: 80vh; overflow-y: auto; display: flex; flex-direction: column;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid #f0f0f0;
+    }
+    .modal-header .modal-title { font-size: 16px; font-weight: 600; color: #333; }
+    .modal-header .modal-close {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; font-size: 16px; color: #999; transition: all .15s;
+    }
+    .modal-header .modal-close:hover { background: #f5f5f5; color: #ff4d88; }
+    .modal-body { padding: 24px; flex: 1; }
+    .modal-footer {
+      padding: 12px 24px; border-top: 1px solid #f0f0f0;
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+    .form-row {
+      display: flex; align-items: flex-start; margin-bottom: 16px;
+    }
+    .form-row .form-label {
+      width: 100px; flex-shrink: 0; text-align: right; padding-right: 12px;
+      font-size: 13px; color: #555; line-height: 32px;
+    }
+    .form-row .form-control { flex: 1; max-width: 360px; }
+    .form-error { color: #ff4d4f; font-size: 12px; margin-top: 3px; }
+    .input-field.error { border-color: #ff4d4f; }
+
+    /* 编辑弹窗-兑换码区域 */
+    .section-divider { border: none; border-top: 1px solid #f0f0f0; margin: 20px 0; }
+    .section-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .section-title .section-badge { font-size: 12px; font-weight: 400; color: #999; background: #f5f5f5; padding: 1px 8px; border-radius: 10px; }
+    .codes-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 12px; }
+    .codes-table th { background: #fafafa; padding: 8px 10px; text-align: left; font-weight: 500; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+    .codes-table td { padding: 8px 10px; border-bottom: 1px solid #f5f5f5; }
+    .codes-table tr:hover td { background: #fafafa; }
+    .codes-table .code-status { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; }
+    .codes-table .code-status.unused { background: #f6ffed; color: #389e0d; }
+    .codes-table .code-status.used { background: #f5f5f5; color: #bbb; }
+    .codes-empty { text-align: center; padding: 32px 0; color: #bbb; font-size: 13px; }
+    .btn-add-codes { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px; font-size: 12px; background: #fff; color: #ff4d88; border: 1px dashed #ff4d88; border-radius: 4px; cursor: pointer; transition: all .15s; }
+    .btn-add-codes:hover { background: #fff0f6; }
+
+    /* 添加兑换码子弹窗 */
+    .sub-modal { z-index: 1001; }
+    .template-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding: 12px 16px; background: #fafafa; border-radius: 6px; }
+    .template-row .template-hint { font-size: 12px; color: #999; flex: 1; }
+    .btn-download { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 16px; font-size: 13px; background: #fff; color: #1677ff; border: 1px solid #1677ff; border-radius: 4px; cursor: pointer; transition: all .15s; }
+    .btn-download:hover { background: #e6f4ff; }
+
+    .upload-area { border: 2px dashed #d9d9d9; border-radius: 8px; padding: 28px 16px; text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 16px; background: #fafafa; }
+    .upload-area:hover, .upload-area.dragover { border-color: #ff4d88; background: #fff0f6; }
+    .upload-area .upload-icon { font-size: 36px; color: #d9d9d9; margin-bottom: 8px; }
+    .upload-area.dragover .upload-icon { color: #ff4d88; }
+    .upload-area .upload-text { font-size: 13px; color: #666; }
+    .upload-area .upload-hint { font-size: 12px; color: #bbb; margin-top: 4px; }
+    .upload-area input[type="file"] { display: none; }
+    .upload-file-name { font-size: 12px; color: #1677ff; margin-top: 6px; }
+
+    .manual-input-hint { font-size: 13px; color: #666; margin-bottom: 6px; }
+    .manual-textarea { width: 100%; height: 100px; padding: 10px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; resize: vertical; outline: none; font-family: monospace; }
+    .manual-textarea:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+
+    .preview-table-wrap { max-height: 300px; overflow-y: auto; border: 1px solid #f0f0f0; border-radius: 4px; margin-top: 12px; }
+    .preview-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .preview-table th { background: #fafafa; padding: 8px 10px; text-align: left; font-weight: 500; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; }
+    .preview-table td { padding: 8px 10px; border-bottom: 1px solid #f5f5f5; }
+    .preview-table tr:hover td { background: #fafafa; }
+    .preview-table .del-code-btn { background: none; border: none; color: #ff4d4f; cursor: pointer; font-size: 12px; padding: 0; }
+    .preview-table .del-code-btn:hover { color: #ff7875; }
+
+    .codes-stats { display: flex; align-items: center; gap: 16px; padding: 10px 16px; background: #f6ffed; border-radius: 4px; margin-top: 12px; font-size: 13px; color: #389e0d; }
+    .codes-stats .stat-num { font-weight: 600; }
+    .codes-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+    /* 添加弹窗-图片上传 */
+    .upload-row { display: flex; align-items: center; gap: 12px; }
+    .prize-img-upload-box {
+      width: 80px; height: 80px; border: 1px dashed #d9d9d9; border-radius: 6px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .2s; background: #fafafa; flex-shrink: 0;
+      overflow: hidden; text-align: center; padding: 4px;
+    }
+    .prize-img-upload-box:hover { border-color: #ff4d88; background: #fff0f6; }
+
+    /* 发放限制行 */
+    .limit-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 13px; color: #555; }
+    .limit-row:last-child { margin-bottom: 0; }
+    .limit-label { width: 90px; flex-shrink: 0; text-align: right; }
+    .limit-input { width: 72px; text-align: center; }
+
+    /* 兑换码输入方式切换tab */
+    .exchange-tabs { display: flex; border-bottom: 1px solid #f0f0f0; margin-bottom: 12px; }
+    .exchange-tab {
+      padding: 8px 20px; font-size: 13px; color: #666; cursor: pointer;
+      border-bottom: 2px solid transparent; transition: all .2s; user-select: none;
+    }
+    .exchange-tab:hover { color: #ff4d88; }
+    .exchange-tab.active { color: #ff4d88; border-bottom-color: #ff4d88; font-weight: 500; }
+    .exchange-panel { padding-top: 4px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="header-left">
+        <span class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed">✕</span>
+        <span class="brand">订阅管理系统</span>
+      </div>
+      <div class="header-right">
+        <span class="user-info">
+          <span class="user-avatar">张</span>
+          <span>张三</span>
+          <span>▾</span>
+        </span>
+      </div>
+    </header>
+
+    <div class="layout-body">
+      <aside class="app-sider" :class="{ collapsed: siderCollapsed }">
+        <div class="sider-logo">
+          <span class="logo-icon">♥</span>
+          <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
+        </div>
+        <div class="sider-menu">
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="sider-menu-item parent-open" @click="opToolsOpen = !opToolsOpen">
+            <span class="menu-icon">🔧</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+            <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">弹窗</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">兑换码</span></a>
+            <a class="sider-menu-item" href="gift-strategy-list.html"><span class="menu-label">赠礼发放策略</span></a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">限时促销策略</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">赠礼物流管理</span></a>
+            <a class="sider-menu-item" href="event-pricing-strategy-list.html"><span class="menu-label">活动价格策略</span></a>
+            <a class="sider-menu-item" href="event-operations-strategy-list.html"><span class="menu-label">活动投放策略</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="deployOpen = !deployOpen">
+            <span class="menu-icon">📢</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
+            <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+            <a class="sider-menu-item" href="rights-pay-list.html"><span class="menu-label">投放策略</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">页面模块展示</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="priceManageOpen = !priceManageOpen">
+            <span class="menu-icon">💰</span>
+            <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+            <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">价格套餐</span></a>
+            <a class="sider-menu-item" href="price-strategy-list.html"><span class="menu-label">价格策略</span></a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">促销套餐</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
+          <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
+            <span class="menu-icon">🎯</span>
+            <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item active" href="prize-list.html"><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="coupon-list.html"><span class="menu-label">抽奖券管理</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">⚙️</span><span class="menu-label" v-show="!siderCollapsed">设置管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏪</span><span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📚</span><span class="menu-label" v-show="!siderCollapsed">知识库</span></a>
+        </div>
+      </aside>
+
+      <main class="content-area">
+        <div class="page-body">
+          <!-- 搜索区域 -->
+          <div class="search-row">
+            <div class="search-item">
+              <label>奖品类型 :</label>
+              <select class="select-field" v-model="searchForm.prizeType">
+                <option value="">全部</option>
+                <option value="兑换码">兑换码</option>
+                <option value="实物">实物</option>
+                <option value="现金红包">现金红包</option>
+                <option value="金豆">金豆</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>奖品ID :</label>
+              <input class="input-field" v-model="searchForm.prizeId" placeholder="请输入" style="width:120px;" />
+            </div>
+            <div class="search-item">
+              <label>奖品名称 :</label>
+              <input class="input-field" v-model="searchForm.prizeName" placeholder="请输入" style="width:160px;" />
+            </div>
+            <div class="search-item">
+              <label>奖品价值 :</label>
+              <select class="select-field" v-model="searchForm.prizeValue">
+                <option value="">全部</option>
+                <option value="高价值">高价值</option>
+                <option value="中价值">中价值</option>
+                <option value="低价值">低价值</option>
+                <option value="无价值">无价值</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>奖品有效期 :</label>
+              <input class="input-field" type="date" v-model="searchForm.startDate" placeholder="开始日期" style="width:130px;" />
+              <span class="date-sep">~</span>
+              <input class="input-field" type="date" v-model="searchForm.endDate" placeholder="结束日期" style="width:130px;" />
+            </div>
+            <button class="btn-primary" style="height:32px; padding:0 16px; font-size:13px;" @click="handleSearch">查 询</button>
+            <button class="btn-primary" style="height:32px; padding:0 16px; font-size:13px;" @click="goAdd">添 加</button>
+          </div>
+
+          <!-- 数据表格 -->
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:70px;">奖品ID</th>
+                  <th style="width:200px;">奖品名称</th>
+                  <th style="width:90px;">奖品类型</th>
+                  <th style="width:80px;">每份数量</th>
+                  <th style="width:90px;">奖品图片</th>
+                  <th style="width:90px;">奖品价值</th>
+                  <th style="width:80px;">奖品总数</th>
+                  <th style="width:80px;">奖品库存</th>
+                  <th style="width:90px;">日获奖上限</th>
+                  <th style="width:90px;">月获奖上限</th>
+                  <th style="width:140px;">更新时间</th>
+                  <th style="width:80px;">操作人</th>
+                  <th style="width:200px;">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in pageData" :key="row.id">
+                  <td>{{ row.id }}</td>
+                  <td>
+                    <div class="prize-name-cell">
+                      {{ row.name }}
+                      <span class="help-icon" v-if="row.hasHelp" title="更多信息">?</span>
+                    </div>
+                  </td>
+                  <td>{{ row.type }}</td>
+                  <td>{{ row.quantityPerShare }}</td>
+                  <td>
+                    <div class="prize-img-cell">
+                      <div class="prize-img-thumb">🖼</div>
+                      <span style="font-size:12px;color:#ff4d88;cursor:pointer;">预览</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="value-tag" :class="{ high: row.value === '高价值', mid: row.value === '中价值', low: row.value === '低价值', none: row.value === '无价值' }">
+                      {{ row.value }}
+                    </span>
+                  </td>
+                  <td>{{ row.totalCount !== null ? row.totalCount : '/' }}</td>
+                  <td>{{ row.inventory !== null ? row.inventory : '/' }}</td>
+                  <td>{{ row.dailyLimit !== null ? row.dailyLimit : '/' }}</td>
+                  <td>{{ row.monthlyLimit !== null ? row.monthlyLimit : '/' }}</td>
+                  <td>{{ row.updatedAt }}</td>
+                  <td>{{ row.operator || '' }}</td>
+                  <td class="action-cell">
+                    <button class="btn-link" @click="goView(row)">查看</button>
+                    <button class="btn-link" v-if="row.canEdit" @click="goEdit(row)">编辑</button>
+                    <button class="btn-link disabled" v-else>编辑</button>
+                    <button class="btn-link" v-if="row.canOffline" @click="goOffline(row)">下架</button>
+                    <button class="btn-link" @click="goCopy(row)">复制</button>
+                  </td>
+                </tr>
+                <tr v-if="pageData.length === 0">
+                  <td colspan="13" class="empty-state">暂无数据</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 分页 -->
+          <div class="pagination-bar" v-if="totalCount > 0">
+            <span>共{{ totalCount }}条</span>
+            <button :disabled="currentPage <= 1" @click="goPage(currentPage - 1)">上一页</button>
+            <button v-for="p in visiblePages" :key="p" :class="{ active: p === currentPage }" @click="goPage(p)">{{ p }}</button>
+            <button :disabled="currentPage >= maxPage" @click="goPage(currentPage + 1)">下一页</button>
+            <span style="margin-left:8px;">
+              <select class="select-field" v-model.number="pageSize" @change="handlePageSizeChange" style="height:28px;">
+                <option :value="20">20 条/页</option>
+                <option :value="50">50 条/页</option>
+                <option :value="100">100 条/页</option>
+              </select>
+            </span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- 添加奖品弹窗 -->
+    <div class="modal-overlay" v-if="addModalVisible" @click.self="closeAddModal">
+      <div class="modal-box" style="width:720px;">
+        <div class="modal-header">
+          <span class="modal-title">添加奖品</span>
+          <span class="modal-close" @click="closeAddModal">✕</span>
+        </div>
+        <div class="modal-body">
+          <!-- 奖品信息 -->
+          <div class="section-title" style="margin-bottom:16px;">奖品信息：</div>
+
+          <div class="form-row">
+            <span class="form-label">奖品名称:</span>
+            <div class="form-control">
+              <input class="input-field" v-model="addForm.prizeName" placeholder="请输入奖品名称" style="width:100%;" />
+              <div class="form-error" v-if="addErrors.prizeName">{{ addErrors.prizeName }}</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品备注:</span>
+            <div class="form-control">
+              <input class="input-field" v-model="addForm.remark" placeholder="仅后台展示使用" style="width:100%;" />
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品类型:</span>
+            <div class="form-control">
+              <select class="input-field" v-model="addForm.prizeType" style="width:100%;">
+                <option value="">请选择</option>
+                <option value="兑换码">兑换码</option>
+                <option value="实物">实物</option>
+                <option value="现金红包">现金红包</option>
+                <option value="金豆">金豆</option>
+              </select>
+              <div class="form-error" v-if="addErrors.prizeType">{{ addErrors.prizeType }}</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <span class="form-label">角标文案:</span>
+            <div class="form-control">
+              <input class="input-field" v-model="addForm.badgeText" placeholder="请输入角标文案" style="width:100%;" />
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">每份数量:</span>
+            <div class="form-control">
+              <input class="input-field" type="number" v-model.number="addForm.quantityPerShare" placeholder="请输入每份数量" style="width:100%;" min="1" />
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品图片:</span>
+            <div class="form-control">
+              <div class="upload-row">
+                <div class="prize-img-upload-box" @click="simulateUpload" :style="addForm.imageFile ? 'border-color:#ff4d88;' : ''">
+                  <template v-if="addForm.imageFile">
+                    <span style="font-size:28px;">🖼</span>
+                    <span style="font-size:11px;color:#ff4d88;margin-top:4px;">{{ addForm.imageFile }}</span>
+                  </template>
+                  <template v-else>
+                    <span style="font-size:28px;color:#d9d9d9;">＋</span>
+                  </template>
+                </div>
+                <div class="upload-hints">
+                  <span style="font-size:12px;color:#999;">请上传比例为 1:1，大小不超过 500KB 的 PNG/JPG/GIF 格式图片</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">中奖弹窗图片:</span>
+            <div class="form-control">
+              <div class="upload-row">
+                <div class="prize-img-upload-box" @click="simulateUpload2" :style="addForm.winPopupImage ? 'border-color:#ff4d88;' : ''">
+                  <template v-if="addForm.winPopupImage">
+                    <span style="font-size:28px;">🖼</span>
+                    <span style="font-size:11px;color:#ff4d88;margin-top:4px;">{{ addForm.winPopupImage }}</span>
+                  </template>
+                  <template v-else>
+                    <span style="font-size:28px;color:#d9d9d9;">＋</span>
+                  </template>
+                </div>
+                <div class="upload-hints">
+                  <span style="font-size:12px;color:#999;">请上传大小不超过 500KB 的 PNG/JPG/GIF 格式图片</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">详情图片:</span>
+            <div class="form-control">
+              <div class="upload-row">
+                <div class="prize-img-upload-box" @click="simulateUpload3" :style="addForm.detailImage ? 'border-color:#ff4d88;' : ''">
+                  <template v-if="addForm.detailImage">
+                    <span style="font-size:28px;">🖼</span>
+                    <span style="font-size:11px;color:#ff4d88;margin-top:4px;">{{ addForm.detailImage }}</span>
+                  </template>
+                  <template v-else>
+                    <span style="font-size:28px;color:#d9d9d9;">＋</span>
+                  </template>
+                </div>
+                <div class="upload-hints">
+                  <span style="font-size:12px;color:#999;">请上传大小不超过 500KB 的 PNG/JPG/GIF 格式图片</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品总数:</span>
+            <div class="form-control">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;">
+                  <input type="radio" v-model="addForm.totalCountMode" value="unlimited" />
+                  <span>无限制</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;">
+                  <input type="radio" v-model="addForm.totalCountMode" value="limited" />
+                  <span>限制为</span>
+                </label>
+                <input class="input-field" type="number" v-if="addForm.totalCountMode === 'limited'" v-model.number="addForm.totalCount" placeholder="请输入数量" style="width:120px;" min="0" />
+                <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;margin-left:12px;">
+                  <input type="checkbox" v-model="addForm.stockAlert" />
+                  <span>启动库存预警</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品价值元:</span>
+            <div class="form-control">
+              <select class="input-field" v-model="addForm.prizeValue" style="width:100%;">
+                <option value="">请选择</option>
+                <option value="高价值">高价值</option>
+                <option value="中价值">中价值</option>
+                <option value="低价值">低价值</option>
+                <option value="无价值">无价值</option>
+              </select>
+              <div class="form-error" v-if="addErrors.prizeValue">{{ addErrors.prizeValue }}</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品有效期:</span>
+            <div class="form-control" style="display:flex;align-items:center;gap:6px;">
+              <input class="input-field" type="date" v-model="addForm.startDate" placeholder="开始日期" style="width:140px;" />
+              <span class="date-sep">~</span>
+              <input class="input-field" type="date" v-model="addForm.endDate" placeholder="结束日期" style="width:140px;" />
+            </div>
+          </div>
+
+          <!-- 抽奖策略 -->
+          <hr class="section-divider" />
+          <div class="section-title" style="margin-bottom:16px;">抽奖策略：</div>
+          <div class="form-row">
+            <span class="form-label">发放限制:</span>
+            <div class="form-control" style="background:#fafafa;padding:12px 16px;border-radius:6px;">
+              <div class="limit-row">
+                <span class="limit-label">分获奖上限:</span>
+                <span>当分已发放奖品数量达到</span>
+                <input class="input-field limit-input" type="number" v-model.number="addForm.minuteLimit" placeholder="0" min="0" />
+                <span>件时，该奖品中奖概率归 0</span>
+              </div>
+              <div class="limit-row">
+                <span class="limit-label">时获奖上限:</span>
+                <span>当时已发放奖品数量达到</span>
+                <input class="input-field limit-input" type="number" v-model.number="addForm.hourlyLimit" placeholder="0" min="0" />
+                <span>件时，该奖品中奖概率归 0</span>
+              </div>
+              <div class="limit-row">
+                <span class="limit-label">日获奖上限:</span>
+                <span>当日已发放奖品数量达到</span>
+                <input class="input-field limit-input" type="number" v-model.number="addForm.dailyLimit" placeholder="0" min="0" />
+                <span>件时，该奖品中奖概率归 0</span>
+              </div>
+              <div class="limit-row">
+                <span class="limit-label">周获奖上限:</span>
+                <span>当周已发放奖品数量达到</span>
+                <input class="input-field limit-input" type="number" v-model.number="addForm.weeklyLimit" placeholder="0" min="0" />
+                <span>件时，该奖品中奖概率归 0</span>
+              </div>
+              <div class="limit-row">
+                <span class="limit-label">月获奖上限:</span>
+                <span>当月已发放奖品数量达到</span>
+                <input class="input-field limit-input" type="number" v-model.number="addForm.monthlyLimit" placeholder="0" min="0" />
+                <span>件时，该奖品中奖概率归 0</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">同一用户获得相同奖品次数限制:</span>
+            <div class="form-control" style="display:flex;align-items:center;gap:6px;">
+              <span>每</span>
+              <input class="input-field" type="number" v-model.number="addForm.userLimitPeriod" placeholder="0" min="0" style="width:58px;" />
+              <span>可获得</span>
+              <input class="input-field" type="number" v-model.number="addForm.userLimitCount" placeholder="0" min="0" style="width:58px;" />
+              <span>次</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" @click="closeAddModal">取 消</button>
+          <button class="btn-primary" @click="submitAdd" style="height:32px;">确 定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 编辑奖品弹窗 -->
+    <div class="modal-overlay" v-if="editModalVisible" @click.self="closeEditModal">
+      <div class="modal-box" style="width:720px;">
+        <div class="modal-header">
+          <span class="modal-title">编辑奖品</span>
+          <span class="modal-close" @click="closeEditModal">✕</span>
+        </div>
+        <div class="modal-body">
+          <!-- 奖品信息 -->
+          <div class="section-title" style="margin-bottom:16px;">奖品信息：</div>
+
+          <div class="form-row">
+            <span class="form-label">奖品ID:</span>
+            <div class="form-control">
+              <span style="line-height:32px;font-size:13px;color:#333;">{{ editForm.id }}</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品名称:</span>
+            <div class="form-control">
+              <input class="input-field" v-model="editForm.prizeName" placeholder="请输入奖品名称" style="width:100%;" />
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品备注:</span>
+            <div class="form-control">
+              <input class="input-field" v-model="editForm.remark" placeholder="仅后台展示使用" style="width:100%;" />
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品类型:</span>
+            <div class="form-control">
+              <select class="input-field" v-model="editForm.prizeType" style="width:100%;" disabled>
+                <option value="">请选择</option>
+                <option value="兑换码">兑换码</option>
+                <option value="实物">实物</option>
+                <option value="现金红包">现金红包</option>
+                <option value="金豆">金豆</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <span class="form-label">角标文案:</span>
+            <div class="form-control">
+              <input class="input-field" v-model="editForm.badgeText" placeholder="请输入角标文案" style="width:100%;" />
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">每份数量:</span>
+            <div class="form-control">
+              <input class="input-field" type="number" v-model.number="editForm.quantityPerShare" placeholder="请输入每份数量" style="width:100%;" min="1" />
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品图片:</span>
+            <div class="form-control">
+              <div class="upload-row">
+                <div class="prize-img-upload-box" @click="simulateEditUpload" :style="editForm.imageFile ? 'border-color:#ff4d88;' : ''">
+                  <template v-if="editForm.imageFile">
+                    <span style="font-size:28px;">🖼</span>
+                    <span style="font-size:11px;color:#ff4d88;margin-top:4px;">{{ editForm.imageFile }}</span>
+                  </template>
+                  <template v-else>
+                    <span style="font-size:28px;color:#d9d9d9;">＋</span>
+                  </template>
+                </div>
+                <div class="upload-hints">
+                  <span style="font-size:12px;color:#999;">请上传比例为 1:1，大小不超过 500KB 的 PNG/JPG/GIF 格式图片</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">中奖弹窗图片:</span>
+            <div class="form-control">
+              <div class="upload-row">
+                <div class="prize-img-upload-box" @click="simulateEditUpload2" :style="editForm.winPopupImage ? 'border-color:#ff4d88;' : ''">
+                  <template v-if="editForm.winPopupImage">
+                    <span style="font-size:28px;">🖼</span>
+                    <span style="font-size:11px;color:#ff4d88;margin-top:4px;">{{ editForm.winPopupImage }}</span>
+                  </template>
+                  <template v-else>
+                    <span style="font-size:28px;color:#d9d9d9;">＋</span>
+                  </template>
+                </div>
+                <div class="upload-hints">
+                  <span style="font-size:12px;color:#999;">请上传大小不超过 500KB 的 PNG/JPG/GIF 格式图片</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">详情图片:</span>
+            <div class="form-control">
+              <div class="upload-row">
+                <div class="prize-img-upload-box" @click="simulateEditUpload3" :style="editForm.detailImage ? 'border-color:#ff4d88;' : ''">
+                  <template v-if="editForm.detailImage">
+                    <span style="font-size:28px;">🖼</span>
+                    <span style="font-size:11px;color:#ff4d88;margin-top:4px;">{{ editForm.detailImage }}</span>
+                  </template>
+                  <template v-else>
+                    <span style="font-size:28px;color:#d9d9d9;">＋</span>
+                  </template>
+                </div>
+                <div class="upload-hints">
+                  <span style="font-size:12px;color:#999;">请上传大小不超过 500KB 的 PNG/JPG/GIF 格式图片</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品总数:</span>
+            <div class="form-control">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;">
+                  <input type="radio" v-model="editForm.totalCountMode" value="unlimited" />
+                  <span>无限制</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;">
+                  <input type="radio" v-model="editForm.totalCountMode" value="limited" />
+                  <span>限制为</span>
+                </label>
+                <input class="input-field" type="number" v-if="editForm.totalCountMode === 'limited'" v-model.number="editForm.totalCount" placeholder="请输入数量" style="width:120px;" min="0" />
+                <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;margin-left:12px;">
+                  <input type="checkbox" v-model="editForm.stockAlert" />
+                  <span>启动库存预警</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label"></span>
+            <div class="form-control">
+              <button class="btn-add-codes" @click="openAddCodesModal">＋ 添加兑换码</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品价值元:</span>
+            <div class="form-control">
+              <select class="input-field" v-model="editForm.prizeValue" style="width:100%;">
+                <option value="">请选择</option>
+                <option value="高价值">高价值</option>
+                <option value="中价值">中价值</option>
+                <option value="低价值">低价值</option>
+                <option value="无价值">无价值</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">奖品有效期:</span>
+            <div class="form-control" style="display:flex;align-items:center;gap:6px;">
+              <input class="input-field" type="date" v-model="editForm.startDate" placeholder="开始日期" style="width:140px;" />
+              <span class="date-sep">~</span>
+              <input class="input-field" type="date" v-model="editForm.endDate" placeholder="结束日期" style="width:140px;" />
+            </div>
+          </div>
+
+          <!-- 抽奖策略 -->
+          <hr class="section-divider" />
+          <div class="section-title" style="margin-bottom:16px;">抽奖策略：</div>
+          <div class="form-row">
+            <span class="form-label">发放限制:</span>
+            <div class="form-control" style="background:#fafafa;padding:12px 16px;border-radius:6px;">
+              <div class="limit-row">
+                <span class="limit-label">分获奖上限:</span>
+                <span>当分已发放奖品数量达到</span>
+                <input class="input-field limit-input" type="number" v-model.number="editForm.minuteLimit" placeholder="0" min="0" />
+                <span>件时，该奖品中奖概率归 0</span>
+              </div>
+              <div class="limit-row">
+                <span class="limit-label">时获奖上限:</span>
+                <span>当时已发放奖品数量达到</span>
+                <input class="input-field limit-input" type="number" v-model.number="editForm.hourlyLimit" placeholder="0" min="0" />
+                <span>件时，该奖品中奖概率归 0</span>
+              </div>
+              <div class="limit-row">
+                <span class="limit-label">日获奖上限:</span>
+                <span>当日已发放奖品数量达到</span>
+                <input class="input-field limit-input" type="number" v-model.number="editForm.dailyLimit" placeholder="0" min="0" />
+                <span>件时，该奖品中奖概率归 0</span>
+              </div>
+              <div class="limit-row">
+                <span class="limit-label">周获奖上限:</span>
+                <span>当周已发放奖品数量达到</span>
+                <input class="input-field limit-input" type="number" v-model.number="editForm.weeklyLimit" placeholder="0" min="0" />
+                <span>件时，该奖品中奖概率归 0</span>
+              </div>
+              <div class="limit-row">
+                <span class="limit-label">月获奖上限:</span>
+                <span>当月已发放奖品数量达到</span>
+                <input class="input-field limit-input" type="number" v-model.number="editForm.monthlyLimit" placeholder="0" min="0" />
+                <span>件时，该奖品中奖概率归 0</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <span class="form-label">同一用户获得相同奖品次数限制:</span>
+            <div class="form-control" style="display:flex;align-items:center;gap:6px;">
+              <span>每</span>
+              <input class="input-field" type="number" v-model.number="editForm.userLimitPeriod" placeholder="0" min="0" style="width:58px;" />
+              <span>可获得</span>
+              <input class="input-field" type="number" v-model.number="editForm.userLimitCount" placeholder="0" min="0" style="width:58px;" />
+              <span>次</span>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" @click="closeEditModal">取 消</button>
+          <button class="btn-primary" @click="submitEdit" style="height:32px;">保 存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 添加兑换码子弹窗 -->
+    <div class="modal-overlay sub-modal" v-if="addCodesModalVisible" @click.self="closeAddCodesModal">
+      <div class="modal-box" style="width:720px;">
+        <div class="modal-header">
+          <span class="modal-title">添加兑换码</span>
+          <span class="modal-close" @click="closeAddCodesModal">✕</span>
+        </div>
+        <div class="modal-body">
+          <!-- 导入方式选择 -->
+          <div style="display:flex;gap:24px;margin-bottom:20px;padding:12px 16px;background:#fafafa;border-radius:6px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+              <input type="radio" v-model="codesImportMode" value="manual" />
+              <span>手动输入</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+              <input type="radio" v-model="codesImportMode" value="batch" />
+              <span>批量导入</span>
+            </label>
+          </div>
+
+          <!-- 批量导入模式 -->
+          <template v-if="codesImportMode === 'batch'">
+            <div class="template-row">
+              <span style="font-size:13px;color:#333;font-weight:500;">📥 第一步：下载导入模版</span>
+              <span class="template-hint">按模版格式填写兑换码，每行一个</span>
+              <button class="btn-download" @click="downloadTemplate">📄 下载导入模版</button>
+            </div>
+
+            <div style="font-size:13px;color:#333;font-weight:500;margin-bottom:8px;">📤 第二步：上传兑换码文件</div>
+            <div
+              class="upload-area"
+              :class="{ dragover: uploadDragover }"
+              @click="triggerFileInput"
+              @dragover.prevent="uploadDragover = true"
+              @dragleave="uploadDragover = false"
+              @drop.prevent="handleDrop"
+            >
+              <div class="upload-icon">📁</div>
+              <div class="upload-text">点击或拖拽Excel文件到此区域上传</div>
+              <div class="upload-hint">支持xlsx、xls、csv格式，单次最多5万条</div>
+              <input type="file" ref="fileInputRef" accept=".xlsx,.xls,.csv" @change="handleFileUpload" />
+              <div class="upload-file-name" v-if="codesFileName">{{ codesFileName }}</div>
+            </div>
+          </template>
+
+          <!-- 手动输入模式 -->
+          <template v-if="codesImportMode === 'manual'">
+            <div style="font-size:13px;color:#333;font-weight:500;margin-bottom:6px;">✏️ 输入兑换码（每行一个）</div>
+            <textarea class="manual-textarea" v-model="manualCodesText" @input="parseManualCodes" placeholder="在此输入兑换码，每行一个&#10;例如：&#10;ABC123DEF456&#10;GHI789JKL012&#10;MNO345PQR678"></textarea>
+          </template>
+
+          <!-- 预览区域（两种模式共用） -->
+          <template v-if="parsedCodes.length > 0">
+            <div class="preview-table-wrap">
+              <table class="preview-table">
+                <thead>
+                  <tr>
+                    <th style="width:50px;">序号</th>
+                    <th>兑换码</th>
+                    <th style="width:60px;">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(c, idx) in parsedCodes" :key="idx">
+                    <td>{{ idx + 1 }}</td>
+                    <td style="font-family:monospace;">{{ c }}</td>
+                    <td>
+                      <button class="del-code-btn" @click="removeParsedCode(idx)">删除</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="codes-stats">
+              <span>✅ 共识别 <span class="stat-num">{{ parsedCodes.length }}</span> 条兑换码</span>
+              <span style="color:#999;">去重后 <span class="stat-num" style="color:#1677ff;">{{ uniqueParsedCount }}</span> 条</span>
+            </div>
+            <div class="codes-actions">
+              <button class="btn-download" style="color:#ff4d88;border-color:#ff4d88;" @click="clearParsedCodes">清空全部</button>
+              <button class="btn-download" @click="dedupeCodes">去重</button>
+            </div>
+          </template>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" @click="closeAddCodesModal">取 消</button>
+          <button class="btn-primary" @click="confirmImportCodes" style="height:32px;" :disabled="parsedCodes.length === 0">确认导入 {{ parsedCodes.length > 0 ? '(' + parsedCodes.length + '条)' : '' }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
+  <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+    // ====== Mock 数据 (参照真实接口数据) ======
+    function generateMockData() {
+      // 生成mock兑换码
+      function makeMockCodes(count) {
+        const codes = [];
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        for (let i = 0; i < count; i++) {
+          let code = '';
+          for (let j = 0; j < 12; j++) code += chars[Math.floor(Math.random() * chars.length)];
+          codes.push({
+            code,
+            status: Math.random() > 0.3 ? '未使用' : '已使用',
+            importedAt: `2026-06-${String(1 + i % 28).padStart(2,'0')} ${String(9 + i % 12).padStart(2,'0')}:${String(i % 60).padStart(2,'0')}:00`,
+          });
+        }
+        return codes;
+      }
+
+      const items = [
+        { id: 2972, name: '32位兑换码', type: '兑换码', quantityPerShare: 1, value: '高价值', totalCount: 2, inventory: 1, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-17 09:35:10', operator: '杨惠玲', canEdit: true, canOffline: false, hasHelp: false, codes: makeMockCodes(5) },
+        { id: 2971, name: '32位兑换码测试_2', type: '兑换码', quantityPerShare: 1, value: '高价值', totalCount: 3, inventory: 3, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-17 09:35:10', operator: '', canEdit: true, canOffline: true, hasHelp: false, codes: makeMockCodes(3) },
+        { id: 2970, name: '32位兑换码测试', type: '兑换码', quantityPerShare: 1, value: '高价值', totalCount: null, inventory: null, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-09 15:50:13', operator: '王靖予', canEdit: true, canOffline: false, hasHelp: false, codes: [] },
+        { id: 2940, name: '千金净雅礼包', type: '兑换码', quantityPerShare: 1, value: '中价值', totalCount: 8, inventory: 0, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-20 10:34:10', operator: '', canEdit: true, canOffline: false, hasHelp: true, codes: makeMockCodes(8) },
+        { id: 2934, name: '618-沪上阿姨免费券', type: '兑换码', quantityPerShare: 1, value: '中价值', totalCount: 4, inventory: 2, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-04 14:09:10', operator: '', canEdit: true, canOffline: true, hasHelp: false, codes: makeMockCodes(4) },
+        { id: 2933, name: '雅诗兰黛小棕瓶50ml', type: '实物', quantityPerShare: 1, value: '高价值', totalCount: 10, inventory: 4, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-14 11:47:10', operator: '', canEdit: true, canOffline: true, hasHelp: true },
+        { id: 2926, name: '测试库存预警复制', type: '兑换码', quantityPerShare: 1, value: '高价值', totalCount: 3, inventory: 3, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-01 09:35:08', operator: '', canEdit: true, canOffline: true, hasHelp: false, codes: makeMockCodes(3) },
+        { id: 2925, name: '测试库存预警复制', type: '兑换码', quantityPerShare: 1, value: '高价值', totalCount: 2, inventory: 2, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-01 09:35:10', operator: '', canEdit: true, canOffline: true, hasHelp: false, codes: makeMockCodes(2) },
+        { id: 2924, name: '美团兑换码', type: '兑换码', quantityPerShare: 1, value: '中价值', totalCount: null, inventory: null, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-01 09:31:29', operator: '', canEdit: true, canOffline: false, hasHelp: true, codes: [] },
+        { id: 2904, name: '实物', type: '实物', quantityPerShare: 1, value: '中价值', totalCount: null, inventory: 999999999, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-05-30 15:10:10', operator: '', canEdit: true, canOffline: true, hasHelp: true },
+        { id: 2899, name: '兑换码y', type: '兑换码', quantityPerShare: 1, value: '中价值', totalCount: 2, inventory: 2, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-05-30 14:57:10', operator: '游国扬', canEdit: true, canOffline: true, hasHelp: true, codes: makeMockCodes(2) },
+        { id: 2898, name: '兑换码y', type: '兑换码', quantityPerShare: 1, value: '中价值', totalCount: null, inventory: null, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-05-30 14:57:10', operator: '游国扬', canEdit: true, canOffline: false, hasHelp: true, codes: [] },
+        { id: 2897, name: '测试', type: '兑换码', quantityPerShare: 1, value: '中价值', totalCount: 1, inventory: 1, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-05-30 14:52:10', operator: '游国扬', canEdit: true, canOffline: true, hasHelp: true, codes: makeMockCodes(1) },
+        { id: 2895, name: '测试ygy', type: '现金红包', quantityPerShare: 0.01, value: '中价值', totalCount: null, inventory: 999999999, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-05-30 14:00:10', operator: '游国扬', canEdit: true, canOffline: true, hasHelp: true },
+        { id: 2893, name: '618卫生巾', type: '兑换码', quantityPerShare: 1, value: '中价值', totalCount: 3, inventory: 3, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-01 09:48:36', operator: '', canEdit: true, canOffline: true, hasHelp: false, codes: makeMockCodes(3) },
+        { id: 2887, name: '618美团兑换码', type: '兑换码', quantityPerShare: 1, value: '中价值', totalCount: 4, inventory: 0, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-14 18:49:10', operator: '', canEdit: true, canOffline: false, hasHelp: true, codes: makeMockCodes(4) },
+        { id: 2886, name: '618卫生巾', type: '兑换码', quantityPerShare: 1, value: '中价值', totalCount: 2, inventory: 0, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-08 18:44:10', operator: '', canEdit: true, canOffline: false, hasHelp: false, codes: makeMockCodes(2) },
+        { id: 2885, name: '618SK-II神仙水精华面霜礼盒装', type: '实物', quantityPerShare: 1, value: '高价值', totalCount: null, inventory: 999999990, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-08 17:49:10', operator: '杨惠玲', canEdit: true, canOffline: true, hasHelp: false },
+        { id: 2884, name: '618金豆2个', type: '金豆', quantityPerShare: 2, value: '低价值', totalCount: null, inventory: 999999962, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-06-15 18:40:10', operator: '', canEdit: true, canOffline: true, hasHelp: false },
+        { id: 2883, name: '实物新增地址弹窗', type: '金豆', quantityPerShare: 1, value: '高价值', totalCount: null, inventory: 999999999, dailyLimit: null, monthlyLimit: null, updatedAt: '2026-05-28 18:34:29', operator: '', canEdit: true, canOffline: true, hasHelp: false },
+      ];
+
+      // 生成更多数据到89条
+      const moreNames = [
+        '618-京东优惠券', '淘宝红包-618', '拼多多现金红包', '唯品会礼券', '小红书福袋',
+        '天猫超市卡', '抖音超值券', '快手幸运红包', '滴滴出行券', '美团外卖券',
+        '饿了么红包', '星巴克礼品卡', '奈雪の茶优惠券', '瑞幸咖啡券', '蜜雪冰城代金券',
+        '海底捞优惠券', '小米手环8', '华为FreeBuds', '苹果AirPods', '索尼降噪耳机',
+        '戴森吸尘器', '科沃斯扫地机器人', '小米空气净化器', '飞利浦电动牙刷', '松下电吹风',
+        'Dior口红', '兰蔻精华液', '雅诗兰黛眼霜', 'SK-II面膜', '资生堂防晒',
+        '欧莱雅套装', '完美日记眼影盘', '花西子散粉', 'MAC口红', 'YSL香水',
+        '阿迪达斯运动鞋', '耐克跑鞋', 'Lululemon瑜伽裤', '优衣库T恤', 'H&M连衣裙',
+        'ZARA外套', '欧时力衬衫', '太平鸟卫衣', '李宁运动套装', '安踏篮球鞋',
+        '篮球', '羽毛球拍', '乒乓球拍', '瑜伽垫', '跑步机',
+        '山地自行车', '电动滑板车', '游戏手柄', 'switch游戏机', 'PS5主机',
+        '机械键盘', '电竞鼠标', '显示器', 'iPad', 'iPhone充电器',
+        'Apple Watch', '智能体重秤', '血压计', '体温枪', '血糖仪',
+        '蛋白粉', '维生素片', '钙片', '鱼油', '益生菌',
+        '坚果礼盒', '牛奶卡', '大米券', '食用油券', '纸巾套装',
+      ];
+
+      for (let i = 0; i < 68; i++) {
+        const idx = items.length + i;
+        const types = ['兑换码', '实物', '现金红包', '金豆'];
+        const type = types[i % 4];
+        const values = ['高价值', '中价值', '低价值'];
+        const value = values[i % 3];
+        const canEdit = true;
+        const hasHelp = i % 7 === 0 || i % 11 === 0;
+
+        const inv = i % 5 === 0 ? null : Math.floor(Math.random() * 99999999);
+        const total = i % 7 === 0 ? null : inv !== null ? inv + Math.floor(Math.random() * 10) : null;
+
+        items.push({
+          id: 2800 - i,
+          name: i < moreNames.length ? moreNames[i] : `测试奖品_${i + 1}`,
+          type,
+          quantityPerShare: type === '金豆' ? Math.ceil(Math.random() * 5) : 1,
+          value,
+          totalCount: total,
+          inventory: inv,
+          dailyLimit: null,
+          monthlyLimit: null,
+          updatedAt: `2026-05-${String(15 + i % 15).padStart(2, '0')} ${String(8 + i % 12).padStart(2, '0')}:${String(i % 60).padStart(2, '0')}:10`,
+          operator: canEdit ? ['杨惠玲', '游国扬', '王靖予'][i % 3] : '',
+          canEdit,
+          canOffline: inv !== null && inv > 0,
+          hasHelp,
+          codes: type === '兑换码' ? makeMockCodes(Math.ceil(Math.random() * 5)) : undefined,
+        });
+      }
+
+      return items;
+    }
+
+    const app = createApp({
+      setup() {
+        const loading = ref(false);
+        const totalCount = ref(0);
+        const currentPage = ref(1);
+        const pageSize = ref(20);
+        const searchForm = reactive({ prizeType: '', prizeId: '', prizeName: '', prizeValue: '', startDate: '', endDate: '' });
+
+        // 添加奖品弹窗
+        const addModalVisible = ref(false);
+        const addForm = reactive({
+          prizeType: '', prizeName: '', remark: '', badgeText: '',
+          quantityPerShare: 1, prizeValue: '',
+          totalCountMode: 'unlimited', totalCount: null, stockAlert: false,
+          dailyLimit: null, weeklyLimit: null, monthlyLimit: null,
+          minuteLimit: null, hourlyLimit: null,
+          userLimitPeriod: null, userLimitCount: null,
+          startDate: '', endDate: '',
+          imageFile: '', winPopupImage: '', detailImage: '',
+          exchangeCodeMode: 'manual', manualCodesText: '', parsedCodes: [], codesFileName: '',
+        });
+        const addErrors = reactive({ prizeType: '', prizeName: '', prizeValue: '' });
+
+        // 侧边栏
+        const siderCollapsed = ref(false);
+        const opToolsOpen = ref(false);
+        const deployOpen = ref(false);
+        const priceManageOpen = ref(false);
+        const lotteryManageOpen = ref(true);
+        const subMenuMaxHeight = ref('2000px');
+
+        const allData = reactive(generateMockData());
+
+        // 过滤数据
+        const filteredData = computed(() => {
+          return allData.filter(item => {
+            if (searchForm.prizeType && item.type !== searchForm.prizeType) return false;
+            if (searchForm.prizeId && !String(item.id).includes(searchForm.prizeId)) return false;
+            if (searchForm.prizeName && !item.name.toLowerCase().includes(searchForm.prizeName.toLowerCase())) return false;
+            if (searchForm.prizeValue && item.value !== searchForm.prizeValue) return false;
+            if (searchForm.startDate && item.updatedAt < searchForm.startDate + ' 00:00:00') return false;
+            if (searchForm.endDate && item.updatedAt > searchForm.endDate + ' 23:59:59') return false;
+            return true;
+          });
+        });
+
+        const maxPage = computed(() => Math.max(1, Math.ceil(totalCount.value / pageSize.value)));
+
+        const visiblePages = computed(() => {
+          const pages = [];
+          const max = maxPage.value;
+          const cur = currentPage.value;
+          let start = Math.max(1, cur - 2);
+          let end = Math.min(max, start + 4);
+          if (end - start < 4) start = Math.max(1, end - 4);
+          for (let i = start; i <= end; i++) pages.push(i);
+          return pages;
+        });
+
+        const pageData = ref([]);
+
+        function fetchList() {
+          loading.value = true;
+          setTimeout(() => {
+            const filtered = filteredData.value;
+            totalCount.value = filtered.length;
+            const start = (currentPage.value - 1) * pageSize.value;
+            pageData.value = filtered.slice(start, start + pageSize.value);
+            loading.value = false;
+          }, 100);
+        }
+
+        function handleSearch() { currentPage.value = 1; fetchList(); }
+        function goPage(page) { if (page >= 1 && page <= maxPage.value) { currentPage.value = page; fetchList(); } }
+        function handlePageSizeChange() { currentPage.value = 1; fetchList(); }
+
+        function goAdd() { addModalVisible.value = true; }
+        function closeAddModal() { addModalVisible.value = false; resetAddForm(); }
+        function resetAddForm() {
+          addForm.prizeType = '';
+          addForm.prizeName = '';
+          addForm.remark = '';
+          addForm.badgeText = '';
+          addForm.quantityPerShare = 1;
+          addForm.prizeValue = '';
+          addForm.totalCountMode = 'unlimited';
+          addForm.totalCount = null;
+          addForm.stockAlert = false;
+          addForm.dailyLimit = null;
+          addForm.weeklyLimit = null;
+          addForm.monthlyLimit = null;
+          addForm.minuteLimit = null;
+          addForm.hourlyLimit = null;
+          addForm.userLimitPeriod = null;
+          addForm.userLimitCount = null;
+          addForm.startDate = '';
+          addForm.endDate = '';
+          addForm.imageFile = '';
+          addForm.winPopupImage = '';
+          addForm.detailImage = '';
+          addErrors.prizeType = '';
+          addErrors.prizeName = '';
+          addErrors.prizeValue = '';
+        }
+        function simulateUpload() {
+          addForm.imageFile = 'prize_image_' + Date.now() + '.png';
+        }
+        function simulateUpload2() {
+          addForm.winPopupImage = 'win_popup_' + Date.now() + '.png';
+        }
+        function simulateUpload3() {
+          addForm.detailImage = 'detail_img_' + Date.now() + '.png';
+        }
+        function submitAdd() {
+          let valid = true;
+          if (!addForm.prizeType) { addErrors.prizeType = '请选择奖品类型'; valid = false; } else { addErrors.prizeType = ''; }
+          if (!addForm.prizeName.trim()) { addErrors.prizeName = '请输入奖品名称'; valid = false; } else { addErrors.prizeName = ''; }
+          if (!addForm.prizeValue) { addErrors.prizeValue = '请选择奖品价值'; valid = false; } else { addErrors.prizeValue = ''; }
+          if (!valid) return;
+
+          const maxId = allData.reduce((max, item) => Math.max(max, item.id), 0);
+          const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
+          const total = addForm.totalCountMode === 'limited' ? (addForm.totalCount || 0) : null;
+          const newPrize = {
+            id: maxId + 1,
+            name: addForm.prizeName.trim(),
+            type: addForm.prizeType,
+            remark: addForm.remark,
+            badgeText: addForm.badgeText,
+            quantityPerShare: addForm.quantityPerShare || 1,
+            value: addForm.prizeValue,
+            totalCount: total,
+            inventory: total,
+            dailyLimit: addForm.dailyLimit || null,
+            weeklyLimit: addForm.weeklyLimit || null,
+            monthlyLimit: addForm.monthlyLimit || null,
+            minuteLimit: addForm.minuteLimit || null,
+            hourlyLimit: addForm.hourlyLimit || null,
+            userLimitPeriod: addForm.userLimitPeriod || null,
+            userLimitCount: addForm.userLimitCount || null,
+            stockAlert: addForm.stockAlert,
+            imageFile: addForm.imageFile,
+            winPopupImage: addForm.winPopupImage,
+            detailImage: addForm.detailImage,
+            startDate: addForm.startDate,
+            endDate: addForm.endDate,
+            updatedAt: now,
+            operator: '张三',
+            canEdit: true,
+            canOffline: true,
+            hasHelp: false,
+          };
+          allData.unshift(newPrize);
+          closeAddModal();
+          handleSearch();
+        }
+        function goView(row) { alert(`查看奖品详情 id=${row.id}`); }
+        function goEdit(row) { openEditModal(row); }
+        function goOffline(row) {
+          if (!confirm(`确定要下架奖品「${row.name}」吗？`)) return;
+          row.canOffline = false;
+          row.canEdit = false;
+          handleSearch();
+        }
+        function goCopy(row) {
+          if (!confirm(`确定要复制奖品「${row.name}」吗？`)) return;
+          const maxId = allData.reduce((max, item) => Math.max(max, item.id), 0);
+          const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
+          const newPrize = {
+            id: maxId + 1,
+            name: row.name + '_副本',
+            type: row.type,
+            quantityPerShare: row.quantityPerShare,
+            value: row.value,
+            totalCount: row.totalCount,
+            inventory: row.inventory,
+            dailyLimit: row.dailyLimit,
+            monthlyLimit: row.monthlyLimit,
+            updatedAt: now,
+            operator: '张三',
+            canEdit: true,
+            canOffline: true,
+            hasHelp: row.hasHelp,
+            codes: row.codes ? row.codes.map(c => ({ ...c })) : undefined,
+          };
+          allData.unshift(newPrize);
+          handleSearch();
+        }
+
+        // ====== 编辑奖品弹窗 ======
+        const editModalVisible = ref(false);
+        const editForm = reactive({
+          id: null, prizeType: '', prizeName: '', remark: '', badgeText: '',
+          quantityPerShare: 1, prizeValue: '',
+          totalCountMode: 'unlimited', totalCount: null, stockAlert: false,
+          dailyLimit: null, weeklyLimit: null, monthlyLimit: null,
+          minuteLimit: null, hourlyLimit: null,
+          userLimitPeriod: null, userLimitCount: null,
+          startDate: '', endDate: '',
+          imageFile: '', winPopupImage: '', detailImage: '',
+          _codes: [], _origRow: null,
+        });
+
+        function openEditModal(row) {
+          editForm.id = row.id;
+          editForm.prizeType = row.type;
+          editForm.prizeName = row.name;
+          editForm.remark = row.remark || '';
+          editForm.badgeText = row.badgeText || '';
+          editForm.quantityPerShare = row.quantityPerShare;
+          editForm.prizeValue = row.value;
+          editForm.totalCountMode = row.totalCount === null ? 'unlimited' : 'limited';
+          editForm.totalCount = row.totalCount;
+          editForm.stockAlert = row.stockAlert || false;
+          editForm.dailyLimit = row.dailyLimit;
+          editForm.weeklyLimit = row.weeklyLimit;
+          editForm.monthlyLimit = row.monthlyLimit;
+          editForm.minuteLimit = row.minuteLimit;
+          editForm.hourlyLimit = row.hourlyLimit;
+          editForm.userLimitPeriod = row.userLimitPeriod;
+          editForm.userLimitCount = row.userLimitCount;
+          editForm.startDate = row.startDate || '';
+          editForm.endDate = row.endDate || '';
+          editForm.imageFile = row.imageFile || '';
+          editForm.winPopupImage = row.winPopupImage || '';
+          editForm.detailImage = row.detailImage || '';
+          editForm._codes = row.codes ? [...row.codes] : [];
+          editForm._origRow = row;
+          editModalVisible.value = true;
+        }
+        function closeEditModal() { editModalVisible.value = false; }
+        function deleteCode(idx) {
+          if (confirm(`确定要删除兑换码「${editForm._codes[idx].code}」吗？`)) {
+            editForm._codes.splice(idx, 1);
+          }
+        }
+        function submitEdit() {
+          const row = editForm._origRow;
+          if (!row) return;
+          row.name = editForm.prizeName.trim();
+          row.remark = editForm.remark;
+          row.badgeText = editForm.badgeText;
+          row.quantityPerShare = editForm.quantityPerShare;
+          row.value = editForm.prizeValue;
+          row.totalCount = editForm.totalCountMode === 'unlimited' ? null : editForm.totalCount;
+          row.stockAlert = editForm.stockAlert;
+          row.dailyLimit = editForm.dailyLimit;
+          row.weeklyLimit = editForm.weeklyLimit;
+          row.monthlyLimit = editForm.monthlyLimit;
+          row.minuteLimit = editForm.minuteLimit;
+          row.hourlyLimit = editForm.hourlyLimit;
+          row.userLimitPeriod = editForm.userLimitPeriod;
+          row.userLimitCount = editForm.userLimitCount;
+          row.startDate = editForm.startDate;
+          row.endDate = editForm.endDate;
+          row.imageFile = editForm.imageFile;
+          row.winPopupImage = editForm.winPopupImage;
+          row.detailImage = editForm.detailImage;
+          row.codes = editForm._codes;
+          row.inventory = editForm.totalCountMode === 'limited' && editForm.totalCount !== null ? editForm.totalCount : row.inventory;
+          row.updatedAt = dayjs().format('YYYY-MM-DD HH:mm:ss');
+          row.operator = '张三';
+          closeEditModal();
+          handleSearch();
+        }
+
+        // 编辑弹窗-图片上传模拟
+        function simulateEditUpload() {
+          editForm.imageFile = 'prize_image_' + Date.now() + '.png';
+        }
+        function simulateEditUpload2() {
+          editForm.winPopupImage = 'win_popup_' + Date.now() + '.png';
+        }
+        function simulateEditUpload3() {
+          editForm.detailImage = 'detail_img_' + Date.now() + '.png';
+        }
+
+        // ====== 添加兑换码子弹窗 ======
+        const addCodesModalVisible = ref(false);
+        const codesImportMode = ref('manual');
+        const parsedCodes = ref([]);
+        const manualCodesText = ref('');
+        const codesFileName = ref('');
+        const uploadDragover = ref(false);
+        const fileInputRef = ref(null);
+        const uniqueParsedCount = computed(() => new Set(parsedCodes.value.map(c => c.trim()).filter(Boolean)).size);
+
+        function openAddCodesModal() {
+          codesImportMode.value = 'manual';
+          parsedCodes.value = [];
+          manualCodesText.value = '';
+          codesFileName.value = '';
+          addCodesModalVisible.value = true;
+        }
+        function closeAddCodesModal() {
+          addCodesModalVisible.value = false;
+          parsedCodes.value = [];
+          manualCodesText.value = '';
+          codesFileName.value = '';
+        }
+
+        // 监听手动输入
+        let _manualWatchTimer = null;
+        function watchManualInput() {
+          // 使用 computed 的 getter 无法实现，用 watchEffect 或在模板里绑定
+        }
+
+        // 手动输入解析（在模板绑定中不如用 watch，但这里我们用简单的 input 事件代理）
+        function parseManualCodes() {
+          const text = manualCodesText.value.trim();
+          if (!text) { parsedCodes.value = []; return; }
+          const lines = text.split(/[\n\r]+/).filter(l => l.trim());
+          parsedCodes.value = lines.map(l => l.trim()).filter(Boolean);
+        }
+
+        // Excel 解析
+        function parseExcelFile(file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            try {
+              const data = new Uint8Array(e.target.result);
+              const workbook = XLSX.read(data, { type: 'array' });
+              const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+              const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+              const codes = [];
+              for (const row of rows) {
+                if (!row || row.length === 0) continue;
+                const cell = String(row[0] || '').trim();
+                if (cell && cell !== '兑换码' && cell !== 'code' && cell.toLowerCase() !== 'exchange code') {
+                  codes.push(cell);
+                }
+              }
+              parsedCodes.value = codes;
+              manualCodesText.value = codes.join('\n');
+            } catch (err) {
+              alert('文件解析失败，请确认文件格式正确。错误：' + err.message);
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        }
+
+        function triggerFileInput() { if (fileInputRef.value) fileInputRef.value.click(); }
+        function handleFileUpload(e) {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          codesFileName.value = file.name;
+          parseExcelFile(file);
+        }
+        function handleDrop(e) {
+          uploadDragover.value = false;
+          const file = e.dataTransfer?.files?.[0];
+          if (!file) return;
+          codesFileName.value = file.name;
+          parseExcelFile(file);
+        }
+        function removeParsedCode(idx) { parsedCodes.value.splice(idx, 1); }
+        function clearParsedCodes() { parsedCodes.value = []; manualCodesText.value = ''; codesFileName.value = ''; }
+        function dedupeCodes() {
+          const seen = new Set();
+          parsedCodes.value = parsedCodes.value.filter(c => { const t = c.trim(); if (seen.has(t)) return false; seen.add(t); return true; });
+        }
+
+        // 下载导入模版
+        function downloadTemplate() {
+          const wb = XLSX.utils.book_new();
+          const rows = [['兑换码'], ['ABC123DEF456'], ['GHI789JKL012'], ['MNO345PQR678']];
+          const ws = XLSX.utils.aoa_to_sheet(rows);
+          ws['!cols'] = [{ wch: 24 }];
+          XLSX.utils.book_append_sheet(wb, ws, '兑换码模板');
+          XLSX.writeFile(wb, '兑换码导入模版.xlsx');
+        }
+
+        function confirmImportCodes() {
+          if (parsedCodes.value.length === 0) return;
+          const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
+          const newCodes = parsedCodes.value.map(c => ({ code: c.trim(), status: '未使用', importedAt: now }));
+          editForm._codes.push(...newCodes);
+          closeAddCodesModal();
+        }
+
+        onMounted(() => { fetchList(); });
+
+        return {
+          loading, totalCount, currentPage, pageSize, maxPage,
+          searchForm, visiblePages, pageData,
+          siderCollapsed, opToolsOpen, deployOpen, priceManageOpen, lotteryManageOpen, subMenuMaxHeight,
+          handleSearch, goPage, handlePageSizeChange,
+          goAdd, closeAddModal, submitAdd, simulateUpload, simulateUpload2, simulateUpload3,
+          addModalVisible, addForm, addErrors,
+          goView, goEdit, goOffline, goCopy,
+          editModalVisible, editForm, openEditModal, closeEditModal, deleteCode, submitEdit,
+          simulateEditUpload, simulateEditUpload2, simulateEditUpload3,
+          addCodesModalVisible, codesImportMode, parsedCodes, manualCodesText, codesFileName, uploadDragover, fileInputRef, uniqueParsedCount,
+          openAddCodesModal, closeAddCodesModal, parseManualCodes,
+          triggerFileInput, handleFileUpload, handleDrop, removeParsedCode, clearParsedCodes, dedupeCodes,
+          downloadTemplate, confirmImportCodes,
+        };
+      }
+    });
+
+    app.mount('#app');
+  </script>
+</body>
+</html>

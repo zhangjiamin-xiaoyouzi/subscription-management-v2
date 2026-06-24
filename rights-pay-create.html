@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>订阅管理系统 - 新增投放策略</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: #f0f2f5; color: rgba(0,0,0,.85);
+    }
+    #app { min-height: 100vh; }
+
+    /* Header */
+    .app-header {
+      height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03); z-index: 100;
+      position: sticky; top: 0;
+    }
+    .header-left { display: flex; align-items: center; gap: 4px; }
+    .menu-fold-btn {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s;
+    }
+    .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; user-select: none; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .header-right .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; }
+
+    /* Layout */
+    .layout-body { display: flex; height: calc(100vh - 48px); }
+    .app-sider {
+      width: 200px; background: #fff; border-right: 1px solid #f0f0f0;
+      transition: width .2s; overflow: hidden; flex-shrink: 0;
+    }
+    .app-sider.collapsed { width: 60px; }
+    .sider-logo { height: 48px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+    .sider-logo .logo-icon { font-size: 22px; color: #ff4d88; }
+    .sider-logo .logo-text { font-size: 14px; font-weight: 600; margin-left: 8px; white-space: nowrap; color: #333; }
+    .sider-menu { padding: 8px 0; }
+    .sider-menu-item {
+      display: flex; align-items: center; height: 44px; padding: 0 16px;
+      font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none;
+      transition: all .15s; cursor: pointer; white-space: nowrap;
+    }
+    .sider-menu-item:hover { background: #fff0f6; color: #ff4d88; }
+    .sider-menu-item.active { color: #fff; background: #ff4d88; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .menu-arrow { font-size: 10px; transition: transform .25s ease; margin-left: auto; }
+    .menu-arrow.open { transform: rotate(90deg); }
+    .sider-submenu { overflow: hidden; transition: max-height .25s ease; }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; }
+    .sider-submenu .sider-menu-item.active { background: #ff4d88; color: #fff; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: #fff0f6; color: #ff4d88; }
+
+    /* Content */
+    .content-area { flex: 1; background: #f0f2f5; overflow-y: auto; overflow-x: hidden; }
+    .page-body { padding: 16px 24px; min-height: 100%; }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(0,0,0,.45); margin-bottom: 16px;
+    }
+    .breadcrumb a { color: rgba(0,0,0,.45); text-decoration: none; }
+    .breadcrumb a:hover { color: #ff4d88; }
+    .breadcrumb .sep { color: rgba(0,0,0,.45); }
+    .breadcrumb .current { color: rgba(0,0,0,.65); }
+
+    /* Form Section */
+    .form-section {
+      background: #fff; border-radius: 2px; padding: 24px; margin-bottom: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    }
+    .section-title {
+      font-size: 14px; font-weight: 600; color: rgba(0,0,0,.85);
+      padding-bottom: 16px; margin-bottom: 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .form-row {
+      display: flex; align-items: flex-start; margin-bottom: 20px;
+    }
+    .form-label {
+      width: 110px; flex-shrink: 0; text-align: right; padding-right: 12px;
+      font-size: 13px; color: rgba(0,0,0,.85); line-height: 32px;
+    }
+    .form-label.required::before {
+      content: '* '; color: #ff4d4f; font-weight: 400;
+    }
+    .form-control { flex: 1; max-width: 520px; min-width: 200px; }
+    .form-hint { font-size: 12px; color: #bbb; margin-top: 4px; }
+    .question-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 1px solid #d9d9d9; color: #bfbfbf; font-size: 9px;
+      cursor: help; vertical-align: middle; margin: 0 2px; line-height: 1;
+    }
+
+    /* Inputs */
+    .input-field {
+      width: 100%; height: 32px; padding: 0 11px; font-size: 13px;
+      border: 1px solid #d9d9d9; border-radius: 2px; outline: none;
+      background: #fff; color: rgba(0,0,0,.85); transition: all .2s;
+    }
+    .input-field:hover { border-color: #ff4d88; }
+    .input-field:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .input-field:disabled { background: #f5f5f5; color: rgba(0,0,0,.45); cursor: not-allowed; }
+    .input-field::placeholder { color: #bfbfbf; }
+
+    /* Select Dropdown */
+    .select-wrap { position: relative; width: 100%; }
+    .select-trigger {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 32px; padding: 0 28px 0 11px; font-size: 13px;
+      border: 1px solid #d9d9d9; border-radius: 2px; cursor: pointer;
+      background: #fff; color: rgba(0,0,0,.85); user-select: none; transition: all .2s;
+      min-width: 80px;
+    }
+    .select-trigger:hover { border-color: #40a9ff; }
+    .select-trigger.open { border-color: #40a9ff; box-shadow: 0 0 0 2px rgba(24,144,255,.2); }
+    .select-trigger .placeholder { color: #bfbfbf; }
+    .select-arrow {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      font-size: 10px; color: #bfbfbf; transition: transform .2s; pointer-events: none;
+    }
+    .select-wrap.open .select-arrow { transform: translateY(-50%) rotate(180deg); }
+    .select-dropdown {
+      position: absolute; top: 36px; left: 0; right: 0; background: #fff;
+      border: 1px solid #d9d9d9; border-radius: 2px; box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      z-index: 200; max-height: 256px; overflow-y: auto; min-width: 120px;
+    }
+    .select-dropdown .select-option {
+      padding: 5px 12px; font-size: 13px; color: rgba(0,0,0,.65); cursor: pointer; white-space: nowrap;
+      transition: all .2s;
+    }
+    .select-dropdown .select-option:hover { background: #f5f5f5; }
+    .select-dropdown .select-option.selected { color: #1890ff; background: #e6f7ff; font-weight: 500; }
+
+    /* Multi-Select Tags */
+    .multi-select-tags {
+      display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+      min-height: 32px; padding: 2px 28px 2px 8px;
+      border: 1px solid #d9d9d9; border-radius: 2px; background: #fff;
+      cursor: pointer; position: relative; transition: all .2s;
+    }
+    .multi-select-tags:hover { border-color: #40a9ff; }
+    .multi-select-tags.open { border-color: #40a9ff; box-shadow: 0 0 0 2px rgba(24,144,255,.2); }
+    .multi-select-tags .tag-item {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 0 6px; height: 22px; font-size: 12px;
+      background: #fafafa; border: 1px solid #f0f0f0; border-radius: 2px;
+    }
+    .multi-select-tags .tag-close {
+      cursor: pointer; font-size: 10px; color: #999; line-height: 1;
+    }
+    .multi-select-tags .tag-close:hover { color: #ff4d4f; }
+    .multi-select-tags .search-input {
+      border: none; outline: none; flex: 1; min-width: 60px; height: 22px;
+      font-size: 13px; background: transparent; color: rgba(0,0,0,.85);
+    }
+
+    /* Radio Group */
+    .radio-group { display: flex; align-items: center; gap: 24px; }
+    .radio-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: rgba(0,0,0,.85); }
+    .radio-item.disabled { opacity: .5; cursor: not-allowed; }
+    .radio-item input[type="radio"] { accent-color: #1890ff; width: 14px; height: 14px; cursor: pointer; }
+    .radio-item.disabled input[type="radio"] { cursor: not-allowed; }
+
+    /* Date Range Picker */
+    .date-range-wrap {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .date-range-wrap .date-input {
+      height: 32px; padding: 0 30px 0 11px; font-size: 13px;
+      border: 1px solid #d9d9d9; border-radius: 2px; outline: none;
+      background: #fff; width: 168px; font-family: inherit;
+      transition: all .2s;
+    }
+    .date-range-wrap .date-input:hover { border-color: #40a9ff; }
+    .date-range-wrap .date-input:focus { border-color: #40a9ff; box-shadow: 0 0 0 2px rgba(24,144,255,.2); }
+    .date-range-wrap .date-sep { color: #bfbfbf; font-size: 13px; }
+    .date-range-clear {
+      cursor: pointer; font-size: 14px; color: #bfbfbf; transition: color .2s;
+    }
+    .date-range-clear:hover { color: #ff4d4f; }
+    .date-icon { font-size: 14px; color: #bfbfbf; }
+
+    /* Spinbutton */
+    .spinbutton-wrap {
+      display: flex; align-items: center; width: 100%;
+    }
+    .spinbutton-wrap .spin-input {
+      height: 32px; width: 60px; text-align: center; font-size: 13px; font-family: inherit;
+      border: 1px solid #d9d9d9; border-left: none; border-right: none; outline: none;
+      color: rgba(0,0,0,.85);
+    }
+    .spin-btn {
+      width: 28px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border: 1px solid #d9d9d9; background: #fff; cursor: pointer; font-size: 11px;
+      color: rgba(0,0,0,.65); transition: all .2s; user-select: none;
+    }
+    .spin-btn:hover { color: #ff4d88; border-color: #ff4d88; }
+    .spin-btn:first-child { border-radius: 2px 0 0 2px; }
+    .spin-btn:last-child { border-radius: 0 2px 2px 0; }
+
+    /* Condition Group */
+    .condition-group {
+      background: #fafafa; border: 1px solid #f0f0f0; border-radius: 2px;
+      padding: 16px; margin-bottom: 8px;
+    }
+    .condition-group-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+    .condition-logic {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 1px 8px; font-size: 12px; color: #ff4d88; background: #fff0f6;
+      border-radius: 2px; border: 1px solid #ffb3cc; font-weight: 500;
+    }
+    .condition-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+    .condition-row .select-wrap.field { width: 168px; }
+    .condition-row .select-wrap.operator { width: 110px; }
+    .condition-row .value-area { flex: 1; min-width: 120px; }
+    .cond-icon-btn {
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      border: 1px solid #d9d9d9; border-radius: 2px; background: #fff;
+      cursor: pointer; font-size: 14px; color: rgba(0,0,0,.65); transition: all .2s;
+      flex-shrink: 0;
+    }
+    .cond-icon-btn:hover { border-color: #ff4d88; color: #ff4d88; }
+    .cond-icon-btn svg { width: 14px; height: 14px; }
+    .clear-data-btn {
+      height: 28px; padding: 0 12px; font-size: 12px; color: #ff4d4f;
+      background: #fff; border: 1px solid #ff4d4f; border-radius: 2px; cursor: pointer;
+      transition: all .2s;
+    }
+    .clear-data-btn:hover { background: #fff2f0; }
+
+    /* Buttons */
+    .btn-primary {
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+      height: 32px; padding: 0 20px; font-size: 13px;
+      background: #ff4d88; color: #fff; border: 1px solid #ff4d88;
+      border-radius: 2px; cursor: pointer; transition: all .2s; white-space: nowrap;
+      letter-spacing: 2px;
+    }
+    .btn-primary:hover { background: #ff3875; border-color: #ff3875; }
+    .btn-cancel {
+      display: inline-flex; align-items: center; justify-content: center;
+      height: 32px; padding: 0 20px; font-size: 13px;
+      background: #fff; color: rgba(0,0,0,.65); border: 1px solid #d9d9d9;
+      border-radius: 2px; cursor: pointer; text-decoration: none;
+      transition: all .2s; letter-spacing: 2px;
+    }
+    .btn-cancel:hover { color: #ff4d88; border-color: #ff4d88; }
+    .btn-outline {
+      display: inline-flex; align-items: center; justify-content: center;
+      height: 32px; padding: 0 12px; font-size: 13px;
+      background: #fff; color: rgba(0,0,0,.65); border: 1px solid #d9d9d9;
+      border-radius: 2px; cursor: pointer; transition: all .2s;
+    }
+    .btn-outline:hover { color: #ff4d88; border-color: #ff4d88; }
+    .btn-add-condition {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 12px; font-size: 12px;
+      background: #fff; color: rgba(0,0,0,.65); border: 1px dashed #d9d9d9;
+      border-radius: 2px; cursor: pointer; transition: all .2s;
+    }
+    .btn-add-condition:hover { border-color: #ff4d88; color: #ff4d88; }
+
+    /* Dashed block button */
+    .btn-dashed-block {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; height: 40px; font-size: 13px;
+      background: #fff; color: rgba(0,0,0,.65); border: 1px dashed #d9d9d9;
+      border-radius: 2px; cursor: pointer; transition: all .2s;
+    }
+    .btn-dashed-block:hover { border-color: #ff4d88; color: #ff4d88; }
+
+    /* Path text */
+    .path-display {
+      display: flex; align-items: center; height: 32px; padding: 0 11px;
+      font-size: 13px; color: rgba(0,0,0,.45); background: #f5f5f5; border-radius: 2px;
+      white-space: nowrap;
+    }
+    .path-display .path-arrow { color: #bfbfbf; margin: 0 6px; }
+    .path-display--editable {
+      cursor: pointer; transition: all .15s;
+      color: rgba(0,0,0,.85); background: #fff; border: 1px solid #d9d9d9;
+    }
+    .path-display--editable:hover { border-color: #ff4d88; background: #fff5f8; }
+    .path-edit-icon { margin-left: auto; font-size: 12px; color: #bfbfbf; }
+    .path-display--editable:hover .path-edit-icon { color: #ff4d88; }
+
+    /* Page selection modal */
+    .page-tabs { display:flex; gap:0; border-bottom:1px solid #e8e8e8; margin-bottom:12px; }
+    .page-tab { padding:8px 16px; font-size:13px; cursor:pointer; color:#666; border-bottom:2px solid transparent; transition:all .15s; white-space:nowrap; }
+    .page-tab:hover { color:#ff4d88; }
+    .page-tab.active { color:#ff4d88; border-bottom-color:#ff4d88; font-weight:500; }
+    .page-search { display:flex; gap:8px; margin-bottom:12px; }
+    .page-search input { flex:1; height:32px; padding:0 10px; font-size:13px; border:1px solid #d9d9d9; border-radius:4px; outline:none; }
+    .page-search input:focus { border-color:#ff4d88; }
+    .page-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; max-height:360px; overflow-y:auto; }
+    .page-card { border:1px solid #e8e8e8; border-radius:6px; padding:12px; cursor:pointer; transition:all .15s; }
+    .page-card:hover { border-color:#ff4d88; box-shadow:0 2px 8px rgba(255,77,136,.12); }
+    .page-card.selected { border-color:#ff4d88; background:#fff5f8; }
+    .page-card-img { width:100%; height:80px; background:#f5f5f5; border-radius:4px; margin-bottom:8px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#ccc; }
+    .page-card-name { font-size:13px; font-weight:500; color:#333; margin-bottom:4px; }
+    .page-card-tags { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:4px; }
+    .page-card-tag { display:inline-block; padding:1px 6px; font-size:11px; border-radius:2px; background:#f0f0f0; color:#888; }
+    .page-card-tag.pink { background:#fff0f6; color:#ff4d88; }
+    .page-card-desc { font-size:11px; color:#999; line-height:1.4; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+    .page-config-panel { margin-top: 16px; padding-top: 12px; border-top: 1px solid #f0f0f0; }
+    .page-config-title { font-size: 13px; color: #333; font-weight: 500; margin-bottom: 10px; }
+    .module-options { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; }
+    .option-radio { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #333; cursor: pointer; user-select: none; }
+    .option-radio input { accent-color: #ff4d88; }
+    .resource-preview-row { display: flex; align-items: flex-start; gap: 18px; }
+    .resource-preview-card { width: 96px; border: 1px solid #ffb6c9; border-radius: 4px; padding: 8px; background: #fffafb; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .resource-preview-thumb { width: 64px; height: 110px; border: 1px solid #ffd3e0; border-radius: 2px; background: linear-gradient(180deg, #ffe7ef 0%, #fff 100%); display: flex; align-items: center; justify-content: center; color: #ff7fa8; font-size: 20px; }
+    .resource-preview-name { font-size: 12px; color: #333; text-align: center; line-height: 1.4; }
+    .modal-footer { padding: 10px 24px; text-align: right; border-top: 1px solid #f0f0f0; }
+
+    /* Placement content layout */
+    .placement-content-wrap {
+      border: 1px solid #f0f0f0; background: #fafafa; padding: 12px 8px 0; border-radius: 2px;
+    }
+    .comp-row-wrapper {
+      display: flex; align-items: stretch; margin-bottom: 12px;
+    }
+    .comp-drag-handle-col {
+      width: 32px; flex-shrink: 0; display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 14px; cursor: grab; color: #bbb; font-size: 16px; user-select: none;
+      border: 1px solid transparent; border-right: none;
+    }
+    .comp-drag-handle-col:hover { color: #ff4d88; }
+    .comp-drag-handle-col:active { cursor: grabbing; }
+    .comp-row-wrapper.drag-over > .comp-drag-handle-col { color: #ff4d88; }
+    .comp-row-inner { flex: 1; min-width: 0; }
+    .comp-row-wrapper.drag-over .comp-collapse-bar,
+    .comp-row-wrapper.drag-over .placement-component-card {
+      border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.15);
+      background: #fff9fb;
+    }
+    .comp-drag-ghost { opacity: 0.4; }
+
+    /* Collapse bar */
+    .comp-collapse-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 40px; padding: 0 14px;
+      border: 1px solid #f0f0f0; background: #fff; border-bottom: none;
+    }
+    .comp-collapse-bar .collapse-bar-left {
+      display: flex; align-items: center; gap: 10px; min-width: 0;
+    }
+    .comp-collapse-bar .collapse-bar-index {
+      font-size: 12px; font-weight: 500; color: rgba(0,0,0,.85); white-space: nowrap;
+    }
+    .comp-collapse-bar .collapse-bar-name {
+      font-size: 12px; color: #ff4d88; white-space: nowrap;
+    }
+    .comp-collapse-bar .collapse-bar-id {
+      font-size: 12px; color: rgba(0,0,0,.45); white-space: nowrap;
+    }
+    .comp-collapse-bar .collapse-bar-right {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    .comp-collapse-toggle {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 28px; padding: 0 10px; font-size: 12px;
+      background: #fff; color: rgba(0,0,0,.65); border: 1px solid #d9d9d9;
+      border-radius: 2px; cursor: pointer; transition: all .2s; white-space: nowrap;
+    }
+    .comp-collapse-toggle:hover { border-color: #ff4d88; color: #ff4d88; }
+    .comp-collapse-toggle .collapse-arrow {
+      display: inline-block; transition: transform .2s; font-size: 10px;
+    }
+    .comp-collapse-toggle .collapse-arrow.expanded { transform: rotate(90deg); }
+
+    /* Section-level editor + preview layout */
+    .placement-section-layout {
+      display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 18px; align-items: flex-start;
+    }
+    .placement-editor {
+      min-width: 0;
+    }
+    .placement-global-preview {
+      width: 280px; flex-shrink: 0; position: sticky; top: 64px;
+      border: 1px solid #f0f0f0; background: #fff; border-radius: 2px; overflow: hidden;
+    }
+    .placement-global-preview .global-preview-header {
+      padding: 10px 14px; font-size: 13px; font-weight: 500; color: rgba(0,0,0,.85);
+      border-bottom: 1px solid #f0f0f0; background: #fafafa;
+    }
+    .placement-global-preview .global-preview-body {
+      padding: 12px 14px; max-height: 70vh; overflow-y: auto;
+    }
+    .global-preview-item {
+      margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px dashed #f0f0f0;
+    }
+    .global-preview-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .global-preview-item .global-preview-label {
+      font-size: 11px; color: rgba(0,0,0,.45); margin-bottom: 6px;
+    }
+    .global-preview-item .global-preview-thumb {
+      width: 100%; height: 64px; border-radius: 6px; overflow: hidden;
+      background: linear-gradient(90deg, #fff4f7 0%, #ffe7ef 100%);
+      border: 1px solid #ffe0ea; display: flex; align-items: center; justify-content: center;
+    }
+    .global-preview-item .global-preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .global-preview-item.price-card-preview .global-preview-thumb {
+      height: auto; padding: 12px; display: block; background: #fff; border-color: #f0d7e1;
+    }
+    .price-preview-title { font-size: 12px; color: #666; margin-bottom: 12px; text-align: center; }
+    .price-preview-cards { display: flex; gap: 12px; margin-bottom: 12px; }
+    .price-preview-card {
+      width: 78px; padding: 12px 8px; border: 1px solid #e8e8e8; border-radius: 12px; background: #fff; text-align: center;
+    }
+    .price-preview-card.active { border-color: #ff9bb8; box-shadow: inset 0 0 0 1px #ffd0de; background: #fffafb; }
+    .price-preview-card-title { font-size: 10px; line-height: 1.4; color: #333; min-height: 30px; margin-bottom: 8px; }
+    .price-preview-card-price { font-size: 15px; font-weight: 700; color: #222; margin-bottom: 4px; }
+    .price-preview-card-origin { font-size: 10px; color: #b5b5b5; text-decoration: line-through; }
+    .price-preview-scrollbar { height: 6px; border-radius: 4px; background: #dbdbdb; margin-bottom: 14px; overflow: hidden; }
+    .price-preview-scrollbar::after { content: ''; display: block; width: 48%; height: 100%; background: #9c9c9c; border-radius: 4px; }
+    .price-preview-btn {
+      width: 100%; height: 38px; border-radius: 20px; border: none; background: #ff4d88; color: #fff; font-size: 14px; font-weight: 600;
+    }
+
+    .price-card-single-wrap { width: 100%; }
+    .price-card-form { border: 1px solid #f0f0f0; background: #fff; padding: 18px 22px 14px; }
+    .price-card-form--single { border: none; padding: 0; }
+    .price-card-strategy-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .price-card-label { width: 84px; flex-shrink: 0; text-align: right; font-size: 13px; font-weight: 600; color: rgba(0,0,0,.85); }
+    .price-card-required::before { content: '* '; color: #ff7875; }
+    .price-card-strategy-input { flex: 1; max-width: 400px; }
+    .price-card-btn {
+      height: 40px; padding: 0 18px; border: 1px solid #ff4d88; background: #ff4d88; color: #fff; border-radius: 2px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .price-card-tabs-row { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; }
+    .price-card-tab {
+      padding: 10px 0; font-size: 13px; color: #333; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;
+    }
+    .price-card-tab.active { color: #ff4d88; border-bottom-color: #ff4d88; font-weight: 600; }
+    .price-card-box { display: flex; gap: 26px; align-items: flex-start; border: 1px solid #f0f0f0; padding: 18px 18px 12px; }
+    .price-card-editor { flex: 1; min-width: 0; }
+    .price-card-preview-pane { width: 360px; flex-shrink: 0; padding-top: 54px; }
+    .price-card-title-line { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 20px; }
+    .price-card-title-line .accent { color: #ff4d88; }
+    .price-card-summary { margin: 0 0 16px 92px; font-size: 14px; font-weight: 600; color: #333; }
+    .price-card-field-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+    .price-card-field-row .input-field,
+    .price-card-field-row .select-trigger { height: 40px; }
+    .price-card-field-row .input-field::placeholder { color: #c7c7c7; }
+    .price-card-field-main { flex: 1; min-width: 0; max-width: 530px; position: relative; }
+    .price-card-inline-tip { margin-left: 92px; font-size: 12px; color: #b5b5b5; margin-top: -4px; margin-bottom: 12px; }
+    .price-card-clear {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border-radius: 50%;
+      background: #333; color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .price-card-bottom { margin-top: 18px; display: flex; align-items: center; gap: 12px; }
+    .price-card-delete {
+      height: 32px; padding: 0 12px; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,.65); border-radius: 2px; cursor: pointer;
+    }
+    .sort-modal-box { width: 760px; max-width: calc(100vw - 40px); }
+    .sort-modal-body { padding: 20px 34px 28px; max-height: 620px; overflow-y: auto; }
+    .sort-list { display: flex; flex-direction: column; gap: 16px; }
+    .sort-item {
+      display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 0 16px;
+      border: 1px solid #efefef; border-radius: 2px; background: #fff; color: #333;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .sort-item.dragging {
+      opacity: .45;
+      background: #fff7fa;
+    }
+    .sort-item.drag-over {
+      border-color: #ff4d88;
+      box-shadow: 0 0 0 2px rgba(255, 77, 136, .12);
+    }
+    .sort-item-handle {
+      width: 22px; flex-shrink: 0; font-size: 18px; color: #666; letter-spacing: 1px; user-select: none; cursor: grab;
+    }
+    .sort-item-text { font-size: 18px; line-height: 1.4; color: #444; }
+    .sort-item-main {
+      flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .sort-item-index {
+      width: 24px; height: 24px; border-radius: 50%; background: #fff1f5; color: #ff4d88;
+      display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+    }
+    .sort-item-actions {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    .sort-action-btn {
+      width: 30px; height: 30px; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,.65);
+      border-radius: 2px; cursor: pointer; font-size: 14px; line-height: 1; transition: all .2s;
+    }
+    .sort-action-btn:hover:not(:disabled) {
+      border-color: #ff4d88; color: #ff4d88;
+    }
+    .sort-action-btn:disabled {
+      cursor: not-allowed; color: #d0d0d0; border-color: #efefef; background: #fafafa;
+    }
+    .sort-modal-tip {
+      margin-top: 16px; font-size: 12px; color: rgba(0,0,0,.45);
+    }
+    .global-preview-empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 40px 0; color: rgba(0,0,0,.25); font-size: 13px;
+    }
+
+    .placement-component-card {
+      display: grid; grid-template-columns: 136px minmax(0, 1fr); gap: 18px;
+      align-items: stretch; border: 1px solid #f0f0f0; background: #fff; padding: 10px; margin-bottom: 12px;
+    }
+    .placement-left-card {
+      border: 1px solid #f0f0f0; background: #fff; padding: 10px 8px; display: flex; flex-direction: column; gap: 8px;
+      align-self: stretch;
+    }
+    .placement-left-title { font-size: 12px; color: rgba(0,0,0,.85); line-height: 1.5; }
+    .placement-left-link { font-size: 12px; color: #ff4d88; line-height: 1.5; }
+    .placement-left-id { font-size: 12px; color: #ff4d88; line-height: 1.5; }
+    .placement-left-actions { display: flex; justify-content: flex-start; }
+    .comp-refresh-btn {
+      height: 28px; padding: 0 12px; font-size: 12px; background: #fff; color: rgba(0,0,0,.65);
+      border: 1px solid #d9d9d9; border-radius: 2px; cursor: pointer; transition: all .2s;
+    }
+    .comp-refresh-btn:hover { border-color: #ff4d88; color: #ff4d88; }
+    .placement-center-panel {
+      border: 1px solid #f0f0f0; background: #fff; padding: 10px 14px 14px;
+    }
+    .placement-row-title { font-size: 12px; color: rgba(0,0,0,.85); margin-bottom: 8px; }
+    .placement-version-tip { font-size: 12px; color: #ff4d4f; margin-bottom: 8px; }
+    .placement-config-title { font-size: 12px; color: rgba(0,0,0,.85); margin-bottom: 8px; }
+    .placement-title-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
+    .placement-upload-box {
+      width: 90px; height: 90px; border-radius: 6px; background: #f5f5f5; border: 1px solid #ededed;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; flex-shrink: 0;
+    }
+    .placement-upload-plus { font-size: 28px; line-height: 1; margin-bottom: 8px; }
+    .placement-upload-text { font-size: 12px; }
+    .placement-form-stack { flex: 1; min-width: 0; }
+    .placement-inline-field { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .placement-inline-label { width: 72px; flex-shrink: 0; text-align: right; font-size: 12px; color: rgba(0,0,0,.85); }
+    .placement-inline-input { flex: 1; min-width: 0; }
+    .placement-inline-input.short { max-width: 260px; }
+    .placement-content-list { display: flex; flex-direction: column; gap: 14px; }
+    .placement-content-item { display: flex; align-items: flex-start; gap: 14px; }
+    .placement-drag-mark { color: #333; font-size: 20px; line-height: 1; padding-top: 4px; width: 20px; text-align: center; }
+    .placement-thumb {
+      width: 90px; height: 90px; border: 1px solid #f0f0f0; border-radius: 6px; background: #fff;
+      display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;
+    }
+    .placement-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .placement-content-fields { flex: 1; min-width: 0; }
+    .placement-content-fields .placement-inline-field:last-child { margin-bottom: 0; }
+    .comp-delete-btn {
+      min-width: 106px; height: 30px; padding: 0 20px; font-size: 12px; letter-spacing: 2px;
+      background: #ff4d88; color: #fff; border: 1px solid #ff4d88; border-radius: 2px; cursor: pointer; transition: all .2s;
+    }
+    .comp-delete-btn:hover { background: #ff3875; border-color: #ff3875; }
+
+    /* Version tag */
+    .version-tag {
+      display: inline-flex; align-items: center;
+      padding: 1px 6px; font-size: 11px; color: #52c41a;
+      background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 2px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 40px 0; color: rgba(0,0,0,.25);
+    }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 8px; }
+    .empty-state .empty-text { font-size: 13px; }
+
+    /* Component Library Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-box {
+      background: #fff; border-radius: 4px; width: 800px; max-height: 80vh;
+      display: flex; flex-direction: column; box-shadow: 0 6px 30px rgba(0,0,0,.15);
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid #f0f0f0;
+    }
+    .modal-header h4 { font-size: 16px; font-weight: 600; color: rgba(0,0,0,.85); }
+    .modal-close {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border: none; background: none; cursor: pointer; font-size: 16px; color: #999; border-radius: 2px;
+    }
+    .modal-close:hover { background: #f5f5f5; color: #333; }
+    .modal-body {
+      flex: 1; overflow-y: auto; padding: 16px 24px;
+    }
+    .comp-modal-toolbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px;
+    }
+    .comp-modal-search { display: flex; align-items: center; gap: 8px; }
+    .comp-modal-search .input-field { width: 150px; }
+    .comp-modal-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .comp-card {
+      border: 1px solid #f0f0f0; border-radius: 4px; padding: 16px;
+      cursor: pointer; transition: all .2s; display: flex; flex-direction: column; gap: 8px;
+    }
+    .comp-card:hover { border-color: #ff4d88; box-shadow: 0 2px 8px rgba(255,77,136,.1); }
+    .comp-card.selected { border-color: #ff4d88; background: #fff0f6; }
+    .comp-card .comp-name { font-size: 13px; font-weight: 500; color: rgba(0,0,0,.85); }
+    .comp-card .comp-desc { font-size: 12px; color: #999; }
+    .comp-card .comp-preview {
+      width: 100%; height: 118px; border: 1px solid #f0f0f0; border-radius: 2px; background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
+      display: flex; align-items: center; justify-content: center; color: #d9d9d9; font-size: 28px;
+    }
+    .comp-card .comp-meta { font-size: 12px; color: #999; line-height: 1.6; }
+    .modal-footer {
+      display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+      padding: 12px 24px; border-top: 1px solid #f0f0f0;
+    }
+
+    /* Footer Actions */
+    .form-actions {
+      background: #fff; border-radius: 2px; padding: 12px 24px;
+      display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 -1px 4px rgba(0,0,0,.03);
+    }
+    .module-scene-hint {
+      display: inline-flex; align-items: center; padding: 0 10px; height: 28px; border-radius: 14px;
+      background: #fff0f6; color: #ff4d88; font-size: 12px; margin-bottom: 12px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+      background: #52c41a; color: #fff; padding: 8px 24px; border-radius: 2px;
+      font-size: 13px; z-index: 2000; box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      pointer-events: none; display: none;
+    }
+    .toast.is-visible { display: block; }
+    .toast.error { background: #ff4d4f; }
+    .fade-enter-active, .fade-leave-active { transition: opacity .3s; }
+    .fade-enter-from, .fade-leave-to { opacity: 0; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <span class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed">✕</span>
+        <span class="brand">订阅管理系统</span>
+      </div>
+      <div class="header-right">
+        <span class="user-info">
+          <span class="user-avatar">张</span>
+          <span>张三</span>
+          <span>▾</span>
+        </span>
+      </div>
+    </header>
+
+    <div class="layout-body">
+      <!-- Sidebar -->
+      <aside class="app-sider" :class="{ collapsed: siderCollapsed }">
+        <div class="sider-logo">
+          <span class="logo-icon">♥</span>
+          <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
+        </div>
+        <div class="sider-menu">
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="sider-menu-item parent-open" :class="{ active: opToolsOpen }" @click="opToolsOpen = !opToolsOpen">
+            <span class="menu-icon">🔧</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+            <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;">弹窗</a>
+            <a class="sider-menu-item" href="javascript:;">兑换码</a>
+            <a class="sider-menu-item" href="gift-strategy-list.html">赠礼发放策略</a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html">限时促销策略</a>
+            <a class="sider-menu-item" href="javascript:;">赠礼物流管理</a>
+            <a class="sider-menu-item" href="event-pricing-strategy-list.html">活动价格策略</a>
+            <a class="sider-menu-item" href="event-operations-strategy-list.html">活动投放策略</a>
+          </div>
+          <div class="sider-menu-item parent-open" :class="{ active: deployOpen }" @click="deployOpen = !deployOpen">
+            <span class="menu-icon">📢</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
+            <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+            <a class="sider-menu-item active" href="rights-pay-list.html">投放策略</a>
+            <a class="sider-menu-item" href="javascript:;">页面模块展示</a>
+          </div>
+          <div class="sider-menu-item parent-open" :class="{ active: priceManageOpen }" @click="priceManageOpen = !priceManageOpen">
+            <span class="menu-icon">💰</span>
+            <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+            <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;">价格套餐</a>
+            <a class="sider-menu-item" href="price-strategy-list.html">价格策略</a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html">促销套餐</a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
+          <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
+            <span class="menu-icon">🎯</span>
+            <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="prize-list.html"><span class="menu-label">奖品管理</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">⚙️</span><span class="menu-label" v-show="!siderCollapsed">设置管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏪</span><span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📚</span><span class="menu-label" v-show="!siderCollapsed">知识库</span></a>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="content-area">
+        <div class="page-body">
+          <!-- Breadcrumb -->
+          <div class="breadcrumb">
+            <a href="rights-pay-list.html">投放策略</a>
+            <span class="sep">/</span>
+            <span class="current">新增</span>
+          </div>
+
+          <!-- 基础信息 -->
+          <div class="form-section">
+            <h5 class="section-title">基础信息</h5>
+
+            <!-- 策略名称 -->
+            <div class="form-row">
+              <span class="form-label required">策略名称 :</span>
+              <div class="form-control">
+                <input class="input-field" type="text" v-model="form.strategyName" placeholder="请输入，≤20字" maxlength="20" />
+              </div>
+            </div>
+            <!-- 策略ID -->
+            <div class="form-row">
+              <span class="form-label required">策略ID :</span>
+              <div class="form-control">
+                <input class="input-field" type="text" disabled placeholder="不向用户展示，系统自动生成" />
+              </div>
+            </div>
+            <!-- 订阅计划 -->
+            <div class="form-row">
+              <span class="form-label required">订阅计划 :</span>
+              <div class="form-control">
+                <div class="select-wrap" :class="{ open: planDropdownOpen }" v-click-outside="() => planDropdownOpen = false">
+                  <div class="select-trigger" :class="{ open: planDropdownOpen }" @click="planDropdownOpen = !planDropdownOpen">
+                    <span v-if="!form.subscriptionPlan" class="placeholder">请选择</span>
+                    <span v-else>{{ planOptions.find(p => p.value === form.subscriptionPlan)?.label || form.subscriptionPlan }}</span>
+                  </div>
+                  <span class="select-arrow">▾</span>
+                  <div class="select-dropdown" v-show="planDropdownOpen">
+                    <div class="select-option"
+                         v-for="opt in planOptions" :key="opt.value"
+                         :class="{ selected: form.subscriptionPlan === opt.value }"
+                         @click.stop="form.subscriptionPlan = opt.value; planDropdownOpen = false">
+                      {{ opt.label }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 投放路径 -->
+            <div class="form-row">
+              <span class="form-label">投放路径 :</span>
+              <div class="form-control">
+                <div class="path-display path-display--editable" @click="openPageSelectModal">
+                  <template v-if="resolvedPath.length > 0">
+                    <span v-for="(seg, i) in resolvedPath" :key="i">
+                      <span v-if="i > 0" class="path-arrow">»</span>{{ seg }}
+                    </span>
+                  </template>
+                  <span v-else style="color:#bfbfbf;">点击选择你要管理的页面</span>
+                  <span class="path-edit-icon">✎</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 投放条件 -->
+          <div class="form-section">
+            <h5 class="section-title">投放条件</h5>
+
+            <!-- 策略类型 -->
+            <div class="form-row">
+              <span class="form-label required">策略类型 <span class="question-icon" title="策略类型说明">?</span> :</span>
+              <div class="form-control">
+                <div class="radio-group">
+                  <label class="radio-item">
+                    <input type="radio" value="normal" v-model="form.strategyType" />
+                    <span>常规</span>
+                  </label>
+                  <label class="radio-item disabled">
+                    <input type="radio" value="activity" disabled />
+                    <span>活动</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" value="app_review" v-model="form.strategyType" />
+                    <span>App审核</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 用户条件 -->
+            <div class="form-row">
+              <span class="form-label">用户条件 :</span>
+              <div class="form-control" style="max-width: 700px;">
+                <div v-for="(group, gi) in conditionGroups" :key="group.id" class="condition-group">
+                  <div class="condition-group-header">
+                    <span class="condition-logic">且</span>
+                  </div>
+                  <div v-for="(cond, ci) in group.conditions" :key="cond.id" class="condition-row">
+                    <!-- Field dropdown -->
+                    <div class="select-wrap field" :class="{ open: cond.fieldOpen }" v-click-outside="() => cond.fieldOpen = false">
+                      <div class="select-trigger" :class="{ open: cond.fieldOpen }" @click="cond.fieldOpen = !cond.fieldOpen">
+                        <span v-if="!cond.field" class="placeholder">请选择</span>
+                        <span v-else>{{ getFieldLabel(cond.field) }}</span>
+                      </div>
+                      <span class="select-arrow">▾</span>
+                      <div class="select-dropdown" v-show="cond.fieldOpen">
+                        <div class="select-option"
+                             v-for="opt in fieldOptions" :key="opt.value"
+                             :class="{ selected: cond.field === opt.value }"
+                             @click.stop="onFieldChange(cond, opt.value)">
+                          {{ opt.label }}
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Operator dropdown -->
+                    <div class="select-wrap operator" :class="{ open: cond.opOpen }" v-click-outside="() => cond.opOpen = false">
+                      <div class="select-trigger" :class="{ open: cond.opOpen }" @click="cond.opOpen = !cond.opOpen">
+                        <span v-if="!cond.operator" class="placeholder">请选择</span>
+                        <span v-else>{{ getOperatorLabel(cond.operator) }}</span>
+                      </div>
+                      <span class="select-arrow">▾</span>
+                      <div class="select-dropdown" v-show="cond.opOpen">
+                        <div class="select-option"
+                             v-for="op in getOperatorsForField(cond.field)" :key="op"
+                             :class="{ selected: cond.operator === op }"
+                             @click.stop="cond.operator = op; cond.opOpen = false">
+                          {{ getOperatorLabel(op) }}
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Value -->
+                    <div class="value-area">
+                      <!-- Multi-select value -->
+                      <div v-if="cond.field && isMultiValueField(cond.field)" class="multi-select-tags" :class="{ open: cond.valueOpen }" @click="cond.valueOpen = !cond.valueOpen">
+                        <span v-for="(v, vi) in cond.valueArr" :key="vi" class="tag-item">
+                          {{ v }}
+                          <span class="tag-close" @click.stop="removeMultiValue(cond, vi)">✕</span>
+                        </span>
+                        <input class="search-input" :placeholder="cond.valueArr.length === 0 ? '请选择' : ''"
+                               v-model="cond.searchText" @keydown.enter.prevent="addMultiValue(cond)" />
+                        <div class="select-dropdown" v-show="cond.valueOpen"
+                             v-click-outside="() => cond.valueOpen = false">
+                          <div class="select-option"
+                               v-for="vo in getValueOptionsForField(cond.field)" :key="vo"
+                               :class="{ selected: cond.valueArr.includes(vo) }"
+                               @click.stop="toggleMultiValue(cond, vo)">
+                            {{ vo }}
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Text value -->
+                      <input v-else-if="cond.field && isTextValueField(cond.field)" class="input-field"
+                             type="text" v-model="cond.textValue" placeholder="请输入" />
+                      <!-- Number value -->
+                      <div v-else-if="cond.field && isNumberValueField(cond.field)" class="spinbutton-wrap">
+                        <span class="spin-btn" @click="cond.numValue = Math.max(0, (cond.numValue||0) - 1)">−</span>
+                        <input class="spin-input" type="text" v-model.number="cond.numValue" @input="cond.numValue = parseInt(cond.numValue)||0" />
+                        <span class="spin-btn" @click="cond.numValue = (cond.numValue||0) + 1">＋</span>
+                      </div>
+                      <!-- Date range -->
+                      <div v-else-if="cond.field && isDateRangeField(cond.field)" class="date-range-wrap">
+                        <input class="date-input" type="text" v-model="cond.dateStart" placeholder="开始时间" />
+                        <span class="date-sep">至</span>
+                        <input class="date-input" type="text" v-model="cond.dateEnd" placeholder="结束时间" />
+                        <span class="date-range-clear" @click="cond.dateStart=''; cond.dateEnd=''" v-if="cond.dateStart || cond.dateEnd">✕</span>
+                      </div>
+                    </div>
+                    <!-- Action buttons -->
+                    <button class="cond-icon-btn" title="切换条件" @click="toggleCondition(cond)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    </button>
+                    <button class="cond-icon-btn" title="添加条件" @click="addConditionToGroup(group)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    </button>
+                    <button class="cond-icon-btn" title="删除条件" @click="removeConditionFromGroup(group, ci)" v-if="group.conditions.length > 1">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    </button>
+                  </div>
+                  <button class="clear-data-btn" @click="removeConditionGroup(gi)" v-if="conditionGroups.length > 1">清除数据</button>
+                </div>
+                <button class="btn-add-condition" style="margin-top:8px;" @click="addConditionGroup">
+                  <span style="font-size:14px;">＋</span> 添加条件组
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 投放内容 -->
+          <div class="form-section">
+            <h5 class="section-title">投放内容</h5>
+
+            <div v-if="isFixedPriceCardPath && fixedPriceCardComponent" class="price-card-single-wrap">
+              <div class="price-card-form price-card-form--single">
+                <div class="price-card-strategy-row">
+                  <span class="price-card-label price-card-required">价格策略:</span>
+                  <div class="price-card-strategy-input">
+                    <input class="input-field" type="text" v-model="fixedPriceCardComponent.moduleTitle" />
+                  </div>
+                  <button class="price-card-btn">选择价格策略</button>
+                </div>
+
+                <div class="price-card-tabs-row">
+                  <div
+                    v-for="tab in fixedPriceCardComponent.priceTabs"
+                    :key="tab"
+                    class="price-card-tab"
+                    :class="{ active: fixedPriceCardComponent.selectedTab === tab }"
+                    @click="fixedPriceCardComponent.selectedTab = tab"
+                  >{{ tab }}</div>
+                  <button class="price-card-btn" style="height:32px;padding:0 12px;" @click="openPriceSortModal(fixedPriceCardComponent)">套餐排序管理</button>
+                </div>
+
+                <div class="price-card-box">
+                  <div class="price-card-editor">
+                    <div class="price-card-title-line">
+                      套餐名称（套餐id） :
+                      <span class="accent">{{ fixedPriceCardComponent.packageName }}</span>
+                      <span class="accent">-基础（{{ fixedPriceCardComponent.packageId }}）</span>
+                    </div>
+                    <div class="price-card-summary">价格信息： {{ fixedPriceCardComponent.priceSummary }}</div>
+
+                    <div class="price-card-field-row">
+                      <span class="price-card-label">套餐名称:</span>
+                      <div class="price-card-field-main">
+                        <input class="input-field" type="text" v-model="fixedPriceCardComponent.packageName" />
+                        <span class="price-card-clear" @click="fixedPriceCardComponent.packageName = ''">×</span>
+                      </div>
+                    </div>
+
+                    <div class="price-card-field-row">
+                      <span class="price-card-label">格子底部标签:</span>
+                      <div class="price-card-field-main">
+                        <input class="input-field" type="text" v-model="fixedPriceCardComponent.cornerTag" placeholder="请输入，≤20字" />
+                      </div>
+                    </div>
+
+                    <div class="price-card-field-row">
+                      <span class="price-card-label">续费说明:</span>
+                      <div class="price-card-field-main">
+                        <input class="input-field" type="text" v-model="fixedPriceCardComponent.renewDesc" placeholder="请输入，≤50字" />
+                      </div>
+                    </div>
+
+                    <div class="price-card-field-row">
+                      <span class="price-card-label price-card-required">支付按钮文案:</span>
+                      <div class="price-card-field-main">
+                        <input class="input-field" type="text" v-model="fixedPriceCardComponent.payButtonText" />
+                      </div>
+                    </div>
+                    <div class="price-card-inline-tip">填写“{y}”变量,展示“划线价-售卖价+赠礼价值”对应的值</div>
+
+                    <div class="price-card-field-row" style="margin-bottom:0;">
+                      <span class="price-card-label">按钮跳转方式:</span>
+                      <div class="price-card-field-main">
+                        <div class="select-wrap" :class="{ open: fixedPriceCardComponent.jumpModeOpen }" v-click-outside="() => fixedPriceCardComponent.jumpModeOpen = false">
+                          <div class="select-trigger" :class="{ open: fixedPriceCardComponent.jumpModeOpen }" @click="fixedPriceCardComponent.jumpModeOpen = !fixedPriceCardComponent.jumpModeOpen">
+                            <span :class="{ placeholder: !fixedPriceCardComponent.jumpMode }">{{ fixedPriceCardComponent.jumpMode || '请选择' }}</span>
+                          </div>
+                          <span class="select-arrow">▾</span>
+                          <div class="select-dropdown" v-show="fixedPriceCardComponent.jumpModeOpen">
+                            <div class="select-option" :class="{ selected: fixedPriceCardComponent.jumpMode === '' }" @click.stop="fixedPriceCardComponent.jumpMode=''; fixedPriceCardComponent.jumpModeOpen=false">请选择</div>
+                            <div class="select-option" :class="{ selected: fixedPriceCardComponent.jumpMode === '支付页内跳转' }" @click.stop="fixedPriceCardComponent.jumpMode='支付页内跳转'; fixedPriceCardComponent.jumpModeOpen=false">支付页内跳转</div>
+                            <div class="select-option" :class="{ selected: fixedPriceCardComponent.jumpMode === '签约流程' }" @click.stop="fixedPriceCardComponent.jumpMode='签约流程'; fixedPriceCardComponent.jumpModeOpen=false">签约流程</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="price-card-inline-tip">常规的支付、签约流程无需设置按钮跳转方式，仅9.03.0版本以上支持该功能</div>
+                  </div>
+
+                  <div class="price-card-preview-pane">
+                    <div class="price-preview-title">效果仅为示意，以实际为准</div>
+                    <div class="price-preview-cards">
+                      <div v-for="(card, cardIndex) in fixedPriceCardComponent.cards" :key="cardIndex" class="price-preview-card" :class="{ active: card.selected }">
+                        <div class="price-preview-card-title">{{ card.title }}</div>
+                        <div class="price-preview-card-price">¥{{ card.price }}</div>
+                        <div class="price-preview-card-origin">¥{{ card.originPrice }}</div>
+                      </div>
+                    </div>
+                    <div class="price-preview-scrollbar"></div>
+                    <button class="price-preview-btn">¥12 {{ fixedPriceCardComponent.payButtonText || '立即开通' }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty: show only dashed button -->
+            <button class="btn-dashed-block" @click="openCompModal" v-else-if="selectedComponents.length === 0">
+              <span style="font-size:14px;">＋</span> 从组件库选择
+            </button>
+
+            <div class="placement-section-layout" v-else-if="selectedComponents.length > 0">
+              <div class="placement-editor">
+                <button class="btn-dashed-block" @click="openCompModal" style="margin-bottom:12px;" v-if="!isFixedPriceCardPath">
+                  <span style="font-size:14px;">＋</span> 从组件库选择
+                </button>
+
+                <div class="placement-content-wrap">
+                  <div
+                    v-for="(comp, ci) in selectedComponents"
+                    :key="comp.cid"
+                    class="comp-row-wrapper"
+                    :class="{ 'comp-drag-ghost': dragIndex === ci, 'drag-over': dragOverIndex === ci }"
+                    draggable="true"
+                    @dragstart="onCompDragStart($event, ci)"
+                    @dragover.prevent="onCompDragOver($event, ci)"
+                    @dragend="onCompDragEnd"
+                    @drop.prevent="onCompDrop($event, ci)"
+                  >
+                    <div class="comp-drag-handle-col" title="拖拽排序">⋮⋮</div>
+                    <div class="comp-row-inner">
+                      <div class="comp-collapse-bar">
+                        <div class="collapse-bar-left">
+                          <span class="collapse-bar-index">组件{{ ci + 1 }}</span>
+                          <span class="collapse-bar-name">{{ comp.bannerLabel || '静态banner' }}</span>
+                          <span class="collapse-bar-id">id:{{ comp.bannerId || '1180' }}</span>
+                        </div>
+                        <div class="collapse-bar-right">
+                          <button class="comp-refresh-btn" @click="refreshComponent(ci)">刷新组件</button>
+                          <button class="comp-collapse-toggle" @click="toggleComponentCollapse(ci)">
+                            <span class="collapse-arrow" :class="{ expanded: !comp.collapsed }">▶</span>
+                            {{ comp.collapsed ? '展开' : '收起' }}
+                          </button>
+                          <button class="comp-delete-btn" @click="removeComponent(ci)">删 除</button>
+                        </div>
+                      </div>
+
+                      <div class="comp-collapse-body" v-show="!comp.collapsed">
+                        <div v-if="comp.key === 'price_card_display'" class="price-card-form">
+                          <div class="price-card-strategy-row">
+                            <span class="price-card-label price-card-required">价格策略:</span>
+                            <div class="price-card-strategy-input">
+                              <input class="input-field" type="text" v-model="comp.moduleTitle" />
+                            </div>
+                            <button class="price-card-btn">选择价格策略</button>
+                          </div>
+
+                          <div class="price-card-tabs-row">
+                            <div
+                              v-for="tab in comp.priceTabs"
+                              :key="tab"
+                              class="price-card-tab"
+                              :class="{ active: comp.selectedTab === tab }"
+                              @click="comp.selectedTab = tab"
+                            >{{ tab }}</div>
+                            <button class="price-card-btn" style="height:32px;padding:0 12px;" @click="openPriceSortModal(comp)">套餐排序管理</button>
+                          </div>
+
+                          <div class="price-card-box">
+                            <div class="price-card-editor">
+                              <div class="price-card-title-line">
+                                套餐名称（套餐id） :
+                                <span class="accent">{{ comp.packageName }}</span>
+                                <span class="accent">-基础（{{ comp.packageId }}）</span>
+                              </div>
+                              <div class="price-card-summary">价格信息： {{ comp.priceSummary }}</div>
+
+                              <div class="price-card-field-row">
+                                <span class="price-card-label">套餐名称:</span>
+                                <div class="price-card-field-main">
+                                  <input class="input-field" type="text" v-model="comp.packageName" />
+                                  <span class="price-card-clear" @click="comp.packageName = ''">×</span>
+                                </div>
+                              </div>
+
+                              <div class="price-card-field-row">
+                                <span class="price-card-label">格子底部标签:</span>
+                                <div class="price-card-field-main">
+                                  <input class="input-field" type="text" v-model="comp.cornerTag" placeholder="请输入，≤20字" />
+                                </div>
+                              </div>
+
+                              <div class="price-card-field-row">
+                                <span class="price-card-label">续费说明:</span>
+                                <div class="price-card-field-main">
+                                  <input class="input-field" type="text" v-model="comp.renewDesc" placeholder="请输入，≤50字" />
+                                </div>
+                              </div>
+
+                              <div class="price-card-field-row">
+                                <span class="price-card-label price-card-required">支付按钮文案:</span>
+                                <div class="price-card-field-main">
+                                  <input class="input-field" type="text" v-model="comp.payButtonText" />
+                                </div>
+                              </div>
+                              <div class="price-card-inline-tip">填写“{y}”变量,展示“划线价-售卖价+赠礼价值”对应的值</div>
+
+                              <div class="price-card-field-row" style="margin-bottom:0;">
+                                <span class="price-card-label">按钮跳转方式:</span>
+                                <div class="price-card-field-main">
+                                  <div class="select-wrap" :class="{ open: comp.jumpModeOpen }" v-click-outside="() => comp.jumpModeOpen = false">
+                                    <div class="select-trigger" :class="{ open: comp.jumpModeOpen }" @click="comp.jumpModeOpen = !comp.jumpModeOpen">
+                                      <span :class="{ placeholder: !comp.jumpMode }">{{ comp.jumpMode || '请选择' }}</span>
+                                    </div>
+                                    <span class="select-arrow">▾</span>
+                                    <div class="select-dropdown" v-show="comp.jumpModeOpen">
+                                      <div class="select-option" :class="{ selected: comp.jumpMode === '' }" @click.stop="comp.jumpMode=''; comp.jumpModeOpen=false">请选择</div>
+                                      <div class="select-option" :class="{ selected: comp.jumpMode === '支付页内跳转' }" @click.stop="comp.jumpMode='支付页内跳转'; comp.jumpModeOpen=false">支付页内跳转</div>
+                                      <div class="select-option" :class="{ selected: comp.jumpMode === '签约流程' }" @click.stop="comp.jumpMode='签约流程'; comp.jumpModeOpen=false">签约流程</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="price-card-inline-tip">常规的支付、签约流程无需设置按钮跳转方式，仅9.03.0版本以上支持该功能</div>
+                            </div>
+
+                            <div class="price-card-preview-pane">
+                              <div class="price-preview-title">效果仅为示意，以实际为准</div>
+                              <div class="price-preview-cards">
+                                <div v-for="(card, cardIndex) in comp.cards" :key="cardIndex" class="price-preview-card" :class="{ active: card.selected }">
+                                  <div class="price-preview-card-title">{{ card.title }}</div>
+                                  <div class="price-preview-card-price">¥{{ card.price }}</div>
+                                  <div class="price-preview-card-origin">¥{{ card.originPrice }}</div>
+                                </div>
+                              </div>
+                              <div class="price-preview-scrollbar"></div>
+                              <button class="price-preview-btn">¥12 {{ comp.payButtonText || '立即开通' }}</button>
+                            </div>
+                          </div>
+
+                          <div class="price-card-bottom">
+                            <button class="price-card-delete" @click="removeComponent(ci)">删除</button>
+                          </div>
+                        </div>
+
+                        <div v-else class="placement-component-card">
+                          <div class="placement-left-card">
+                            <div class="placement-left-title">组件{{ ci + 1 }}</div>
+                            <div class="placement-left-link">{{ comp.bannerLabel || '静态banner' }}</div>
+                            <div class="placement-left-id">id:{{ comp.bannerId || '1180' }}</div>
+                            <div class="placement-left-actions">
+                              <button class="comp-refresh-btn" @click="refreshComponent(ci)">刷新组件</button>
+                            </div>
+                          </div>
+
+                          <div class="placement-center-panel">
+                            <div class="placement-row-title">第1行</div>
+                            <div class="placement-version-tip" v-if="comp.versionHint">{{ comp.versionHint }}</div>
+
+                            <div class="placement-config-title" v-if="comp.hasTitleConfig">标题配置:</div>
+                            <div class="placement-title-row" v-if="comp.hasTitleConfig">
+                              <div class="placement-upload-box">
+                                <div class="placement-upload-plus">＋</div>
+                                <div class="placement-upload-text">上传图片</div>
+                              </div>
+                              <div class="placement-form-stack">
+                                <div class="placement-inline-field">
+                                  <span class="placement-inline-label">跳转地址:</span>
+                                  <div class="placement-inline-input short">
+                                    <select class="input-field" v-model="comp.titleJumpLabel">
+                                      <option value="">请选择</option>
+                                      <option value="会员日活动页">会员日活动页</option>
+                                      <option value="拼团活动页(非固定入口)">拼团活动页(非固定入口)</option>
+                                    </select>
+                                  </div>
+                                  <div class="placement-inline-input" style="max-width:290px;">
+                                    <input class="input-field" type="text" v-model="comp.moduleTitle" placeholder="模块标题" />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="placement-config-title" v-if="comp.hasContentConfig">内容配置:</div>
+                            <div class="placement-content-list" v-if="comp.hasContentConfig">
+                              <div v-for="(item, ii) in comp.contentItems" :key="ii" class="placement-content-item">
+                                <div class="placement-drag-mark">☰</div>
+                                <div class="placement-thumb" v-if="!useRightSideGlobalPreview">
+                                  <img :src="item.previewImage || comp.previewImage" alt="banner预览" />
+                                </div>
+                                <div class="placement-content-fields">
+                                  <div class="placement-inline-field">
+                                    <span class="placement-inline-label">跳转地址:</span>
+                                    <div class="placement-inline-input short">
+                                      <select class="input-field" v-model="item.jumpLabel">
+                                        <option value="">请选择</option>
+                                        <option value="会员日活动页">会员日活动页</option>
+                                        <option value="拼团活动页(非固定入口)">拼团活动页(非固定入口)</option>
+                                      </select>
+                                    </div>
+                                    <div class="placement-inline-input" style="max-width:290px;">
+                                      <input class="input-field" type="text" v-model="item.titleText" placeholder="模块标题" />
+                                    </div>
+                                  </div>
+                                  <div class="placement-inline-field" v-if="ii === 0">
+                                    <span class="placement-inline-label">地址:</span>
+                                    <div class="placement-inline-input short">
+                                      <select class="input-field" v-model="item.addressLabel">
+                                        <option value="">请选择</option>
+                                        <option value="会员中心腰部 banner">会员中心腰部 banner</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <div class="placement-inline-field" v-if="ii === 0">
+                                    <span class="placement-inline-label">视图从右侧滑入:</span>
+                                    <div class="placement-inline-input short">
+                                      <select class="input-field" v-model="item.slideMode">
+                                        <option value="">请选择</option>
+                                        <option value="是">是</option>
+                                        <option value="否">否</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <div class="placement-inline-field" v-if="ii === 0">
+                                    <span class="placement-inline-label">关闭顶部弹簧效果:</span>
+                                    <div class="placement-inline-input short">
+                                      <select class="input-field" v-model="item.springEffect">
+                                        <option value="">请选择</option>
+                                        <option value="开启">开启</option>
+                                        <option value="关闭">关闭</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <div class="placement-inline-field" v-if="ii === 1">
+                                    <span class="placement-inline-label">细分入口:</span>
+                                    <div class="placement-inline-input short">
+                                      <select class="input-field" v-model="item.subEntry">
+                                        <option value="">请选择</option>
+                                        <option value="入口一">入口一</option>
+                                        <option value="入口二">入口二</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="placement-global-preview" v-if="!isFixedPriceCardPath">
+                <div class="global-preview-header">预览</div>
+                <div class="global-preview-body">
+                  <div v-for="(comp, pi) in selectedComponents" :key="'prev_'+comp.cid" class="global-preview-item" :class="{ 'price-card-preview': comp.key === 'price_card_display' }">
+                    <div class="global-preview-label">{{ comp.bannerLabel || '静态banner' }} · 组件{{ pi + 1 }}</div>
+                    <div class="global-preview-thumb">
+                      <template v-if="comp.key === 'price_card_display'">
+                        <div class="price-preview-title">效果仅为示意，以实际为准</div>
+                        <div class="price-preview-cards">
+                          <div v-for="(card, cardIndex) in comp.cards" :key="cardIndex" class="price-preview-card" :class="{ active: card.selected }">
+                            <div class="price-preview-card-title">{{ card.title }}</div>
+                            <div class="price-preview-card-price">¥{{ card.price }}</div>
+                            <div class="price-preview-card-origin">¥{{ card.originPrice }}</div>
+                          </div>
+                        </div>
+                        <div class="price-preview-scrollbar"></div>
+                        <button class="price-preview-btn">¥12 {{ comp.payButtonText || '立即开通' }}</button>
+                      </template>
+                      <img v-else-if="comp.previewImage" :src="comp.previewImage" alt="预览图" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 选择你要管理的页面 -->
+          <div class="modal-overlay" v-if="pageSelectModal.visible" @click.self="pageSelectModal.visible = false">
+            <div class="modal-box" style="width:720px;">
+              <div class="modal-header">
+                <h4>选择你要管理的页面</h4>
+                <button class="modal-close" @click="pageSelectModal.visible = false">✕</button>
+              </div>
+              <div class="modal-body">
+                <div class="page-tabs">
+                  <div class="page-tab" :class="{ active: pageSelectModal.activeTab === 'all' }" @click="switchPageTab('all')">
+                    全部页面({{ allPages.length }})
+                  </div>
+                  <div class="page-tab" :class="{ active: pageSelectModal.activeTab === 'vip' }" @click="switchPageTab('vip')">
+                    会员主链路({{ vipPages.length }})
+                  </div>
+                  <div class="page-tab" :class="{ active: pageSelectModal.activeTab === 'activity' }" @click="switchPageTab('activity')">
+                    活动页面({{ activityPages.length }})
+                  </div>
+                  <div class="page-tab" :class="{ active: pageSelectModal.activeTab === 'rights' }" @click="switchPageTab('rights')">
+                    权益入口展示({{ rightsPages.length }})
+                  </div>
+                </div>
+                <div class="page-search">
+                  <input type="text" v-model="pageSelectModal.search" placeholder="搜索名称/标签/介绍" />
+                  <button class="btn-outline" style="width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;">🔍</button>
+                </div>
+                <div class="page-grid">
+                  <div v-for="page in filteredPages" :key="page.key"
+                    class="page-card"
+                    :class="{ selected: pageSelectModal.selected === page.key }"
+                    @click="selectPageFromModal(page.key)">
+                    <div class="page-card-img">{{ page.icon }}</div>
+                    <div class="page-card-name">{{ page.name }}</div>
+                    <div class="page-card-tags">
+                      <span v-for="tag in page.tags" :key="tag" class="page-card-tag" :class="{ pink: tag === '下单转化' || tag === '曝光转化' }">{{ tag }}</span>
+                    </div>
+                    <div class="page-card-desc">{{ page.desc }}</div>
+                  </div>
+                </div>
+                <div class="page-config-panel" v-if="pageModuleConfig">
+                  <div class="page-config-title">选择页面内模块:</div>
+                  <div class="module-options">
+                    <label class="option-radio" v-for="module in pageModuleConfig.modules" :key="module.key">
+                      <input type="radio" name="moduleKey" :value="module.key" v-model="pageSelectModal.selectedModule" />
+                      <span>{{ module.name }}</span>
+                    </label>
+                  </div>
+                  <div class="page-config-title">选择资源位:</div>
+                  <div class="resource-preview-row">
+                    <label class="option-radio" style="align-items:flex-start; gap:12px;" v-for="location in pageModuleConfig.locations" :key="location.key">
+                      <input type="radio" name="locationKey" :value="location.key" v-model="pageSelectModal.selectedLocation" style="margin-top:6px;" />
+                      <div class="resource-preview-card">
+                        <div class="resource-preview-name">{{ location.name }}</div>
+                        <div class="resource-preview-thumb">{{ location.icon }}</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button class="btn-cancel" style="width:auto;padding:0 16px;" @click="pageSelectModal.visible = false">取消</button>
+                <button class="btn-primary" style="width:auto;padding:0 24px;" :disabled="!pageSelectModal.selected" @click="confirmPageSelect">确认</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Component Library Modal -->
+          <div class="modal-overlay" v-if="compModalVisible" @click.self="compModalVisible = false">
+            <div class="modal-box">
+              <div class="modal-header">
+                <h4>从组件库选择</h4>
+                <button class="modal-close" @click="compModalVisible = false">✕</button>
+              </div>
+              <div class="modal-body">
+                <div class="comp-modal-toolbar">
+                  <div class="comp-modal-search">
+                    <input class="input-field" type="text" v-model="componentSearch" placeholder="请输入名称或ID" />
+                    <button class="btn-primary" style="height:32px;padding:0 18px;letter-spacing:0;">查 找</button>
+                  </div>
+                  <div style="display:flex;gap:8px;">
+                    <button class="btn-primary" style="height:32px;padding:0 14px;letter-spacing:0;">管理组件库</button>
+                    <button class="btn-cancel" style="height:32px;padding:0 14px;letter-spacing:0;">刷 新</button>
+                  </div>
+                </div>
+                <div class="comp-modal-grid">
+                  <div class="comp-card" v-for="comp in filteredComponentLibrary" :key="comp.key"
+                       :class="{ selected: tempSelectedKeys.includes(comp.key) }"
+                       @click="toggleComponentSelect(comp.key)">
+                    <div class="comp-preview">{{ comp.icon }}</div>
+                    <span class="comp-name">{{ comp.name }}</span>
+                    <span class="comp-desc">{{ comp.desc }}</span>
+                    <span class="comp-meta">{{ comp.mockId }}</span>
+                    <span class="comp-meta">{{ comp.mockTime }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button class="btn-cancel" style="width:auto;padding:0 16px;" @click="compModalVisible = false">取消</button>
+                <button class="btn-primary" style="width:auto;padding:0 24px;" @click="confirmComponentSelect">确定</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-overlay" v-if="sortModal.visible" @click.self="closePriceSortModal">
+            <div class="modal-box sort-modal-box">
+              <div class="modal-header">
+                <h4>排序</h4>
+                <button class="modal-close" @click="closePriceSortModal">✕</button>
+              </div>
+              <div class="sort-modal-body">
+                <div class="sort-list">
+                  <div
+                    class="sort-item"
+                    v-for="(item, index) in sortModal.items"
+                    :key="item"
+                    :class="{ dragging: sortModal.dragIndex === index, 'drag-over': sortModal.dragOverIndex === index }"
+                    draggable="true"
+                    @dragstart="onSortDragStart($event, index)"
+                    @dragover.prevent="onSortDragOver($event, index)"
+                    @dragend="onSortDragEnd"
+                    @drop.prevent="onSortDrop($event, index)"
+                  >
+                    <div class="sort-item-handle">☰</div>
+                    <div class="sort-item-main">
+                      <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                        <div class="sort-item-index">{{ index + 1 }}</div>
+                        <div class="sort-item-text">{{ item }}</div>
+                      </div>
+                      <div class="sort-item-actions">
+                        <button class="sort-action-btn" @click="moveSortItem(index, -1)" :disabled="index === 0">↑</button>
+                        <button class="sort-action-btn" @click="moveSortItem(index, 1)" :disabled="index === sortModal.items.length - 1">↓</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="sort-modal-tip">支持直接拖拽排序，也可通过右侧上下按钮精确调整，点击确定后同步到价格卡片顺序。</div>
+              </div>
+              <div class="modal-footer">
+                <button class="btn-cancel" style="width:auto;padding:0 24px;" @click="closePriceSortModal">取消</button>
+                <button class="btn-primary" style="width:auto;padding:0 28px;" @click="confirmPriceSort">确定</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="form-actions">
+            <button class="btn-primary" @click="handleSave">保&ensp;存</button>
+            <a class="btn-cancel" href="rights-pay-list.html">取&ensp;消</a>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" :class="{ error: toastError, 'is-visible': !!(toast && toast.trim()) }" v-text="toast"></div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script>
+    const { createApp, ref, reactive, nextTick } = Vue;
+
+    // v-click-outside directive
+    const clickOutside = {
+      mounted(el, binding, vnode) {
+        el.__clickOutsideHandler = (event) => {
+          if (!el.contains(event.target) && el !== event.target) {
+            binding.value(event);
+          }
+        };
+        document.addEventListener('click', el.__clickOutsideHandler);
+      },
+      unmounted(el) {
+        document.removeEventListener('click', el.__clickOutsideHandler);
+      }
+    };
+
+    // ====================== Condition Definitions ======================
+    const CONDITION_FIELDS = [
+      { value: 'vip_status', label: '会员状态', type: 'multi', operators: ['include', 'exclude'],
+        valueOptions: ['会员生效中', '会员已过期', '未订阅', '会员待生效'] },
+      { value: 'app_version', label: '应用版本', type: 'text', operators: ['gte', 'gt', 'eq', 'lt', 'lte'] },
+      { value: 'mode', label: '身份模式', type: 'multi', operators: ['include', 'exclude'],
+        valueOptions: ['育儿', '备孕', '怀孕', '经期', '普通'] },
+      { value: 'platform', label: '客户端平台', type: 'multi', operators: ['include', 'exclude'],
+        valueOptions: ['Android', 'iOS'] },
+      { value: 'baby_month_min', label: '宝宝月数[最小宝宝]', type: 'number', operators: ['lte', 'gte', 'eq'] },
+      { value: 'delivery_time', label: '投放时间', type: 'dateRange', operators: ['range'] },
+      { value: 'ab_test', label: 'AB实验', type: 'multi', operators: ['include', 'exclude'], valueOptions: [] },
+      { value: 'crowd_package', label: '谛听人群包', type: 'multi', operators: ['include', 'exclude'], valueOptions: [] },
+      { value: 'user_id', label: '用户ID', type: 'text', operators: ['eq'] },
+      { value: 'contract_status', label: '签约状态', type: 'multi', operators: ['include', 'exclude'],
+        valueOptions: ['已签约', '未签约'] },
+      { value: 'first_purchase', label: '用户拥有首购特惠资格', type: 'multi', operators: ['include', 'exclude'],
+        valueOptions: ['是', '否'] },
+      { value: 'latest_package', label: '最新订单的套餐类型', type: 'multi', operators: ['include', 'exclude'],
+        valueOptions: ['月度会员', '季度会员', '年度会员', '学生会员', '连续包月'] },
+    ];
+
+    const OPERATOR_LABELS = {
+      include: '包含', exclude: '不包含',
+      eq: '等于', gte: '大于等于', gt: '大于', lte: '小于等于', lt: '小于',
+      range: '区间',
+    };
+
+    function getFieldDef(fieldValue) {
+      return CONDITION_FIELDS.find(f => f.value === fieldValue);
+    }
+
+    function newCondition() {
+      return {
+        id: 0,
+        field: '', fieldOpen: false,
+        operator: '', opOpen: false,
+        valueArr: [], valueOpen: false, searchText: '',
+        textValue: '', numValue: 0,
+        dateStart: '', dateEnd: '',
+      };
+    }
+
+    const PAGE_MODULE_OPTIONS = {
+      VIP_CENTER: {
+        modules: [{ key: 'VIP_CENTER_INFO_STREAM', name: '信息流' }],
+        locations: [{ key: 'INFO_FLOW', name: '信息流', icon: '🖼️' }],
+      },
+      PAY_WINDOW: {
+        modules: [{ key: 'PRICE', name: '价格卡片' }],
+        locations: [{ key: 'PRICE_SORT_DISPLAY', name: '价格排序与展示', icon: '💳' }],
+      },
+    };
+
+    createApp({
+      data() {
+        let condId = 1, groupId = 1;
+        const defaultCond = newCondition(); defaultCond.id = condId++;
+
+        return {
+          siderCollapsed: false,
+          opToolsOpen: false, deployOpen: true,
+          priceManageOpen: false, lotteryManageOpen: false,
+          subMenuMaxHeight: '400px',
+          toast: '', toastError: false, toastTimer: null,
+          planDropdownOpen: false,
+
+          // Page selection
+          pageListData: [
+            { key: 'PAY_WINDOW', name: '支付转化页', tags: ['下单转化'], desc: '独立页面，应用内常规链路上进行付费下单的页面', icon: '📄', category: 'vip' },
+            { key: 'PAY_WINDOW_POPUP', name: '支付转化弹窗', tags: ['下单转化'], desc: '页面直接拉起的半弹窗，用于支付下单', icon: '🖼️', category: 'vip' },
+            { key: 'PAY_STUDENT', name: '学生开卡页', tags: ['群体效应', '下单转化'], desc: '通过学生认证可优惠价购买', icon: '🎓', category: 'vip' },
+            { key: 'VIP_CENTER', name: '会员中心页', tags: ['会员主页面'], desc: '用户浏览和管理会员权益的中心页面', icon: '🏠', category: 'vip' },
+            { key: 'RIGHTS_DETAIL', name: '权益详情页', tags: ['曝光转化'], desc: '用户在权益详情页内，对会员下单页的触达入口', icon: '📋', category: 'vip' },
+            { key: 'MY_TAB', name: '我tab页面', tags: ['个性化数据', '曝光转化'], desc: '用户"我"tab页面，展示个人相关数据和入口', icon: '👤', category: 'vip' },
+            { key: 'ACTIVITY_1', name: '会员日活动页', tags: ['活动'], desc: '618/双11等大促活动专属落地页', icon: '🎉', category: 'activity' },
+            { key: 'ACTIVITY_2', name: '限时秒杀页', tags: ['活动', '下单转化'], desc: '限时秒杀活动页面，营造紧迫感促进转化', icon: '⏰', category: 'activity' },
+            { key: 'ACTIVITY_3', name: '签到有礼页', tags: ['活动', '促活'], desc: '每日签到获取积分/奖品，提升用户活跃度', icon: '📅', category: 'activity' },
+            { key: 'RIGHTS_1', name: '记录Tab', tags: ['个性化数据', '曝光转化'], desc: '展示用户行为记录和相关数据的页面', icon: '📊', category: 'rights' },
+            { key: 'RIGHTS_2', name: '排卵试纸页', tags: ['备孕身份', '个性化数据'], desc: '针对备孕用户展示排卵试纸相关功能', icon: '🔬', category: 'rights' },
+            { key: 'RIGHTS_3', name: '爱康国宾免费体检', tags: ['买赠', '下单转化'], desc: '购买后可获得体检权益', icon: '🏥', category: 'rights' },
+          ],
+          pageSelectModal: {
+            visible: false,
+            selected: '',
+            search: '',
+            activeTab: 'all',
+            selectedModule: '',
+            selectedLocation: '',
+          },
+          sortModal: {
+            visible: false,
+            items: [],
+            targetCid: '',
+            dragIndex: null,
+            dragOverIndex: null,
+          },
+
+          // Path resolution
+          pageNameMap: {
+            'PAY_STUDENT': '学生开卡页', 'PAY_WINDOW': '支付转化页',
+            'MY_TAB': '我tab页面', 'RIGHTS_DETAIL': '权益详情页', 'VIP_CENTER': '会员中心页',
+          },
+          moduleNameMap: {
+            'PRICE': '价格卡片', 'CARD_TOP': '价格上方banner',
+            'MY_TAB_MEMBER_CARD': '我tab会员卡片', 'TOP_RESOURCE': '顶部资源位',
+            'VIP_CENTER_INFO_STREAM': '信息流', 'BOTTOM_RESOURCE': '底部运营位',
+            'MY_TAB_RIGHT_MARKETING': '右侧运营位', 'MY_TAB_BTN_BADGE': '按钮角标',
+            'PRICE_TAG': '限时标签',
+          },
+          locationNameMap: {
+            'INFO_FLOW': '信息流', 'DEFAULT': '默认', 'PRICE_SORT_DISPLAY': '价格排序与展示',
+          },
+
+          planOptions: [
+            { label: '订阅计划-大于等于876版本', value: 'sub_876' },
+            { label: '月度会员计划', value: 'monthly' },
+            { label: '季度会员计划', value: 'quarterly' },
+            { label: '年度会员计划', value: 'yearly' },
+            { label: '学生会员计划', value: 'student' },
+            { label: '连续包月计划', value: 'continuation_monthly' },
+          ],
+
+          fieldOptions: CONDITION_FIELDS,
+
+          condIdCounter: condId,
+          groupIdCounter: groupId,
+
+          form: {
+            pageKey: '', moduleKey: '', locationKey: '',
+            strategyName: '', subscriptionPlan: '', strategyType: 'normal',
+          },
+
+          conditionGroups: [],
+
+          // Component library
+          compModalVisible: false,
+          componentSearch: '',
+          tempSelectedKeys: [],
+          selectedComponents: [],
+          dragIndex: null,
+          dragOverIndex: null,
+          componentLibrary: [
+            {
+              key: 'static_banner', icon: '🖼️', name: '静态banner', desc: '静态图片banner组件',
+              mockId: '会员中心banner (1179)', mockTime: '庄于惠 最后修改于2026-06-11 09:53:12',
+              hasTitleConfig: true, titleConfigLabel: '标题配置',
+              hasContentConfig: true, versionHint: '8.90.0版本以上生效，请注意配置范围',
+              bannerUrl: '', bannerLabel: '静态banner', bannerId: '1180',
+              moduleTitle: '', titleJumpLabel: '', previewImage: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="380" height="112" viewBox="0 0 380 112"><rect width="380" height="112" rx="12" fill="%23fff4f7"/><rect x="0" y="0" width="380" height="112" rx="12" fill="url(%23g)" fill-opacity="0.9"/><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%23ffdce9"/><stop offset="100%" stop-color="%23ffeef4"/></linearGradient></defs><text x="24" y="43" font-size="22" fill="%23a34a6a" font-family="Arial">会员日</text><text x="24" y="73" font-size="16" fill="%23ff5c93" font-family="Arial">专属福利限时领</text><rect x="228" y="20" width="126" height="72" rx="10" fill="%23fff" opacity="0.88"/><text x="246" y="50" font-size="18" fill="%23666" font-family="Arial">2人拼团低至3.4折</text><text x="246" y="74" font-size="14" fill="%23ff7ea7" font-family="Arial">限时加赠30天会员</text></svg>',
+              contentItems: [
+                { jumpLabel: '会员日活动页', titleText: '', addressLabel: '会员中心腰部 banner', slideMode: '', springEffect: '', previewImage: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="80" viewBox="0 0 180 80"><rect width="180" height="80" rx="8" fill="%23fff4f7"/><text x="16" y="34" font-size="16" fill="%23a34a6a" font-family="Arial">会员日</text><text x="16" y="54" font-size="12" fill="%23ff5c93" font-family="Arial">专属福利限时领</text><rect x="110" y="16" width="54" height="48" rx="8" fill="%23ffd7e6"/></svg>' },
+                { jumpLabel: '拼团活动页(非固定入口)', titleText: '', subEntry: '', previewImage: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="80" viewBox="0 0 180 80"><rect width="180" height="80" rx="8" fill="%23fff7fa"/><rect x="12" y="20" width="72" height="40" rx="8" fill="%23ffe1eb"/><text x="95" y="34" font-size="13" fill="%23a34a6a" font-family="Arial">2人拼团低至3.4折</text><text x="95" y="54" font-size="11" fill="%23ff7ea7" font-family="Arial">限时加赠30天会员</text></svg>' },
+              ],
+            },
+            {
+              key: 'nav_banner', icon: '🧭', name: '导航banner', desc: '带导航标签的banner组件',
+              mockId: '会员中心-新版福利模块 (1081)', mockTime: '庄于惠 最后修改于2026-06-18 09:55:16',
+              hasTitleConfig: true, titleConfigLabel: '标题配置',
+              hasContentConfig: true, versionHint: '9.06.0版本以上生效，请注意配置范围',
+              bannerUrl: '', bannerLabel: '导航banner', bannerId: '',
+              moduleTitle: '', contentItems: [],
+              isNavBanner: true, navTabs: [
+                { label: '热门福利', color: '浅粉色', items: [] },
+                { label: '美食购物', color: '浅粉色', items: [] },
+                { label: '娱乐生活', color: '浅粉色', items: [] },
+                { label: '出行旅游', color: '浅粉色', items: [] },
+              ],
+            },
+            {
+              key: 'info_stream_card', icon: '📋', name: '信息流卡片', desc: '信息流中的订阅引导卡片',
+              mockId: '会员中心banner-怀孕-会员日 (1181)', mockTime: '庄于惠 最后修改于2026-06-11 11:07:10',
+              hasTitleConfig: true, titleConfigLabel: '标题配置（9.05.0 新增）',
+              hasContentConfig: true, versionHint: null,
+              bannerUrl: '', bannerLabel: '静态banner', bannerId: '',
+              moduleTitle: '', contentItems: [
+                { jumpLabel: '', jumpUrl: '', imageTag: '' },
+              ],
+            },
+            {
+              key: 'top_banner', icon: '🎯', name: '顶部Banner', desc: '页面顶部资源位展示',
+              mockId: '支付半弹窗banner (116)', mockTime: '庄于惠 最后修改于2026-06-10 16:40:01',
+              hasTitleConfig: true, titleConfigLabel: '标题配置（9.05.0 新增）',
+              hasContentConfig: true, versionHint: null,
+              bannerUrl: '', bannerLabel: '静态banner', bannerId: '',
+              moduleTitle: '', contentItems: [
+                { jumpLabel: '', jumpUrl: '', imageTag: '' },
+              ],
+            },
+            {
+              key: 'bottom_bar', icon: '📌', name: '底部运营位', desc: '页面底部固定展示位',
+              mockId: '会员中心banner-备孕-会员日 (1179)', mockTime: '庄于惠 最后修改于2026-06-11 09:53:12',
+              hasTitleConfig: false, hasContentConfig: true, versionHint: null,
+              bannerUrl: '', bannerLabel: '静态banner', bannerId: '',
+              moduleTitle: '', contentItems: [
+                { jumpLabel: '', jumpUrl: '', imageTag: '' },
+              ],
+            },
+            {
+              key: 'right_marketing', icon: '📢', name: '右侧运营位', desc: '页面右侧营销展示位',
+              mockId: '会员中心banner【仅安卓】-经期育儿 (1178)', mockTime: '庄于惠 最后修改于2026-06-11 09:53:26',
+              hasTitleConfig: false, hasContentConfig: true, versionHint: null,
+              bannerUrl: '', bannerLabel: '静态banner', bannerId: '',
+              moduleTitle: '', contentItems: [
+                { jumpLabel: '', jumpUrl: '', imageTag: '' },
+              ],
+            },
+            {
+              key: 'btn_badge', icon: '🔴', name: '按钮角标', desc: '按钮上的角标提示',
+              mockId: '会员中心banner【仅安卓】-小飞轮 (1173)', mockTime: '庄于惠 最后修改于2026-06-10 16:39:01',
+              hasTitleConfig: false, hasContentConfig: true, versionHint: null,
+              bannerUrl: '', bannerLabel: '', bannerId: '',
+              moduleTitle: '', contentItems: [
+                { jumpLabel: '', jumpUrl: '', imageTag: '' },
+              ],
+            },
+            {
+              key: 'price_tag', icon: '🏷️', name: '限时标签', desc: '限时优惠标签展示',
+              mockId: '会员中心banner【仅安卓】-怀孕福利 (1180)', mockTime: '庄于惠 最后修改于2026-06-11 09:53:02',
+              hasTitleConfig: false, hasContentConfig: true, versionHint: null,
+              bannerUrl: '', bannerLabel: '', bannerId: '',
+              moduleTitle: '', contentItems: [
+                { jumpLabel: '', jumpUrl: '', imageTag: '' },
+              ],
+            },
+            {
+              key: 'vip_card', icon: '💳', name: '会员卡片', desc: '会员权益卡片展示',
+              mockId: '会员中心banner【怀孕会员日】(1182)', mockTime: '庄于惠 最后修改于2026-06-18 09:55:16',
+              hasTitleConfig: true, titleConfigLabel: '标题配置',
+              hasContentConfig: true, versionHint: null,
+              bannerUrl: '', bannerLabel: '静态banner', bannerId: '',
+              moduleTitle: '', contentItems: [
+                { jumpLabel: '', jumpUrl: '', imageTag: '' },
+              ],
+            },
+            {
+              key: 'price_card_display', icon: '💳', name: '价格卡片', desc: '价格排序与展示配置',
+              mockId: '支付转化页价格卡片 (2026)', mockTime: '庄于惠 最后修改于2026-06-23 10:30:00',
+              hasTitleConfig: false, hasContentConfig: true, versionHint: '9.03.0版本以上支持按钮跳转方式',
+              bannerUrl: '', bannerLabel: '价格卡片', bannerId: '25',
+              moduleTitle: '26年618-历史非育儿(首2月9元)-基础',
+              previewImage: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="380" height="220" viewBox="0 0 380 220"><rect width="380" height="220" rx="12" fill="%23ffffff"/><text x="18" y="28" font-size="14" fill="%23333" font-family="Arial">效果仅为示意，以实际为准</text><rect x="18" y="48" width="92" height="154" rx="12" fill="%23fffafb" stroke="%23ff8fb3" stroke-width="2"/><rect x="124" y="48" width="92" height="154" rx="12" fill="%23fff" stroke="%23ececec"/><rect x="230" y="48" width="92" height="154" rx="12" fill="%23fff" stroke="%23ececec"/><text x="28" y="86" font-size="12" fill="%23333" font-family="Arial">连续包月（首2月9元）</text><text x="48" y="138" font-size="24" fill="%23222" font-family="Arial">¥12</text><text x="62" y="166" font-size="12" fill="%23bbb" text-decoration="line-through" font-family="Arial">¥19</text><text x="138" y="86" font-size="12" fill="%23333" font-family="Arial">连续包季-基础</text><text x="156" y="138" font-size="24" fill="%23222" font-family="Arial">¥33</text><text x="166" y="166" font-size="12" fill="%23bbb" text-decoration="line-through" font-family="Arial">¥57</text><text x="244" y="86" font-size="12" fill="%23333" font-family="Arial">连续包年-基础</text><text x="258" y="138" font-size="24" fill="%23222" font-family="Arial">¥128</text><text x="266" y="166" font-size="12" fill="%23bbb" text-decoration="line-through" font-family="Arial">¥228</text><rect x="18" y="208" width="130" height="6" rx="3" fill="%23d8d8d8"/><rect x="18" y="208" width="58" height="6" rx="3" fill="%239d9d9d"/></svg>',
+              priceTabs: ['连续包月', '连续包季', '连续包年', '月卡', '季卡', '年卡', '半年卡'],
+              selectedTab: '连续包月',
+              packageName: '连续包月（首2月9元）-基础',
+              packageId: '25',
+              priceSummary: '【首2月 9 元，续费12 元】(划线价：19元)（原价￥19）',
+              cornerTag: '',
+              renewDesc: '',
+              payButtonText: '立即开通',
+              jumpMode: '',
+              packageCards: [
+                { tab: '连续包月', title: '连续包月（首2月9元）', price: '12', originPrice: '19' },
+                { tab: '连续包季', title: '连续包季-基础', price: '33', originPrice: '57' },
+                { tab: '连续包年', title: '连续包年-基础', price: '128', originPrice: '228' },
+                { tab: '月卡', title: '月卡', price: '', originPrice: '' },
+                { tab: '季卡', title: '季卡', price: '', originPrice: '' },
+                { tab: '年卡', title: '年卡', price: '', originPrice: '' },
+                { tab: '半年卡', title: '半年卡', price: '', originPrice: '' },
+              ],
+              cards: [
+                { title: '连续包月（首2月9元）', price: '12', originPrice: '19', selected: true },
+                { title: '连续包季-基础', price: '33', originPrice: '57', selected: false },
+                { title: '连续包年-基础', price: '128', originPrice: '228', selected: false },
+              ],
+            },
+          ],
+        };
+      },
+
+      computed: {
+        resolvedPath() {
+          const segs = [];
+          if (this.form.pageKey) segs.push(this.pageNameMap[this.form.pageKey] || this.form.pageKey);
+          if (this.form.moduleKey) segs.push(this.moduleNameMap[this.form.moduleKey] || this.form.moduleKey);
+          if (this.form.locationKey) segs.push(this.locationNameMap[this.form.locationKey] || this.form.locationKey);
+          return segs;
+        },
+        isFixedPriceCardPath() {
+          return this.form.pageKey === 'PAY_WINDOW'
+            && this.form.moduleKey === 'PRICE'
+            && this.form.locationKey === 'PRICE_SORT_DISPLAY';
+        },
+        fixedPriceCardComponent() {
+          if (!this.isFixedPriceCardPath) return null;
+          return this.selectedComponents.find(comp => comp.key === 'price_card_display') || null;
+        },
+        useRightSideGlobalPreview() {
+          return this.form.pageKey === 'VIP_CENTER'
+            && this.form.moduleKey === 'VIP_CENTER_INFO_STREAM'
+            && this.form.locationKey === 'INFO_FLOW';
+        },
+        filteredComponentLibrary() {
+          const keyword = (this.componentSearch || '').trim().toLowerCase();
+          if (!keyword) return this.componentLibrary;
+          return this.componentLibrary.filter(comp =>
+            comp.name.toLowerCase().includes(keyword) ||
+            comp.desc.toLowerCase().includes(keyword) ||
+            (comp.mockId || '').toLowerCase().includes(keyword)
+          );
+        },
+
+        // Page selection computed
+        allPages() { return this.pageListData; },
+        vipPages() { return this.pageListData.filter(p => p.category === 'vip'); },
+        activityPages() { return this.pageListData.filter(p => p.category === 'activity'); },
+        rightsPages() { return this.pageListData.filter(p => p.category === 'rights'); },
+        tabPageMap() {
+          return { all: this.allPages, vip: this.vipPages, activity: this.activityPages, rights: this.rightsPages };
+        },
+        filteredPages() {
+          const base = this.tabPageMap[this.pageSelectModal.activeTab] || this.allPages;
+          if (!this.pageSelectModal.search) return base;
+          const q = this.pageSelectModal.search.toLowerCase();
+          return base.filter(p =>
+            p.name.toLowerCase().includes(q) ||
+            p.desc.toLowerCase().includes(q) ||
+            p.tags.some(t => t.toLowerCase().includes(q))
+          );
+        },
+        pageModuleConfig() {
+          return PAGE_MODULE_OPTIONS[this.pageSelectModal.selected] || null;
+        },
+      },
+
+      mounted() {
+        const params = new URLSearchParams(window.location.search);
+        const pageKey = params.get('page_keys');
+        const moduleKey = params.get('module_key');
+        const locationKey = params.get('location_key');
+        if (pageKey) this.form.pageKey = pageKey;
+        if (moduleKey) this.form.moduleKey = moduleKey;
+        if (locationKey) this.form.locationKey = locationKey;
+        if (this.form.pageKey === 'VIP_CENTER' && this.form.moduleKey === 'VIP_CENTER_INFO_STREAM' && this.form.locationKey === 'INFO_FLOW') {
+          const defaultComp = this.componentLibrary.find(comp => comp.key === 'static_banner');
+          if (defaultComp) {
+            const comp = JSON.parse(JSON.stringify(defaultComp));
+            comp.cid = 'comp_' + Date.now();
+            comp.collapsed = false;
+            this.selectedComponents = [comp];
+          }
+        } else if (this.form.pageKey === 'PAY_WINDOW' && this.form.moduleKey === 'PRICE' && this.form.locationKey === 'PRICE_SORT_DISPLAY') {
+          const defaultComp = this.componentLibrary.find(comp => comp.key === 'price_card_display');
+          if (defaultComp) {
+            const comp = JSON.parse(JSON.stringify(defaultComp));
+            comp.cid = 'comp_' + Date.now();
+            comp.collapsed = false;
+            this.selectedComponents = [comp];
+          }
+        }
+      },
+
+      methods: {
+        showToast(msg, isError = false) {
+          this.toast = msg;
+          this.toastError = isError;
+          clearTimeout(this.toastTimer);
+          this.toastTimer = setTimeout(() => { this.toast = ''; }, 2000);
+        },
+
+        // ---- Condition helpers ----
+        getFieldLabel(fv) { const fd = getFieldDef(fv); return fd ? fd.label : fv; },
+        getOperatorLabel(op) { return OPERATOR_LABELS[op] || op; },
+        getOperatorsForField(fv) {
+          const fd = getFieldDef(fv);
+          return fd ? fd.operators : [];
+        },
+        getValueOptionsForField(fv) {
+          const fd = getFieldDef(fv);
+          return fd ? (fd.valueOptions || []) : [];
+        },
+        isMultiValueField(fv) { const fd = getFieldDef(fv); return fd && fd.type === 'multi'; },
+        isTextValueField(fv) { const fd = getFieldDef(fv); return fd && fd.type === 'text'; },
+        isNumberValueField(fv) { const fd = getFieldDef(fv); return fd && fd.type === 'number'; },
+        isDateRangeField(fv) { const fd = getFieldDef(fv); return fd && fd.type === 'dateRange'; },
+
+        onFieldChange(cond, value) {
+          cond.field = value;
+          cond.fieldOpen = false;
+          // Reset operator and value
+          cond.operator = '';
+          cond.valueArr = [];
+          cond.textValue = '';
+          cond.numValue = 0;
+          cond.dateStart = '';
+          cond.dateEnd = '';
+          // Auto-set operator for dateRange
+          if (this.isDateRangeField(value)) {
+            cond.operator = 'range';
+          }
+        },
+
+        addMultiValue(cond) {
+          const txt = (cond.searchText || '').trim();
+          if (txt && !cond.valueArr.includes(txt)) {
+            cond.valueArr.push(txt);
+          }
+          cond.searchText = '';
+        },
+        removeMultiValue(cond, vi) { cond.valueArr.splice(vi, 1); },
+        toggleMultiValue(cond, vo) {
+          const idx = cond.valueArr.indexOf(vo);
+          if (idx >= 0) cond.valueArr.splice(idx, 1);
+          else cond.valueArr.push(vo);
+        },
+
+        // ---- Condition groups ----
+        addConditionGroup() {
+          const cond = newCondition();
+          cond.id = ++this.condIdCounter;
+          this.conditionGroups.push({
+            id: ++this.groupIdCounter,
+            conditions: [cond],
+          });
+        },
+        removeConditionGroup(gi) {
+          if (this.conditionGroups.length > 1) {
+            this.conditionGroups.splice(gi, 1);
+          }
+        },
+        addConditionToGroup(group) {
+          const cond = newCondition();
+          cond.id = ++this.condIdCounter;
+          group.conditions.push(cond);
+        },
+        removeConditionFromGroup(group, ci) {
+          if (group.conditions.length > 1) {
+            group.conditions.splice(ci, 1);
+          }
+        },
+        toggleCondition(cond) {
+          // Flip operator if possible
+          const ops = this.getOperatorsForField(cond.field);
+          if (ops.length > 0) {
+            const curIdx = ops.indexOf(cond.operator);
+            cond.operator = ops[(curIdx + 1) % ops.length];
+          }
+        },
+
+        // ---- Save ----
+        handleSave() {
+          if (!this.form.strategyName.trim()) {
+            this.showToast('请输入策略名称', true); return;
+          }
+          if (!this.form.subscriptionPlan) {
+            this.showToast('请选择订阅计划', true); return;
+          }
+          if (!this.form.strategyType) {
+            this.showToast('请选择策略类型', true); return;
+          }
+
+          const buildConditionValue = (cond) => {
+            const fd = getFieldDef(cond.field);
+            if (!fd) return null;
+            if (fd.type === 'multi') return cond.valueArr;
+            if (fd.type === 'text') return cond.textValue;
+            if (fd.type === 'number') return cond.numValue;
+            if (fd.type === 'dateRange') return { start: cond.dateStart, end: cond.dateEnd };
+            return null;
+          };
+
+          const payload = {
+            pageKey: this.form.pageKey,
+            moduleKey: this.form.moduleKey,
+            locationKey: this.form.locationKey,
+            strategyName: this.form.strategyName.trim(),
+            subscriptionPlan: this.form.subscriptionPlan,
+            strategyType: this.form.strategyType,
+            userConditions: this.conditionGroups.map(g => ({
+              logic: 'AND',
+              conditions: g.conditions
+                .filter(c => c.field)
+                .map(c => ({
+                  field: c.field,
+                  operator: c.operator,
+                  value: buildConditionValue(c),
+                })),
+            })).filter(g => g.conditions.length > 0),
+            components: this.selectedComponents.map(c => c.key),
+          };
+
+          console.log('保存数据:', JSON.stringify(payload, null, 2));
+          this.showToast('保存成功！');
+        },
+
+        // ---- Component library ----
+        openCompModal() {
+          this.tempSelectedKeys = this.selectedComponents.map(c => c.key);
+          this.compModalVisible = true;
+        },
+        toggleComponentSelect(key) {
+          const idx = this.tempSelectedKeys.indexOf(key);
+          if (idx >= 0) this.tempSelectedKeys.splice(idx, 1);
+          else this.tempSelectedKeys.push(key);
+        },
+        confirmComponentSelect() {
+          let compIdCounter = Date.now();
+          this.tempSelectedKeys.forEach(key => {
+            if (!this.selectedComponents.find(c => c.key === key)) {
+              const comp = this.componentLibrary.find(c => c.key === key);
+              if (comp) {
+                const newComp = JSON.parse(JSON.stringify(comp));
+                newComp.cid = 'comp_' + (compIdCounter++);
+                newComp.collapsed = false;
+                this.selectedComponents.push(newComp);
+              }
+            }
+          });
+          // Remove deselected
+          this.selectedComponents = this.selectedComponents.filter(c =>
+            this.tempSelectedKeys.includes(c.key)
+          );
+          this.tempSelectedKeys = [];
+          this.compModalVisible = false;
+        },
+        removeComponent(index) {
+          this.selectedComponents.splice(index, 1);
+        },
+        refreshComponent(index) {
+          this.showToast('组件已刷新');
+        },
+        openPriceSortModal(comp) {
+          this.sortModal.items = Array.isArray(comp.priceTabs) ? [...comp.priceTabs] : [];
+          this.sortModal.targetCid = comp.cid || '';
+          this.sortModal.dragIndex = null;
+          this.sortModal.dragOverIndex = null;
+          this.sortModal.visible = true;
+        },
+        closePriceSortModal() {
+          this.sortModal.visible = false;
+          this.sortModal.dragIndex = null;
+          this.sortModal.dragOverIndex = null;
+          this.sortModal.targetCid = '';
+          this.sortModal.items = [];
+        },
+        moveSortItem(index, direction) {
+          const targetIndex = index + direction;
+          if (targetIndex < 0 || targetIndex >= this.sortModal.items.length) return;
+          const moved = this.sortModal.items.splice(index, 1)[0];
+          this.sortModal.items.splice(targetIndex, 0, moved);
+        },
+        onSortDragStart(event, index) {
+          this.sortModal.dragIndex = index;
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', String(index));
+        },
+        onSortDragOver(event, index) {
+          if (this.sortModal.dragIndex === null || this.sortModal.dragIndex === index) return;
+          this.sortModal.dragOverIndex = index;
+          event.dataTransfer.dropEffect = 'move';
+        },
+        onSortDragEnd() {
+          this.sortModal.dragIndex = null;
+          this.sortModal.dragOverIndex = null;
+        },
+        onSortDrop(event, index) {
+          const rawIndex = event.dataTransfer.getData('text/plain');
+          const fromIndex = rawIndex === '' ? this.sortModal.dragIndex : Number(rawIndex);
+          if (Number.isNaN(fromIndex) || fromIndex === null || fromIndex === index) {
+            this.onSortDragEnd();
+            return;
+          }
+          const moved = this.sortModal.items.splice(fromIndex, 1)[0];
+          this.sortModal.items.splice(index, 0, moved);
+          this.onSortDragEnd();
+        },
+        confirmPriceSort() {
+          const targetComp = this.selectedComponents.find(comp => comp.cid === this.sortModal.targetCid);
+          if (!targetComp) {
+            this.closePriceSortModal();
+            return;
+          }
+          const orderedTabs = [...this.sortModal.items];
+          targetComp.priceTabs = orderedTabs;
+          if (!orderedTabs.includes(targetComp.selectedTab)) {
+            targetComp.selectedTab = orderedTabs[0] || '';
+          }
+          if (Array.isArray(targetComp.cards)) {
+            const packageCardMap = new Map(
+              (targetComp.packageCards || []).map(card => [card.tab, card])
+            );
+            targetComp.cards = orderedTabs.map(tab => {
+              const sourceCard = packageCardMap.get(tab) || { title: tab, price: '', originPrice: '' };
+              return {
+                title: sourceCard.title,
+                price: sourceCard.price,
+                originPrice: sourceCard.originPrice,
+                selected: tab === targetComp.selectedTab,
+              };
+            });
+          }
+          this.showToast('套餐顺序已更新');
+          this.closePriceSortModal();
+        },
+
+        // ---- Page selection modal ----
+        openPageSelectModal() {
+          this.pageSelectModal.visible = true;
+          this.pageSelectModal.selected = this.form.pageKey || '';
+          this.pageSelectModal.search = '';
+          this.pageSelectModal.activeTab = 'all';
+          if (this.pageSelectModal.selected) {
+            const config = PAGE_MODULE_OPTIONS[this.pageSelectModal.selected];
+            if (config) {
+              this.pageSelectModal.selectedModule = this.form.moduleKey || config.modules[0]?.key || '';
+              this.pageSelectModal.selectedLocation = this.form.locationKey || config.locations[0]?.key || '';
+            } else {
+              this.pageSelectModal.selectedModule = '';
+              this.pageSelectModal.selectedLocation = '';
+            }
+          } else {
+            this.pageSelectModal.selectedModule = '';
+            this.pageSelectModal.selectedLocation = '';
+          }
+        },
+        switchPageTab(tab) {
+          this.pageSelectModal.activeTab = tab;
+          this.pageSelectModal.search = '';
+          this.pageSelectModal.selected = '';
+          this.pageSelectModal.selectedModule = '';
+          this.pageSelectModal.selectedLocation = '';
+        },
+        selectPageFromModal(key) {
+          this.pageSelectModal.selected = this.pageSelectModal.selected === key ? '' : key;
+          this.pageSelectModal.selectedModule = '';
+          this.pageSelectModal.selectedLocation = '';
+          const config = PAGE_MODULE_OPTIONS[this.pageSelectModal.selected];
+          if (config) {
+            this.pageSelectModal.selectedModule = config.modules[0]?.key || '';
+            this.pageSelectModal.selectedLocation = config.locations[0]?.key || '';
+          }
+        },
+        confirmPageSelect() {
+          if (!this.pageSelectModal.selected) return;
+          this.form.pageKey = this.pageSelectModal.selected;
+          this.form.moduleKey = this.pageSelectModal.selectedModule;
+          this.form.locationKey = this.pageSelectModal.selectedLocation;
+          this.pageSelectModal.visible = false;
+
+          // Re-evaluate default component for new path
+          if (this.form.pageKey === 'VIP_CENTER' && this.form.moduleKey === 'VIP_CENTER_INFO_STREAM' && this.form.locationKey === 'INFO_FLOW') {
+            if (this.selectedComponents.length === 0) {
+              const defaultComp = this.componentLibrary.find(comp => comp.key === 'static_banner');
+              if (defaultComp) {
+                const comp = JSON.parse(JSON.stringify(defaultComp));
+                comp.cid = 'comp_' + Date.now();
+                comp.collapsed = false;
+                this.selectedComponents = [comp];
+              }
+            }
+          } else if (this.form.pageKey === 'PAY_WINDOW' && this.form.moduleKey === 'PRICE' && this.form.locationKey === 'PRICE_SORT_DISPLAY') {
+            const defaultComp = this.componentLibrary.find(comp => comp.key === 'price_card_display');
+            if (defaultComp) {
+              const comp = JSON.parse(JSON.stringify(defaultComp));
+              comp.cid = 'comp_' + Date.now();
+              comp.collapsed = false;
+              this.selectedComponents = [comp];
+            }
+          }
+        },
+
+        toggleComponentCollapse(index) {
+          this.selectedComponents[index].collapsed = !this.selectedComponents[index].collapsed;
+        },
+
+        // ---- Drag & Drop reorder ----
+        onCompDragStart(e, index) {
+          this.dragIndex = index;
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', index);
+        },
+        onCompDragOver(e, index) {
+          if (this.dragIndex === null || this.dragIndex === index) return;
+          this.dragOverIndex = index;
+        },
+        onCompDragEnd() {
+          this.dragIndex = null;
+          this.dragOverIndex = null;
+        },
+        onCompDrop(e, targetIndex) {
+          const fromIndex = this.dragIndex;
+          if (fromIndex === null || fromIndex === targetIndex) return;
+          const items = [...this.selectedComponents];
+          const [moved] = items.splice(fromIndex, 1);
+          items.splice(targetIndex, 0, moved);
+          this.selectedComponents = items;
+          this.dragIndex = null;
+          this.dragOverIndex = null;
+        },
+      },
+
+      directives: { clickOutside },
+    }).mount('#app');
+  </script>
+</body>
+</html>

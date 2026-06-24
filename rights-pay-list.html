@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>运营位投放策略 - 投放策略</title>
+  <link rel="stylesheet" href="https://unpkg.com/ant-design-vue@3.2.20/dist/antd.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: #f5f5f5; color: #333;
+    }
+    #app { min-height: 100vh; }
+
+    .app-header {
+      height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03); z-index: 100;
+      position: sticky; top: 0;
+    }
+    .app-header .header-left { display: flex; align-items: center; gap: 4px; }
+    .header-left .menu-fold-btn {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s;
+    }
+    .header-left .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .header-left .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; user-select: none; }
+    .app-header .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .header-right .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+    .layout-body { display: flex; height: calc(100vh - 48px); }
+    .app-sider {
+      width: 200px; background: #fff; border-right: 1px solid #f0f0f0;
+      transition: width .2s; overflow: hidden; flex-shrink: 0;
+    }
+    .app-sider.collapsed { width: 60px; }
+    .sider-logo { height: 48px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+    .sider-logo .logo-icon { font-size: 22px; color: #ff4d88; }
+    .sider-logo .logo-text { font-size: 14px; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+    .sider-menu { padding: 8px 0; }
+    .sider-menu-item {
+      display: flex; align-items: center; height: 44px; padding: 0 16px;
+      font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none;
+      transition: all .15s; cursor: pointer; white-space: nowrap;
+    }
+    .sider-menu-item:hover { background: #fff0f6; color: #ff4d88; }
+    .sider-menu-item.active { color: #fff; background: #ff4d88; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .sider-submenu { overflow: hidden; transition: max-height .25s ease; }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; }
+    .sider-submenu .sider-menu-item.active { background: #ff4d88; color: #fff; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: #fff0f6; color: #ff4d88; }
+
+    .content-area { flex: 1; background: #f0f2f5; overflow-x: auto; }
+    .page-body { background: #fff; padding: 16px 24px 24px; min-height: 100%; }
+    .page-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .page-desc { font-size: 13px; color: #666; margin-bottom: 16px; }
+    .page-desc a { color: #ff4d88; }
+
+    .toolbar { margin-bottom: 16px; }
+    .toolbar-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; flex-wrap: wrap; }
+    .toolbar-top-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .toolbar-top-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    .toolbar-links { display: flex; align-items: center; gap: 12px; }
+    .toolbar-links a { color: #ff4d88; font-size: 13px; text-decoration: none; }
+    .toolbar-links a:hover { color: #ff3875; }
+
+    .filter-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+    .filter-label { font-size: 13px; color: #666; white-space: nowrap; }
+    .filter-row .input-field { width: 140px; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 16px; font-size: 13px;
+      background: #ff4d88; color: #fff; border: 1px solid #ff4d88;
+      border-radius: 4px; cursor: pointer; transition: all .2s; white-space: nowrap;
+    }
+    .btn-primary:hover { background: #ff3875; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 16px; font-size: 13px;
+      background: #fff; color: #333; border: 1px solid #d9d9d9;
+      border-radius: 4px; cursor: pointer; transition: all .2s; white-space: nowrap;
+    }
+    .btn-outline:hover { border-color: #ff4d88; color: #ff4d88; }
+    .btn-outline:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-link { background: none; border: none; color: #ff4d88; font-size: 13px; cursor: pointer; padding: 2px 4px; }
+    .btn-link:hover { color: #ff3875; }
+    .btn-danger { background: none; border: none; color: #ff4d4f; font-size: 13px; cursor: pointer; padding: 2px 4px; }
+    .btn-danger:hover { color: #d9363e; }
+    .input-field { height: 32px; padding: 0 10px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; }
+    .input-field:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .select-field { height: 32px; padding: 0 8px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; background: #fff; cursor: pointer; }
+    .checkbox-inline { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #666; cursor: pointer; white-space: nowrap; }
+
+    .preview-bar { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+
+    .toolbar-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+    .data-table thead th {
+      background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 500;
+      border-bottom: 1px solid #f0f0f0; white-space: nowrap; user-select: none;
+    }
+    .data-table thead th.sortable { cursor: pointer; }
+    .data-table thead th.sortable:hover { background: #fff0f6; }
+    .sort-icons { display: inline-flex; flex-direction: column; line-height: 1; margin-left: 4px; font-size: 9px; color: #bbb; vertical-align: middle; }
+    .sort-icons span.active { color: #ff4d88; }
+    .editable-priority { cursor: pointer; color: #ff4d88; border-bottom: 1px dashed #ff4d88; }
+    .data-table tbody td { padding: 10px 12px; border-bottom: 1px solid #f5f5f5; overflow: hidden; text-overflow: ellipsis; }
+    .data-table tbody tr:hover { background: #fafafa; }
+    .empty-state { text-align: center; padding: 60px 0; color: #bbb; }
+
+    .path-text { font-size: 12px; color: #555; }
+    .type-tag { display: inline-block; padding: 0 6px; border-radius: 2px; font-size: 11px; }
+    .type-tag.regular { background: #e6f7ff; color: #1890ff; }
+    .type-tag.activity { background: #fff7e6; color: #fa8c16; }
+    .status-enabled { color: #52c41a; font-weight: 500; }
+
+    .condition-preview { font-size: 12px; color: #666; line-height: 1.6; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .expand-btn { color: #ff4d88; cursor: pointer; font-size: 12px; white-space: nowrap; }
+
+    .pagination-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 16px 0; font-size: 13px; color: #666; }
+    .pagination-bar button {
+      height: 28px; padding: 0 12px; font-size: 12px; border: 1px solid #d9d9d9;
+      border-radius: 4px; background: #fff; cursor: pointer;
+    }
+    .pagination-bar button:hover { border-color: #ff4d88; color: #ff4d88; }
+    .pagination-bar button:disabled { opacity: .4; cursor: not-allowed; }
+    .pagination-bar button.current { border-color: #ff4d88; color: #ff4d88; }
+
+    .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+    .modal-box { background: #fff; border-radius: 6px; width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,.15); }
+    .modal-hd { padding: 14px 20px; font-size: 15px; font-weight: 600; border-bottom: 1px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between; }
+    .modal-close { background:none; border:none; font-size:18px; color:#999; cursor:pointer; padding:0; line-height:1; }
+    .modal-close:hover { color:#ff4d88; }
+    .modal-bd { padding: 20px; font-size: 14px; line-height: 1.6; }
+    .modal-ft { padding: 10px 20px; text-align: right; border-top: 1px solid #f0f0f0; }
+
+    /* Page selection modal */
+    .page-tabs { display:flex; gap:0; border-bottom:1px solid #e8e8e8; margin-bottom:12px; }
+    .page-tab { padding:8px 16px; font-size:13px; cursor:pointer; color:#666; border-bottom:2px solid transparent; transition:all .15s; white-space:nowrap; }
+    .page-tab:hover { color:#ff4d88; }
+    .page-tab.active { color:#ff4d88; border-bottom-color:#ff4d88; font-weight:500; }
+    .page-search { display:flex; gap:8px; margin-bottom:12px; }
+    .page-search input { flex:1; height:32px; padding:0 10px; font-size:13px; border:1px solid #d9d9d9; border-radius:4px; outline:none; }
+    .page-search input:focus { border-color:#ff4d88; }
+    .page-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; max-height:360px; overflow-y:auto; }
+    .page-card { border:1px solid #e8e8e8; border-radius:6px; padding:12px; cursor:pointer; transition:all .15s; }
+    .page-card:hover { border-color:#ff4d88; box-shadow:0 2px 8px rgba(255,77,136,.12); }
+    .page-card.selected { border-color:#ff4d88; background:#fff5f8; }
+    .page-card-img { width:100%; height:80px; background:#f5f5f5; border-radius:4px; margin-bottom:8px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#ccc; }
+    .page-card-name { font-size:13px; font-weight:500; color:#333; margin-bottom:4px; }
+    .page-card-tags { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:4px; }
+    .page-card-tag { display:inline-block; padding:1px 6px; font-size:11px; border-radius:2px; background:#f0f0f0; color:#888; }
+    .page-card-tag.pink { background:#fff0f6; color:#ff4d88; }
+    .page-card-desc { font-size:11px; color:#999; line-height:1.4; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+    .page-config-panel { margin-top: 16px; padding-top: 12px; border-top: 1px solid #f0f0f0; }
+    .page-config-title { font-size: 13px; color: #333; font-weight: 500; margin-bottom: 10px; }
+    .module-options, .location-options { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; }
+    .option-radio { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #333; cursor: pointer; user-select: none; }
+    .option-radio input { accent-color: #ff4d88; }
+    .resource-preview-row { display: flex; align-items: flex-start; gap: 18px; }
+    .resource-preview-card { width: 96px; border: 1px solid #ffb6c9; border-radius: 4px; padding: 8px; background: #fffafb; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .resource-preview-thumb { width: 64px; height: 110px; border: 1px solid #ffd3e0; border-radius: 2px; background: linear-gradient(180deg, #ffe7ef 0%, #fff 100%); display: flex; align-items: center; justify-content: center; color: #ff7fa8; font-size: 20px; }
+    .resource-preview-name { font-size: 12px; color: #333; text-align: center; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="header-left">
+        <span class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed">✕</span>
+        <span class="brand">订阅管理系统</span>
+      </div>
+      <div class="header-right">
+        <span class="user-info">
+          <span class="user-avatar">张</span>
+          <span>张三</span>
+          <span>▾</span>
+        </span>
+      </div>
+    </header>
+
+    <div class="layout-body">
+      <aside class="app-sider" :class="{ collapsed: siderCollapsed }">
+        <div class="sider-logo">
+          <span class="logo-icon">♥</span>
+          <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
+        </div>
+        <div class="sider-menu">
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="sider-menu-item parent-open" :class="{ active: opToolsOpen }" @click="opToolsOpen = !opToolsOpen">
+            <span class="menu-icon">🔧</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+            <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;">弹窗</a>
+            <a class="sider-menu-item" href="javascript:;">兑换码</a>
+            <a class="sider-menu-item" href="gift-strategy-list.html">赠礼发放策略</a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html">限时促销策略</a>
+            <a class="sider-menu-item" href="javascript:;">赠礼物流管理</a>
+            <a class="sider-menu-item" href="event-pricing-strategy-list.html">活动价格策略</a>
+            <a class="sider-menu-item" href="event-operations-strategy-list.html">活动投放策略</a>
+          </div>
+          <div class="sider-menu-item parent-open" :class="{ active: deployOpen }" @click="deployOpen = !deployOpen">
+            <span class="menu-icon">📢</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
+            <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+            <a class="sider-menu-item active" href="rights-pay-list.html">投放策略</a>
+            <a class="sider-menu-item" href="javascript:;">页面模块展示</a>
+          </div>
+          <div class="sider-menu-item parent-open" :class="{ active: priceManageOpen }" @click="priceManageOpen = !priceManageOpen">
+            <span class="menu-icon">💰</span>
+            <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+            <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;">价格套餐</a>
+            <a class="sider-menu-item" href="price-strategy-list.html">价格策略</a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html">促销套餐</a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
+          <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
+            <span class="menu-icon">🎯</span>
+            <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="prize-list.html"><span class="menu-label">奖品管理</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">⚙️</span><span class="menu-label" v-show="!siderCollapsed">设置管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏪</span><span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📚</span><span class="menu-label" v-show="!siderCollapsed">知识库</span></a>
+        </div>
+      </aside>
+
+      <main class="content-area">
+        <div class="page-body">
+          <div class="page-title">运营位投放策略</div>
+          <div class="page-desc">
+            用于管理会员常规链路的资源位投放内容，若需要针对多个资源位进行临时组合、统一配置可前往
+            <a href="javascript:;">"活动投放策略"</a>
+          </div>
+
+          <!-- 工具栏 -->
+          <div class="toolbar">
+            <div class="toolbar-top">
+              <div class="toolbar-top-left">
+                <button class="btn-primary" @click="goCreate">新建投放策略</button>
+                <button class="btn-primary" style="background:#fff; color:#ff4d88; border:1px solid #ff4d88;" @click="openBatchPriority" :disabled="selectedIds.size === 0">
+                  批量修改优先级
+                  <template v-if="selectedIds.size > 0">({{ selectedIds.size }})</template>
+                </button>
+              </div>
+              <div class="toolbar-top-right">
+                <button class="btn-outline" style="margin-right:8px;">素材管理</button>
+                <button class="btn-outline">banner组件库</button>
+              </div>
+            </div>
+            <!-- 筛选区 -->
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div class="filter-row">
+                <span class="filter-label">页面 :</span>
+                <select class="select-field" v-model="filterForm.page" style="width:140px;">
+                  <option value="">页面</option>
+                  <option value="PAY_STUDENT">学生开卡页</option>
+                  <option value="PAY_WINDOW">支付转化弹窗</option>
+                  <option value="MY_TAB">我tab页面</option>
+                  <option value="RIGHTS_DETAIL">权益详情页</option>
+                  <option value="VIP_CENTER">会员中心页</option>
+                </select>
+                <span class="filter-label">模块 :</span>
+                <select class="select-field" v-model="filterForm.module" style="width:120px;">
+                  <option value="">模块</option>
+                  <option value="PRICE">价格卡片</option>
+                  <option value="CARD_TOP">价格上方banner</option>
+                  <option value="MY_TAB_MEMBER_CARD">我tab会员卡片</option>
+                  <option value="TOP_RESOURCE">顶部资源位</option>
+                  <option value="VIP_CENTER_INFO_STREAM">信息流</option>
+                </select>
+                <span class="filter-label">资源位 :</span>
+                <select class="select-field" v-model="filterForm.location" style="width:120px;">
+                  <option value="">资源位</option>
+                  <option value="LEFT_TAG">价格套餐标签</option>
+                  <option value="CARD_TOP_BANNER">价格上方banner</option>
+                  <option value="MY_TAB_NOTIFICATION_BARS">底部运营位</option>
+                  <option value="MY_TAB_RIGHT_MARKETING">右侧运营位</option>
+                  <option value="TOP_RESOURCE">顶部资源位</option>
+                  <option value="MY_TAB_BTN_BADGE">按钮角标</option>
+                  <option value="INFO_FLOW">信息流</option>
+                </select>
+                <span class="filter-label">策略名称 :</span>
+                <input class="input-field" v-model="filterForm.name" placeholder="策略名称" style="width:130px;" />
+                <span class="filter-label">策略ID :</span>
+                <input class="input-field" v-model="filterForm.strategyId" placeholder="策略ID" style="width:100px;" />
+                <span class="filter-label">策略类型 :</span>
+                <select class="select-field" v-model="filterForm.type" style="width:100px;">
+                  <option value="">策略类型</option>
+                  <option value="常规">常规</option>
+                  <option value="活动">活动</option>
+                </select>
+              </div>
+              <div class="filter-row">
+                <button class="btn-outline" @click="addSearchCondition">＋ 搜索条件</button>
+                <button class="btn-primary" style="height:32px; padding:0 14px; font-size:13px;" @click="handleSearch">查 找</button>
+                <button class="btn-outline" @click="handlePreview">预 览</button>
+                <label class="checkbox-inline">
+                  <input type="checkbox" :checked="filterForm.hideActivity" @change="filterForm.hideActivity = $event.target.checked; handleSearch()" />
+                  隐藏"活动"
+                </label>
+                <label class="checkbox-inline">
+                  <input type="checkbox" :checked="filterForm.onlyEnabled" @change="filterForm.onlyEnabled = $event.target.checked; handleSearch()" />
+                  仅看"启用"
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 数据表格 -->
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:40px;">
+                    <input type="checkbox" :checked="allSelected" @change="toggleSelectAll" />
+                  </th>
+                  <th style="width:60px;">ID</th>
+                  <th style="width:220px;">策略名称</th>
+                  <th style="width:60px;">策略类型</th>
+                  <th style="width:180px;">投放路径</th>
+                  <th style="width:80px;" class="sortable" @click="toggleSort">
+                    优先级
+                    <span class="sort-icons">
+                      <span :class="{ active: sortDir === 'asc' }">▲</span>
+                      <span :class="{ active: sortDir === 'desc' }">▼</span>
+                    </span>
+                  </th>
+                  <th style="width:200px;">投放条件 <span class="expand-btn" @click="expandAll">展开</span></th>
+                  <th style="width:140px;">最后修改时间</th>
+                  <th style="width:80px;">最后编辑人</th>
+                  <th style="width:60px;">状态</th>
+                  <th style="width:150px;">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="pageData.length === 0"><td colspan="11" class="empty-state">暂无数据</td></tr>
+                <tr v-for="row in pageData" :key="row.id">
+                  <td>
+                    <input type="checkbox" :checked="selectedIds.has(row.id)" :disabled="row.noCheck" @change="toggleSelect(row.id)" />
+                  </td>
+                  <td>{{ row.id }}</td>
+                  <td>
+                    <span v-if="row.strategyType === '活动'" style="color:#fa8c16;">[活动]</span>{{ row.name }}
+                  </td>
+                  <td>
+                    <span class="type-tag" :class="row.strategyType === '活动' ? 'activity' : 'regular'">{{ row.strategyType }}</span>
+                  </td>
+                  <td><span class="path-text">{{ row.path }}</span></td>
+                  <td>
+                    <template v-if="editingRowId === row.id">
+                      <input class="input-field" type="number" v-model.number="editingValue" min="1"
+                        style="width:70px; height:28px;" @keyup.enter="savePriority(row)" @blur="savePriority(row)" />
+                    </template>
+                    <template v-else>
+                      <span class="editable-priority" @click="startEdit(row)">{{ row.priority }}</span>
+                    </template>
+                  </td>
+                  <td>
+                    <div v-if="row.conditions.length === 0">展开</div>
+                    <div v-else-if="!row.conditionExpanded" class="condition-preview">
+                      <span v-for="(c, ci) in row.conditions" :key="ci">
+                        <span v-if="ci > 0"> </span>{{ c.key }} {{ c.op }} <span style="color:#999;">{{ c.value }}</span>
+                      </span>
+                    </div>
+                    <div v-else style="font-size:12px; line-height:1.6;">
+                      <div v-for="(c, ci) in row.conditions" :key="ci">{{ c.key }} {{ c.op }} {{ c.value }}</div>
+                    </div>
+                    <span v-if="row.conditions.length > 0" class="expand-btn" @click="row.conditionExpanded = !row.conditionExpanded">
+                      {{ row.conditionExpanded ? '收起' : '展开' }}
+                    </span>
+                  </td>
+                  <td>{{ row.lastModifyTime }}</td>
+                  <td>{{ row.lastEditor }}</td>
+                  <td><span class="status-enabled">{{ row.status === '启用' ? '启用' : '禁用' }}</span></td>
+                  <td style="white-space:nowrap;">
+                    <template v-if="row.strategyType === '活动'">
+                      <button class="btn-link" @click="goView(row)">查看</button>
+                    </template>
+                    <template v-else>
+                      <button class="btn-link" @click="goEdit(row)">修改</button>
+                      <button class="btn-link" @click="goView(row)">查看</button>
+                      <button class="btn-link" @click="goCopy(row)">复制</button>
+                      <button class="btn-danger" @click="confirmDisable(row)">失效</button>
+                    </template>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 分页 -->
+          <div class="pagination-bar">
+            <span>共 {{ totalFiltered }} 条</span>
+            <button :disabled="currentPage <= 1" @click="goPage(currentPage - 1)">上一页</button>
+            <button v-for="p in pageNumbers" :key="p"
+              :class="{ current: p === currentPage }"
+              @click="goPage(p)">{{ p }}</button>
+            <button :disabled="currentPage >= totalPages" @click="goPage(currentPage + 1)">下一页</button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- 批量修改优先级弹窗 -->
+    <div class="modal-mask" v-if="batchModal.visible" @click.self="batchModal.visible = false">
+      <div class="modal-box" style="width:520px;">
+        <div class="modal-hd">
+          <span>批量修改优先级</span>
+          <button class="modal-close" @click="batchModal.visible = false">✕</button>
+        </div>
+        <div class="modal-bd">
+          <p style="margin-bottom:12px; font-size:13px; color:#666;">
+            已选择 <strong style="color:#ff4d88;">{{ selectedIds.size }}</strong> 条策略，请逐一输入优先级：
+          </p>
+          <div style="max-height:360px; overflow-y:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:13px;">
+              <thead>
+                <tr style="background:#fafafa;">
+                  <th style="padding:8px 12px; text-align:left; font-weight:500; color:#666; border-bottom:1px solid #f0f0f0;">ID</th>
+                  <th style="padding:8px 12px; text-align:left; font-weight:500; color:#666; border-bottom:1px solid #f0f0f0;">策略名称</th>
+                  <th style="padding:8px 12px; text-align:left; font-weight:500; color:#666; border-bottom:1px solid #f0f0f0; width:140px;">优先级</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in getSelectedItems()" :key="item.id" style="border-bottom:1px solid #f5f5f5;">
+                  <td style="padding:6px 12px; color:#999;">{{ item.id }}</td>
+                  <td style="padding:6px 12px;">{{ item.name }}</td>
+                  <td style="padding:6px 12px;">
+                    <input class="input-field" type="number" v-model.number="batchModal.priorities[item.id]" min="1"
+                      style="width:100%; height:32px; font-size:13px;" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-ft">
+          <button class="btn-outline" @click="batchModal.visible = false">取消</button>
+          <button class="btn-primary" @click="confirmBatchPriority">确认修改</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 失效确认弹窗 -->
+    <div class="modal-mask" v-if="disableModal.visible" @click.self="disableModal.visible = false">
+      <div class="modal-box">
+        <div class="modal-hd">操作确认</div>
+        <div class="modal-bd">{{ disableModal.message }}</div>
+        <div class="modal-ft">
+          <button class="btn-outline" @click="disableModal.visible = false">取消</button>
+          <button class="btn-primary" @click="handleDisableOk">确认</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 选择你要管理的页面 -->
+    <div class="modal-mask" v-if="pageSelectModal.visible" @click.self="pageSelectModal.visible = false">
+      <div class="modal-box" style="width:720px;">
+        <div class="modal-hd">
+          <span>选择你要管理的页面</span>
+          <button class="modal-close" @click="pageSelectModal.visible = false">✕</button>
+        </div>
+        <div class="modal-bd">
+          <div class="page-tabs">
+            <div class="page-tab" :class="{ active: pageSelectModal.activeTab === 'all' }" @click="switchPageTab('all')">
+              全部页面({{ allPages.length }})
+            </div>
+            <div class="page-tab" :class="{ active: pageSelectModal.activeTab === 'vip' }" @click="switchPageTab('vip')">
+              会员主链路({{ vipPages.length }})
+            </div>
+            <div class="page-tab" :class="{ active: pageSelectModal.activeTab === 'activity' }" @click="switchPageTab('activity')">
+              活动页面({{ activityPages.length }})
+            </div>
+            <div class="page-tab" :class="{ active: pageSelectModal.activeTab === 'rights' }" @click="switchPageTab('rights')">
+              权益入口展示({{ rightsPages.length }})
+            </div>
+          </div>
+          <div class="page-search">
+            <input type="text" v-model="pageSelectModal.search" placeholder="搜索名称/标签/介绍" />
+            <button class="btn-outline" style="width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;">🔍</button>
+          </div>
+          <div class="page-grid">
+            <div v-for="page in filteredPages" :key="page.key"
+              class="page-card"
+              :class="{ selected: pageSelectModal.selected === page.key }"
+              @click="selectPageFromModal(page.key)">
+              <div class="page-card-img">{{ page.icon }}</div>
+              <div class="page-card-name">{{ page.name }}</div>
+              <div class="page-card-tags">
+                <span v-for="tag in page.tags" :key="tag" class="page-card-tag" :class="{ pink: tag === '下单转化' || tag === '曝光转化' }">{{ tag }}</span>
+              </div>
+              <div class="page-card-desc">{{ page.desc }}</div>
+            </div>
+          </div>
+          <div class="page-config-panel" v-if="pageModuleConfig">
+            <div class="page-config-title">选择页面内模块:</div>
+            <div class="module-options">
+              <label class="option-radio" v-for="module in pageModuleConfig.modules" :key="module.key">
+                <input type="radio" name="moduleKey" :value="module.key" v-model="pageSelectModal.selectedModule" />
+                <span>{{ module.name }}</span>
+              </label>
+            </div>
+            <div class="page-config-title">选择资源位:</div>
+            <div class="resource-preview-row">
+              <label class="option-radio" style="align-items:flex-start; gap:12px;" v-for="location in pageModuleConfig.locations" :key="location.key">
+                <input type="radio" name="locationKey" :value="location.key" v-model="pageSelectModal.selectedLocation" style="margin-top:6px;" />
+                <div class="resource-preview-card">
+                  <div class="resource-preview-name">{{ location.name }}</div>
+                  <div class="resource-preview-thumb">{{ location.icon }}</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-ft">
+          <button class="btn-outline" @click="pageSelectModal.visible = false">取消</button>
+          <button class="btn-primary" :disabled="!pageSelectModal.selected" @click="confirmPageSelect">确认</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
+  <script>
+    const { createApp, ref, reactive, computed, onMounted, watch } = Vue;
+
+    createApp({
+      setup() {
+        const siderCollapsed = ref(localStorage.getItem('menu_siderCollapsed') === 'true');
+        const opToolsOpen = ref(localStorage.getItem('menu_opToolsOpen') !== 'false');
+        const deployOpen = ref(localStorage.getItem('menu_deployOpen') === 'true');
+        const priceManageOpen = ref(localStorage.getItem('menu_priceManageOpen') !== 'false');
+        const lotteryManageOpen = ref(true);
+        watch(siderCollapsed, v => localStorage.setItem('menu_siderCollapsed', v));
+        watch(opToolsOpen, v => localStorage.setItem('menu_opToolsOpen', v));
+        watch(deployOpen, v => localStorage.setItem('menu_deployOpen', v));
+        watch(priceManageOpen, v => localStorage.setItem('menu_priceManageOpen', v));
+        watch(lotteryManageOpen, v => localStorage.setItem('menu_lotteryManageOpen', v));
+        const subMenuMaxHeight = '400px';
+        const currentPage = ref(1);
+        const pageSize = ref(10);
+        const sortDir = ref(''); // '', 'asc', 'desc'
+        const selectedIds = reactive(new Set());
+
+        const filterForm = reactive({
+          page: '', module: '', location: '',
+          name: '', strategyId: '', type: '',
+          hideActivity: false, onlyEnabled: true,
+        });
+
+        const disableModal = reactive({ visible: false, message: '', record: null });
+        const batchModal = reactive({ visible: false, priorities: {} });
+        const PAGE_MODULE_OPTIONS = {
+          VIP_CENTER: {
+            modules: [{ key: 'VIP_CENTER_INFO_STREAM', name: '信息流' }],
+            locations: [{ key: 'INFO_FLOW', name: '信息流', icon: '🖼️' }],
+          },
+        };
+
+        // 内联编辑
+        const editingRowId = ref(null);
+        const editingValue = ref(1);
+
+        const allData = reactive([]);
+
+        // Mock data generation
+        const mockRows = [
+          { id: 779, name: '【618】学生特惠_套餐左上角标签-年卡', strategyType: '常规', path: '学生开卡页 -> 价格卡片 -> 价格套餐标签', priority: 3, conditions: [], lastModifyTime: '2026-06-15 16:00:27', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 776, name: '【618】未订阅（id：1）_1', strategyType: '活动', path: '支付转化弹窗 -> 价格上方banner -> 价格上方banner', priority: 100, conditions: [], lastModifyTime: '2026-06-15 14:48:40', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 777, name: '【618】未订阅（id：1）_1', strategyType: '活动', path: '我tab页面 -> 我tab会员卡片 -> 底部运营位', priority: 101, conditions: [], lastModifyTime: '2026-06-15 14:48:40', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 778, name: '【618】未订阅（id：1）_1', strategyType: '活动', path: '我tab页面 -> 我tab会员卡片 -> 右侧运营位', priority: 102, conditions: [], lastModifyTime: '2026-06-15 14:48:40', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 659, name: '【会员日】-权益页顶部-已订阅', strategyType: '常规', path: '权益详情页 -> 顶部资源位 -> 顶部资源位', priority: 11, conditions: [
+            { key: '会员状态', op: '包含', value: '会员生效中' },
+            { key: '页面范围', op: '包含', value: '产检智能解读-产检时间表，产检智能解读-会员tab，产检智能解读-小工具，会员tab-好孕计划，会员tab-经期健康度，会员tab-黄金受孕期，发育测评，好孕计划，孕期营养计划，智能喂养_喂奶，智能喂养_睡眠，经期健康度，辅食计划-喂养工具，辅食计划-辅食工具，黄金受孕期' },
+          ], lastModifyTime: '2026-06-11 15:11:15', lastEditor: '张三', status: '启用', noCheck: true },
+          { id: 764, name: '6月会员日_预发测试-可删', strategyType: '常规', path: '权益详情页 -> 顶部资源位 -> 顶部资源位', priority: 16, conditions: [
+            { key: '会员状态', op: '包含', value: '会员生效中' },
+            { key: '页面范围', op: '包含', value: '产检智能解读-产检时间表，产检智能解读-会员tab，产检智能解读-小工具，会员tab-好孕计划，会员tab-经期健康度，会员tab-黄金受孕期，发育测评，好孕计划，孕期营养计划，智能喂养_喂奶，智能喂养_睡眠，经期健康度，辅食计划-喂养工具，辅食计划-辅食工具，黄金受孕期' },
+          ], lastModifyTime: '2026-06-11 14:40:41', lastEditor: '李四', status: '启用', noCheck: true },
+          { id: 661, name: '【会员日】已订阅-按钮角标', strategyType: '常规', path: '我tab页面 -> 我tab会员卡片 -> 按钮角标', priority: 19, conditions: [], lastModifyTime: '2026-06-10 16:51:21', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 775, name: '【会员日】已订阅（id：2）_1', strategyType: '活动', path: '我tab页面 -> 我tab会员卡片 -> 右侧运营位', priority: 200, conditions: [], lastModifyTime: '2026-06-10 16:48:13', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 774, name: '【15】【育儿】无发育-已订阅【安卓】', strategyType: '常规', path: '会员中心页 -> 信息流 -> 信息流', priority: 51, conditions: [], lastModifyTime: '2026-06-10 16:35:45', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 773, name: '【15】【育儿】无发育-已订阅【苹果】', strategyType: '常规', path: '会员中心页 -> 信息流 -> 信息流', priority: 50, conditions: [], lastModifyTime: '2026-06-10 16:34:48', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 772, name: '【15】【育儿】有发育-已订阅【苹果】', strategyType: '常规', path: '会员中心页 -> 信息流 -> 信息流', priority: 49, conditions: [], lastModifyTime: '2026-06-10 16:32:57', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 771, name: '【15】【育儿】有发育-已订阅【安卓】', strategyType: '常规', path: '会员中心页 -> 信息流 -> 信息流', priority: 48, conditions: [], lastModifyTime: '2026-06-10 16:31:22', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 660, name: '【会员日】已订阅-右侧运营位', strategyType: '常规', path: '我tab页面 -> 我tab会员卡片 -> 右侧运营位', priority: 15, conditions: [], lastModifyTime: '2026-06-10 15:20:00', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 658, name: '【会员日】-权益页顶部-未订阅', strategyType: '常规', path: '权益详情页 -> 顶部资源位 -> 顶部资源位', priority: 10, conditions: [
+            { key: '会员状态', op: '不包含', value: '会员生效中' },
+            { key: '页面范围', op: '包含', value: '产检智能解读-产检时间表，产检智能解读-会员tab' },
+          ], lastModifyTime: '2026-06-09 11:22:33', lastEditor: '张三', status: '启用', noCheck: false },
+          { id: 650, name: '【会员日】-支付弹窗-已订阅', strategyType: '常规', path: '支付转化弹窗 -> 价格上方banner -> 价格上方banner', priority: 8, conditions: [], lastModifyTime: '2026-06-08 17:10:05', lastEditor: '李四', status: '启用', noCheck: false },
+
+          // Generate additional mock data to reach ~30 items
+          ...[...Array(15)].map((_, i) => {
+            const baseId = 640 - i;
+            const names = [
+              '【会员日】-学生开卡页-新用户', '付费引导弹窗-年卡推荐', '【会员日】-权益页中部banner',
+              '学生开卡页_连续包月优惠', '育儿主页-底部运营位', '支付转化页-限时标签',
+              '权益详情页-推荐套餐', '【会员日】-我tab-已订阅', '支付弹窗-新用户专享',
+              '学生认证页-特惠标签', '育儿主页-信息流卡片', '收银台-底部推荐位',
+              '权益详情页-角标', '【会员日】-支付弹窗-未订阅', '会员中心-顶部banner',
+            ];
+            const types = i % 5 === 0 ? '活动' : '常规';
+            const paths = [
+              '学生开卡页 -> 价格卡片 -> 限时标签', '支付转化弹窗 -> 价格上方banner -> 价格上方banner',
+              '权益详情页 -> 信息流 -> 信息流', '学生开卡页 -> 价格卡片 -> 价格套餐标签',
+              '育儿会员主页 -> 底部运营位 -> 底部运营位', '支付转化页 -> 限时标签 -> 限时标签',
+            ];
+            const editors = ['张三', '李四', '王五', '赵六', '陈七', '孙八'];
+            const hasConditions = i % 3 === 0;
+            return {
+              id: baseId,
+              name: names[i],
+              strategyType: types,
+              path: paths[i % paths.length],
+              priority: 500 - i * 10 + Math.floor(Math.random() * 5),
+              conditions: hasConditions ? [
+                { key: '会员状态', op: '包含', value: '会员生效中' },
+                { key: '页面范围', op: '包含', value: '产检智能解读-产检时间表，会员tab-好孕计划' },
+              ] : [],
+              lastModifyTime: dayjs('2026-06-14').subtract(i * 2 + Math.floor(Math.random() * 3), 'day').format('YYYY-MM-DD HH:mm:ss'),
+              lastEditor: editors[i % editors.length],
+              status: i % 7 === 0 ? '禁用' : '启用',
+              noCheck: i % 8 === 0,
+            };
+          }),
+        ];
+
+        onMounted(() => {
+          allData.push(...mockRows);
+        });
+
+        // Add reactive expanded state
+        mockRows.forEach(r => { r.conditionExpanded = false; });
+
+        const filteredData = computed(() => {
+          let result = [...allData];
+
+          if (filterForm.page) {
+            result = result.filter(r => r.path.includes(getPageName(filterForm.page)));
+          }
+          if (filterForm.name.trim()) {
+            const kw = filterForm.name.trim().toLowerCase();
+            result = result.filter(r => r.name.toLowerCase().includes(kw));
+          }
+          if (filterForm.strategyId.trim()) {
+            const sid = filterForm.strategyId.trim();
+            result = result.filter(r => String(r.id) === sid);
+          }
+          if (filterForm.type) {
+            result = result.filter(r => r.strategyType === filterForm.type);
+          }
+          if (filterForm.hideActivity) {
+            result = result.filter(r => r.strategyType !== '活动');
+          }
+          if (filterForm.onlyEnabled) {
+            result = result.filter(r => r.status === '启用');
+          }
+
+          if (sortDir.value === 'asc') {
+            result.sort((a, b) => a.priority - b.priority);
+          } else if (sortDir.value === 'desc') {
+            result.sort((a, b) => b.priority - a.priority);
+          }
+
+          return result;
+        });
+
+        function getPageName(key) {
+          const map = {
+            PAY_STUDENT: '学生开卡页', PAY_WINDOW: '支付转化弹窗',
+            MY_TAB: '我tab页面', RIGHTS_DETAIL: '权益详情页', VIP_CENTER: '会员中心页',
+          };
+          return map[key] || '';
+        }
+
+        const totalFiltered = computed(() => filteredData.value.length);
+        const totalPages = computed(() => Math.max(1, Math.ceil(totalFiltered.value / pageSize.value)));
+
+        const pageNumbers = computed(() => {
+          const total = totalPages.value;
+          const cur = currentPage.value;
+          const nums = [];
+          if (total <= 7) {
+            for (let i = 1; i <= total; i++) nums.push(i);
+          } else {
+            nums.push(1);
+            let start = Math.max(2, cur - 2);
+            let end = Math.min(total - 1, cur + 2);
+            if (start > 2) nums.push('...');
+            for (let i = start; i <= end; i++) nums.push(i);
+            if (end < total - 1) nums.push('...');
+            nums.push(total);
+          }
+          return nums;
+        });
+
+        const pageData = computed(() => {
+          const start = (currentPage.value - 1) * pageSize.value;
+          return filteredData.value.slice(start, start + pageSize.value);
+        });
+
+        const allSelected = computed({
+          get: () => {
+            const pageIds = pageData.value.filter(r => !r.noCheck).map(r => r.id);
+            return pageIds.length > 0 && pageIds.every(id => selectedIds.has(id));
+          },
+          set: (val) => {},
+        });
+
+        function toggleSelectAll(e) {
+          const checked = e.target.checked;
+          pageData.value.forEach(r => {
+            if (!r.noCheck) {
+              if (checked) selectedIds.add(r.id);
+              else selectedIds.delete(r.id);
+            }
+          });
+        }
+
+        function toggleSelect(id) {
+          if (selectedIds.has(id)) selectedIds.delete(id);
+          else selectedIds.add(id);
+        }
+
+        function toggleSort() {
+          if (sortDir.value === '') sortDir.value = 'desc';
+          else if (sortDir.value === 'desc') sortDir.value = 'asc';
+          else sortDir.value = '';
+        }
+
+        // ---- 优先级编辑 ----
+        function checkPriorityConflict(value, excludeIds) {
+          return allData.some(r => !excludeIds.has(r.id) && r.priority === value);
+        }
+
+        function startEdit(row) {
+          editingRowId.value = row.id;
+          editingValue.value = row.priority;
+        }
+
+        function savePriority(row) {
+          if (editingRowId.value !== row.id) return;
+          const newVal = parseInt(editingValue.value) || 1;
+          if (newVal !== row.priority) {
+            if (checkPriorityConflict(newVal, new Set([row.id]))) {
+              alert(`优先级 ${newVal} 已被其他策略占用，请更换`);
+              editingRowId.value = null;
+              return;
+            }
+            row.priority = newVal;
+          }
+          editingRowId.value = null;
+        }
+
+        function getSelectedItems() {
+          return allData.filter(item => selectedIds.has(item.id));
+        }
+
+        // ---- 批量修改优先级 ----
+        function openBatchPriority() {
+          if (selectedIds.size === 0) {
+            alert('请先勾选需要修改的策略');
+            return;
+          }
+          const priorities = {};
+          getSelectedItems().forEach(item => {
+            priorities[item.id] = item.priority;
+          });
+          batchModal.priorities = priorities;
+          batchModal.visible = true;
+        }
+
+        function confirmBatchPriority() {
+          const selectedItems = getSelectedItems();
+          // 1. 检测选中项之间是否有重复
+          const valMap = {};
+          for (const item of selectedItems) {
+            const newVal = parseInt(batchModal.priorities[item.id]) || item.priority;
+            if (!valMap[newVal]) valMap[newVal] = [];
+            valMap[newVal].push(item.id);
+          }
+          const dupVals = Object.keys(valMap).filter(k => valMap[k].length > 1);
+          if (dupVals.length > 0) {
+            alert(`优先级 ${dupVals.join('、')} 存在重复，每条策略的优先级必须唯一`);
+            return;
+          }
+          // 2. 检测与非选中项是否冲突
+          for (const item of selectedItems) {
+            const newVal = parseInt(batchModal.priorities[item.id]) || item.priority;
+            if (newVal !== item.priority && checkPriorityConflict(newVal, selectedIds)) {
+              alert(`优先级 ${newVal} 已被其他策略占用，请调整后重试`);
+              return;
+            }
+          }
+          selectedItems.forEach(item => {
+            const newVal = parseInt(batchModal.priorities[item.id]);
+            if (newVal && newVal !== item.priority) {
+              item.priority = newVal;
+            }
+          });
+          selectedIds.clear();
+          batchModal.visible = false;
+        }
+
+        function expandAll() {
+          const hasCollapsed = pageData.value.some(r => r.conditions.length > 0 && !r.conditionExpanded);
+          allData.forEach(r => { r.conditionExpanded = hasCollapsed; });
+        }
+
+        function handleSearch() {
+          currentPage.value = 1;
+        }
+
+        function addSearchCondition() {
+          alert('展开更多搜索条件');
+        }
+
+        function handlePreview() {
+          const selected = [...selectedIds];
+          if (selected.length === 0) { alert('请先选择要预览的策略'); return; }
+          alert('预览策略ID: ' + selected.join(', '));
+        }
+
+        function goPage(p) {
+          if (typeof p === 'number' && p >= 1 && p <= totalPages.value) {
+            currentPage.value = p;
+          }
+        }
+
+        // 页面选择弹窗数据
+        const pageListData = [
+          { key: 'PAY_WINDOW', name: '支付转化页', tags: ['下单转化'], desc: '独立页面，应用内常规链路上进行付费下单的页面', icon: '📄', category: 'vip' },
+          { key: 'PAY_WINDOW_POPUP', name: '支付转化弹窗', tags: ['下单转化'], desc: '页面直接拉起的半弹窗，用于支付下单', icon: '🖼️', category: 'vip' },
+          { key: 'PAY_STUDENT', name: '学生开卡页', tags: ['群体效应', '下单转化'], desc: '通过学生认证可优惠价购买', icon: '🎓', category: 'vip' },
+          { key: 'VIP_CENTER', name: '会员中心页', tags: ['会员主页面'], desc: '用户浏览和管理会员权益的中心页面', icon: '🏠', category: 'vip' },
+          { key: 'RIGHTS_DETAIL', name: '权益详情页', tags: ['曝光转化'], desc: '用户在权益详情页内，对会员下单页的触达入口', icon: '📋', category: 'vip' },
+          { key: 'MY_TAB', name: '我tab页面', tags: ['个性化数据', '曝光转化'], desc: '用户"我"tab页面，展示个人相关数据和入口', icon: '👤', category: 'vip' },
+          { key: 'ACTIVITY_1', name: '会员日活动页', tags: ['活动'], desc: '618/双11等大促活动专属落地页', icon: '🎉', category: 'activity' },
+          { key: 'ACTIVITY_2', name: '限时秒杀页', tags: ['活动', '下单转化'], desc: '限时秒杀活动页面，营造紧迫感促进转化', icon: '⏰', category: 'activity' },
+          { key: 'ACTIVITY_3', name: '签到有礼页', tags: ['活动', '促活'], desc: '每日签到获取积分/奖品，提升用户活跃度', icon: '📅', category: 'activity' },
+          { key: 'RIGHTS_1', name: '记录Tab', tags: ['个性化数据', '曝光转化'], desc: '展示用户行为记录和相关数据的页面', icon: '📊', category: 'rights' },
+          { key: 'RIGHTS_2', name: '排卵试纸页', tags: ['备孕身份', '个性化数据'], desc: '针对备孕用户展示排卵试纸相关功能', icon: '🔬', category: 'rights' },
+          { key: 'RIGHTS_3', name: '爱康国宾免费体检', tags: ['买赠', '下单转化'], desc: '购买后可获得体检权益', icon: '🏥', category: 'rights' },
+        ];
+
+        const pageSelectModal = reactive({
+          visible: false,
+          selected: '',
+          search: '',
+          activeTab: 'all',
+          selectedModule: '',
+          selectedLocation: '',
+        });
+
+        const allPages = computed(() => pageListData);
+        const vipPages = computed(() => pageListData.filter(p => p.category === 'vip'));
+        const activityPages = computed(() => pageListData.filter(p => p.category === 'activity'));
+        const rightsPages = computed(() => pageListData.filter(p => p.category === 'rights'));
+
+        const tabPageMap = { all: allPages, vip: vipPages, activity: activityPages, rights: rightsPages };
+
+        const filteredPages = computed(() => {
+          const base = tabPageMap[pageSelectModal.activeTab] || allPages;
+          if (!pageSelectModal.search) return base.value;
+          const q = pageSelectModal.search.toLowerCase();
+          return base.value.filter(p =>
+            p.name.toLowerCase().includes(q) ||
+            p.desc.toLowerCase().includes(q) ||
+            p.tags.some(t => t.toLowerCase().includes(q))
+          );
+        });
+        const pageModuleConfig = computed(() => PAGE_MODULE_OPTIONS[pageSelectModal.selected] || null);
+
+        function switchPageTab(tab) {
+          pageSelectModal.activeTab = tab;
+          pageSelectModal.search = '';
+          pageSelectModal.selected = '';
+        }
+
+        function selectPageFromModal(key) {
+          pageSelectModal.selected = pageSelectModal.selected === key ? '' : key;
+          pageSelectModal.selectedModule = '';
+          pageSelectModal.selectedLocation = '';
+          const pageConfig = PAGE_MODULE_OPTIONS[pageSelectModal.selected];
+          if (pageConfig) {
+            pageSelectModal.selectedModule = pageConfig.modules[0]?.key || '';
+            pageSelectModal.selectedLocation = pageConfig.locations[0]?.key || '';
+          }
+        }
+
+        function confirmPageSelect() {
+          if (!pageSelectModal.selected) return;
+          const params = new URLSearchParams();
+          params.set('page_keys', pageSelectModal.selected);
+          if (pageSelectModal.selectedModule) params.set('module_key', pageSelectModal.selectedModule);
+          if (pageSelectModal.selectedLocation) params.set('location_key', pageSelectModal.selectedLocation);
+          window.location.href = 'rights-pay-create.html?' + params.toString();
+        }
+
+        function goCreate() {
+          pageSelectModal.visible = true;
+          pageSelectModal.selected = '';
+          pageSelectModal.search = '';
+          pageSelectModal.activeTab = 'all';
+          pageSelectModal.selectedModule = '';
+          pageSelectModal.selectedLocation = '';
+        }
+        function goEdit(row) {
+          const params = new URLSearchParams();
+          params.set('id', row.id);
+          params.set('page_keys', extractPageKey(row.path));
+          params.set('module_key', extractModuleKey(row.path));
+          params.set('location_key', extractLocationKey(row.path));
+          // 保留当前筛选条件
+          const searchParams = new URLSearchParams();
+          if (filterForm.page) searchParams.set('page', filterForm.page);
+          if (filterForm.name) searchParams.set('name', filterForm.name);
+          params.set('searchParams', searchParams.toString());
+          window.location.href = 'rights-pay-create.html?' + params.toString();
+        }
+        function goView(row) {
+          const params = new URLSearchParams();
+          params.set('id', row.id);
+          params.set('page_keys', extractPageKey(row.path));
+          params.set('module_key', extractModuleKey(row.path));
+          params.set('location_key', extractLocationKey(row.path));
+          alert('查看策略详情：' + row.id + ' ' + row.name);
+        }
+        function goCopy(row) {
+          const params = new URLSearchParams();
+          params.set('id', row.id);
+          params.set('page_keys', extractPageKey(row.path));
+          params.set('module_key', extractModuleKey(row.path));
+          params.set('location_key', extractLocationKey(row.path));
+          const searchParams = new URLSearchParams();
+          if (filterForm.page) searchParams.set('page', filterForm.page);
+          if (filterForm.name) searchParams.set('name', filterForm.name);
+          params.set('searchParams', searchParams.toString());
+          window.location.href = 'rights-pay-create.html?' + params.toString();
+        }
+
+        function extractPageKey(path) {
+          const pageMap = {
+            '学生开卡页': 'PAY_STUDENT',
+            '支付转化弹窗': 'PAY_WINDOW',
+            '我tab页面': 'MY_TAB',
+            '权益详情页': 'RIGHTS_DETAIL',
+            '会员中心页': 'VIP_CENTER',
+            '育儿会员主页': 'VIP_CENTER',
+          };
+          for (const [name, key] of Object.entries(pageMap)) {
+            if (path.includes(name)) return key;
+          }
+          return '';
+        }
+        function extractModuleKey(path) {
+          const moduleMap = {
+            '价格卡片': 'PRICE',
+            '价格上方banner': 'CARD_TOP',
+            '我tab会员卡片': 'MY_TAB_MEMBER_CARD',
+            '顶部资源位': 'TOP_RESOURCE',
+            '信息流': 'VIP_CENTER_INFO_STREAM',
+            '底部运营位': 'BOTTOM_RESOURCE',
+            '右侧运营位': 'MY_TAB_RIGHT_MARKETING',
+            '按钮角标': 'MY_TAB_BTN_BADGE',
+            '限时标签': 'PRICE_TAG',
+          };
+          for (const [name, key] of Object.entries(moduleMap)) {
+            if (path.includes(name)) return key;
+          }
+          return '';
+        }
+        function extractLocationKey(path) {
+          const locationMap = {
+            '价格套餐标签': 'LEFT_TAG',
+            '价格上方banner': 'CARD_TOP_BANNER',
+            '底部运营位': 'BOTTOM_RESOURCE',
+            '右侧运营位': 'MY_TAB_RIGHT_MARKETING',
+            '顶部资源位': 'TOP_RESOURCE',
+            '按钮角标': 'MY_TAB_BTN_BADGE',
+            '信息流': 'INFO_FLOW',
+            '限时标签': 'PRICE_TAG',
+          };
+          for (const [name, key] of Object.entries(locationMap)) {
+            if (path.includes(name)) return key;
+          }
+          return '';
+        }
+
+        function confirmDisable(row) {
+          disableModal.visible = true;
+          disableModal.record = row;
+          disableModal.message = '确认将策略「' + row.name + '」失效？';
+        }
+
+        function handleDisableOk() {
+          if (disableModal.record) {
+            disableModal.record.status = '禁用';
+            disableModal.record.lastEditor = '赵六';
+            disableModal.record.lastModifyTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+          }
+          disableModal.visible = false;
+        }
+
+        return {
+          siderCollapsed, opToolsOpen, deployOpen, priceManageOpen, lotteryManageOpen, subMenuMaxHeight,
+          currentPage, pageSize, sortDir, selectedIds,
+          filterForm, disableModal, batchModal, allData,
+          editingRowId, editingValue,
+          filteredData, totalFiltered, totalPages, pageNumbers, pageData,
+          allSelected, toggleSelectAll, toggleSelect,
+          toggleSort, expandAll,
+          startEdit, savePriority,
+          openBatchPriority, confirmBatchPriority, getSelectedItems,
+          handleSearch, addSearchCondition, handlePreview,
+          goPage, goCreate, goEdit, goView, goCopy,
+          extractPageKey, extractModuleKey, extractLocationKey,
+          confirmDisable, handleDisableOk,
+          pageSelectModal, allPages, vipPages, activityPages, rightsPages,
+          filteredPages, pageModuleConfig, switchPageTab, selectPageFromModal, confirmPageSelect,
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

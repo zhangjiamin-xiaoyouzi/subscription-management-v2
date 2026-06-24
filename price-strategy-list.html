@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>订阅管理系统 - 价格策略</title>
+  <link rel="stylesheet" href="https://unpkg.com/ant-design-vue@3.2.20/dist/antd.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: #f5f5f5; color: #333;
+    }
+    #app { min-height: 100vh; }
+
+    .app-header {
+      height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03); z-index: 100;
+      position: sticky; top: 0;
+    }
+    .app-header .header-left { display: flex; align-items: center; gap: 4px; }
+    .header-left .menu-fold-btn {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s;
+    }
+    .header-left .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .header-left .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; user-select: none; }
+    .app-header .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .header-right .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+    .layout-body { display: flex; height: calc(100vh - 48px); }
+    .app-sider {
+      width: 200px; background: #fff; border-right: 1px solid #f0f0f0;
+      transition: width .2s; overflow: hidden; flex-shrink: 0;
+    }
+    .app-sider.collapsed { width: 60px; }
+    .sider-logo { height: 48px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+    .sider-logo .logo-icon { font-size: 22px; color: #ff4d88; }
+    .sider-logo .logo-text { font-size: 14px; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+    .sider-menu { padding: 8px 0; }
+    .sider-menu-item {
+      display: flex; align-items: center; height: 44px; padding: 0 16px;
+      font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none;
+      transition: all .15s; cursor: pointer; white-space: nowrap;
+    }
+    .sider-menu-item:hover { background: #fff0f6; color: #ff4d88; }
+    .sider-menu-item.active { color: #fff; background: #ff4d88; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .menu-arrow { font-size: 10px; transition: transform .25s ease; margin-left: auto; }
+    .menu-arrow.open { transform: rotate(90deg); }
+    .sider-submenu { overflow: hidden; transition: max-height .25s ease; }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; }
+    .sider-submenu .sider-menu-item.active { background: #ff4d88; color: #fff; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: #fff0f6; color: #ff4d88; }
+
+    .content-area { flex: 1; background: #f0f2f5; overflow-x: auto; }
+    .page-body { background: #fff; padding: 16px 24px 24px; min-height: 100%; }
+    .page-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .page-desc { font-size: 13px; color: #666; margin-bottom: 16px; }
+    .page-desc a { color: #ff4d88; }
+
+    /* Steps guide */
+    .steps-guide { display: flex; align-items: flex-start; gap: 24px; margin-bottom: 20px; padding: 12px 16px; background: #fafafa; border-radius: 6px; flex-wrap: wrap; }
+    .steps-guide .step-item { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; color: #666; }
+    .steps-guide .step-num { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+    .steps-guide a { color: #ff4d88; text-decoration: none; }
+    .steps-guide a:hover { color: #ff3875; }
+    .steps-guide .step-arrow { color: #ccc; font-size: 14px; margin: 2px 4px 0; }
+
+    .toolbar { margin-bottom: 16px; }
+    .toolbar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; flex-wrap: wrap; }
+    .toolbar-top-left { display: flex; align-items: center; gap: 12px; }
+    .toolbar-top-right { display: flex; align-items: center; gap: 12px; }
+
+    .filter-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .filter-label { font-size: 13px; color: #666; white-space: nowrap; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 16px; font-size: 13px;
+      background: #ff4d88; color: #fff; border: 1px solid #ff4d88;
+      border-radius: 4px; cursor: pointer; transition: all .2s; white-space: nowrap;
+    }
+    .btn-primary:hover { background: #ff3875; border-color: #ff3875; }
+    .btn-primary:disabled { background: #f5a0c5; border-color: #f5a0c5; cursor: not-allowed; }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 16px; font-size: 13px;
+      background: #fff; color: #666; border: 1px solid #d9d9d9;
+      border-radius: 4px; cursor: pointer; transition: all .2s; white-space: nowrap;
+    }
+    .btn-outline:hover { color: #ff4d88; border-color: #ff4d88; }
+
+    .btn-link {
+      background: none; border: none; color: #ff4d88; font-size: 13px; cursor: pointer; padding: 0 8px;
+    }
+    .btn-link:hover { color: #ff3875; }
+    .btn-danger {
+      background: none; border: none; color: #ff4d88; font-size: 13px; cursor: pointer; padding: 0 8px;
+    }
+    .btn-danger:hover { color: #d9364e; }
+
+    .input-field {
+      height: 32px; padding: 0 11px; font-size: 13px; border: 1px solid #d9d9d9;
+      border-radius: 4px; outline: none; background: #fff; color: #333;
+    }
+    .input-field:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .input-field::placeholder { color: #bbb; }
+
+    .checkbox-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #666; cursor: pointer; }
+    .checkbox-inline input[type="checkbox"] { accent-color: #ff4d88; cursor: pointer; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th, .data-table td {
+      padding: 10px 12px; text-align: left; border-bottom: 1px solid #f0f0f0;
+    }
+    .data-table th { background: #fafafa; color: #666; font-weight: 500; white-space: nowrap; }
+    .data-table tbody tr:hover { background: #fafafa; }
+    .data-table tbody tr:hover td { border-bottom-color: #e8e8e8; }
+
+    .empty-state { text-align: center; padding: 40px; color: #999; font-size: 13px; }
+
+    .status-enabled { color: #52c41a; font-weight: 500; }
+    .status-disabled { color: #999; }
+
+    .plan-detail { font-size: 12px; line-height: 1.8; color: #555; }
+    .plan-detail .plan-item {
+      display: inline-block; margin-right: 8px; margin-bottom: 4px;
+      padding: 2px 8px; background: #f5f5f5; border-radius: 3px; white-space: nowrap;
+    }
+    .plan-detail .plan-label { color: #ff4d88; font-weight: 500; }
+    .plan-detail .plan-strikethrough { color: #999; text-decoration: line-through; margin-left: 2px; }
+
+    /* Pagination */
+    .pagination-bar {
+      display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+      margin-top: 16px; font-size: 13px; color: #666;
+    }
+    .pagination-bar button {
+      min-width: 32px; height: 32px; padding: 0 8px;
+      border: 1px solid #d9d9d9; border-radius: 4px;
+      background: #fff; color: #666; cursor: pointer; font-size: 13px;
+      transition: all .2s;
+    }
+    .pagination-bar button:hover:not(:disabled) { color: #ff4d88; border-color: #ff4d88; }
+    .pagination-bar button.current { background: #ff4d88; color: #fff; border-color: #ff4d88; }
+    .pagination-bar button:disabled { color: #d9d9d9; cursor: not-allowed; }
+
+    /* Modal */
+    .modal-mask {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-box { background: #fff; border-radius: 6px; width: 480px; max-width: 90vw; box-shadow: 0 4px 24px rgba(0,0,0,.15); }
+    .modal-hd {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px; border-bottom: 1px solid #f0f0f0;
+      font-size: 15px; font-weight: 600; color: #333;
+    }
+    .modal-close {
+      background: none; border: none; font-size: 16px; color: #999; cursor: pointer; padding: 4px;
+    }
+    .modal-close:hover { color: #333; }
+    .modal-bd { padding: 20px; font-size: 13px; color: #666; line-height: 1.6; }
+    .modal-ft {
+      display: flex; justify-content: flex-end; gap: 8px;
+      padding: 12px 20px; border-top: 1px solid #f0f0f0;
+    }
+
+    /* Price strategy detail table in modal */
+    .detail-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+    .detail-table th, .detail-table td { padding: 8px 12px; border: 1px solid #f0f0f0; text-align: left; }
+    .detail-table th { background: #fafafa; color: #666; font-weight: 500; }
+
+    /* Create modal form styles */
+    .create-modal .modal-box { width: 700px; max-width: 95vw; }
+    .create-modal .form-group { margin-bottom: 16px; }
+    .create-modal .form-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
+    .create-modal .form-label {
+      width: 100px; text-align: right; padding-top: 6px;
+      font-size: 13px; color: #666; flex-shrink: 0;
+    }
+    .create-modal .form-label.required::before { content: '* '; color: #ff4d88; }
+    .create-modal .form-control { flex: 1; }
+    .create-modal .select-field {
+      height: 32px; padding: 0 8px; font-size: 13px; border: 1px solid #d9d9d9;
+      border-radius: 4px; outline: none; background: #fff; color: #333;
+    }
+    .create-modal .select-field:focus { border-color: #ff4d88; }
+    .create-modal .plan-card {
+      border: 1px solid #f0f0f0; border-radius: 6px; padding: 12px 16px;
+      margin-bottom: 10px; background: #fafafa;
+    }
+    .create-modal .plan-card-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+    }
+    .create-modal .plan-card-header .plan-index { font-size: 13px; font-weight: 500; color: #333; }
+    .create-modal .plan-card-fields { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+    .create-modal .plan-card-fields .field-item { display: flex; flex-direction: column; gap: 4px; }
+    .create-modal .plan-card-fields .field-item label { font-size: 12px; color: #999; }
+    .create-modal .plan-card-fields .field-item select,
+    .create-modal .plan-card-fields .field-item input { height: 30px; font-size: 12px; }
+    .create-modal .btn-danger-outline {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 28px; padding: 0 10px; font-size: 12px;
+      background: #fff; color: #ff4d88; border: 1px solid #ff4d88;
+      border-radius: 4px; cursor: pointer; transition: all .2s;
+    }
+    .create-modal .btn-danger-outline:hover:disabled { background: #fff; color: #ff4d88; }
+    .create-modal .btn-danger-outline:hover:not(:disabled) { background: #ff4d88; color: #fff; }
+    .create-modal .tip-text { font-size: 12px; color: #999; margin-top: 4px; }
+    .create-modal .section-title {
+      font-size: 14px; font-weight: 600; color: #333; margin-bottom: 16px;
+      padding-bottom: 8px; border-bottom: 1px solid #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- 顶部导航 -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed" :title="siderCollapsed ? '展开菜单' : '折叠菜单'">☰</div>
+        <span class="brand">订阅管理系统</span>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <div class="user-avatar">张</div>
+          <span>张家敏</span>
+          <span>▾</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-body">
+      <!-- 左侧菜单 -->
+      <aside class="app-sider" :class="{ collapsed: siderCollapsed }">
+        <div class="sider-logo">
+          <span class="logo-icon">♥</span>
+          <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
+        </div>
+        <nav class="sider-menu">
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="sider-menu-item" :class="{ 'parent-open': opToolsOpen }" @click="opToolsOpen = !opToolsOpen">
+            <span class="menu-icon">🔧</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+            <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">弹窗</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">兑换码</span></a>
+            <a class="sider-menu-item" href="gift-strategy-list.html"><span class="menu-label">赠礼发放策略</span></a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">限时促销策略</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">赠礼物流管理</span></a>
+            <a class="sider-menu-item" href="event-pricing-strategy-list.html"><span class="menu-label">活动价格策略</span></a>
+            <a class="sider-menu-item" href="event-operations-strategy-list.html"><span class="menu-label">活动投放策略</span></a>
+          </div>
+          <div class="sider-menu-item" :class="{ 'parent-open': deployOpen }" @click="deployOpen = !deployOpen">
+            <span class="menu-icon">📢</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
+            <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+            <a class="sider-menu-item" href="rights-pay-list.html"><span class="menu-label">投放策略</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">页面模块展示</span></a>
+          </div>
+          <div class="sider-menu-item" :class="{ 'parent-open': priceManageOpen }" @click="priceManageOpen = !priceManageOpen">
+            <span class="menu-icon">💰</span>
+            <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+            <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">价格套餐</span></a>
+            <a class="sider-menu-item active" href="price-strategy-list.html"><span class="menu-label">价格策略</span></a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">促销套餐</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
+          <div class="sider-menu-item" :class="{ 'parent-open': lotteryManageOpen }" @click="lotteryManageOpen = !lotteryManageOpen">
+            <span class="menu-icon">🎯</span>
+            <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="prize-list.html"><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="coupon-list.html"><span class="menu-label">抽奖券管理</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">⚙️</span><span class="menu-label" v-show="!siderCollapsed">设置管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏪</span><span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📚</span><span class="menu-label" v-show="!siderCollapsed">知识库</span></a>
+        </nav>
+      </aside>
+
+      <!-- 右侧内容 -->
+      <main class="content-area">
+        <div class="page-body">
+          <h4 class="page-title">价格策略</h4>
+          <p class="page-desc">组装不同订阅套餐，组合不同用户所命中的价格策略</p>
+
+          <!-- 步骤引导 -->
+          <div class="steps-guide">
+            <div class="step-item">
+              <span class="step-num">1</span>
+              <span>创建"<a href="javascript:;">价格套餐</a>"</span>
+            </div>
+            <span class="step-arrow">→</span>
+            <div class="step-item">
+              <span class="step-num">2</span>
+              <span>在"价格策略"中关联组装</span>
+            </div>
+            <span class="step-arrow">→</span>
+            <div class="step-item">
+              <span class="step-num">3</span>
+              <span>在"<a href="rights-pay-list.html">投放策略</a>"中设置展示方案</span>
+            </div>
+          </div>
+
+          <!-- 工具栏 -->
+          <div class="toolbar">
+            <div class="toolbar-top">
+              <div class="toolbar-top-left">
+                <button class="btn-primary" @click="goCreate">新增价格策略</button>
+              </div>
+              <div class="toolbar-top-right">
+                <div class="filter-row">
+                  <input class="input-field" v-model="searchText" placeholder="根椐策略名称或id" style="width:180px;" @keyup.enter="handleSearch" />
+                  <button class="btn-outline" @click="handleSearch">查 找</button>
+                  <label class="checkbox-inline">
+                    <input type="checkbox" v-model="onlyEnabled" @change="handleSearch" />
+                    仅看"启用"
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 数据表格 -->
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:220px;">策略名称（方案标识）</th>
+                  <th style="min-width:400px;">方案明细</th>
+                  <th style="width:80px;">状态</th>
+                  <th style="width:180px;">更新人（更新时间）</th>
+                  <th style="width:150px;">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="pageData.length === 0">
+                  <td colspan="5" class="empty-state">暂无数据</td>
+                </tr>
+                <tr v-for="row in pageData" :key="row.id">
+                  <td>
+                    <div style="font-weight:500; color:#333;">{{ row.name }}</div>
+                    <div style="font-size:12px; color:#999;">({{ row.id }})</div>
+                  </td>
+                  <td>
+                    <div class="plan-detail">
+                      <span v-for="(plan, pi) in row.plans" :key="pi" class="plan-item">
+                        <span class="plan-label">{{ plan.period }}：</span>
+                        {{ plan.packageId }} - {{ plan.packageName }}
+                        【{{ plan.price }} 元】
+                        <span v-if="plan.originalPrice" class="plan-strikethrough">（划线价：{{ plan.originalPrice }}元）</span>
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <span :class="row.status === '启用' ? 'status-enabled' : 'status-disabled'">{{ row.status }}</span>
+                  </td>
+                  <td>
+                    <div>{{ row.updater }}</div>
+                    <div style="font-size:12px; color:#999;">{{ row.updateTime }}</div>
+                  </td>
+                  <td style="white-space:nowrap;">
+                    <button class="btn-link" @click="goView(row)">查看</button>
+                    <button class="btn-link" @click="goCopy(row)">复制</button>
+                    <button v-if="row.status === '启用'" class="btn-danger" @click="confirmDisable(row)">失效</button>
+                    <button v-else class="btn-link" @click="confirmEnable(row)">启用</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 分页 -->
+          <div class="pagination-bar">
+            <span>共 {{ totalFiltered }} 条</span>
+            <button :disabled="currentPage <= 1" @click="goPage(currentPage - 1)">上一页</button>
+            <button v-for="p in pageNumbers" :key="p"
+              :class="{ current: p === currentPage }"
+              @click="goPage(p)">{{ p }}</button>
+            <button :disabled="currentPage >= totalPages" @click="goPage(currentPage + 1)">下一页</button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- 失效确认弹窗 -->
+    <div class="modal-mask" v-if="disableModal.visible" @click.self="disableModal.visible = false">
+      <div class="modal-box">
+        <div class="modal-hd">操作确认</div>
+        <div class="modal-bd">{{ disableModal.message }}</div>
+        <div class="modal-ft">
+          <button class="btn-outline" @click="disableModal.visible = false">取消</button>
+          <button class="btn-primary" @click="handleDisableOk">确认</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 查看详情弹窗 -->
+    <div class="modal-mask" v-if="viewModal.visible" @click.self="viewModal.visible = false">
+      <div class="modal-box" style="width:680px; max-width:95vw;">
+        <div class="modal-hd">
+          <span>策略详情</span>
+          <button class="modal-close" @click="viewModal.visible = false">✕</button>
+        </div>
+        <div class="modal-bd">
+          <div style="margin-bottom:12px;">
+            <span style="color:#999;">策略名称：</span>
+            <strong>{{ viewModal.data.name }}</strong>
+            <span style="color:#ccc; margin-left:8px;">(ID: {{ viewModal.data.id }})</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <span style="color:#999;">状态：</span>
+            <span :class="viewModal.data.status === '启用' ? 'status-enabled' : 'status-disabled'">{{ viewModal.data.status }}</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <span style="color:#999;">更新人/时间：</span>
+            {{ viewModal.data.updater }} / {{ viewModal.data.updateTime }}
+          </div>
+          <div>
+            <span style="color:#999;">方案明细：</span>
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>订阅周期</th>
+                  <th>套餐ID</th>
+                  <th>套餐名称</th>
+                  <th>实际价格</th>
+                  <th>划线价</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(plan, pi) in viewModal.data.plans" :key="pi">
+                  <td>{{ plan.period }}</td>
+                  <td>{{ plan.packageId }}</td>
+                  <td>{{ plan.packageName }}</td>
+                  <td style="color:#ff4d88; font-weight:500;">{{ plan.price }} 元</td>
+                  <td style="color:#999;">{{ plan.originalPrice ? plan.originalPrice + ' 元' : '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-ft">
+          <button class="btn-outline" @click="viewModal.visible = false">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新增价格策略弹窗 -->
+    <div class="modal-mask create-modal" v-if="createModal.visible" @click.self="createModal.visible = false">
+      <div class="modal-box">
+        <div class="modal-hd">
+          <span>新建价格策略</span>
+          <button class="modal-close" @click="createModal.visible = false">✕</button>
+        </div>
+        <div class="modal-bd">
+          <!-- 隐藏字段 type -->
+          <div class="form-row" style="display:none;">
+            <div class="form-control">
+              <input class="input-field" type="text" value="0" disabled />
+            </div>
+          </div>
+
+          <!-- 价格策略名称 -->
+          <div class="form-row">
+            <label class="form-label required">价格策略名称</label>
+            <div class="form-control">
+              <input class="input-field" v-model="createForm.name" placeholder="请输入，≤15" maxlength="15" />
+            </div>
+          </div>
+
+          <!-- 各订阅周期关联策略 -->
+          <template v-for="period in createPeriods" :key="period.key">
+            <div class="form-row" style="display:none;">
+              <div class="form-control">
+                <input class="input-field" type="text" value="" disabled />
+              </div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">{{ period.label }}</label>
+              <div class="form-control">
+                <select class="select-field" v-model="createForm.mapping[period.key]" style="width:100%;">
+                  <option value="">请选择</option>
+                  <option v-for="opt in periodOptions[period.key]" :key="opt.value" :value="opt.value">
+                    {{ opt.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </template>
+        </div>
+        <div class="modal-ft">
+          <button class="btn-outline" @click="createModal.visible = false">取 消</button>
+          <button class="btn-primary" @click="handleCreateSave" :disabled="!canCreate">保 存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
+  <script>
+    const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const siderCollapsed = ref(false);
+        const opToolsOpen = ref(false);
+        const deployOpen = ref(false);
+        const priceManageOpen = ref(true);
+        const lotteryManageOpen = ref(false);
+        const subMenuMaxHeight = '2000px';
+
+        const currentPage = ref(1);
+        const pageSize = ref(10);
+        const searchText = ref('');
+        const onlyEnabled = ref(false);
+
+        const disableModal = reactive({ visible: false, message: '', record: null, action: '' });
+        const viewModal = reactive({ visible: false, data: {} });
+        const createModal = reactive({ visible: false });
+
+        // 创建表单
+        const createForm = reactive({
+          name: '',
+          mapping: {
+            continuousMonth: '',
+            continuousQuarter: '',
+            continuousYear: '',
+            monthCard: '',
+            quarterCard: '',
+            yearCard: '',
+            weekCard: '',
+            doubleMonthCard: '',
+            halfYearCard: '',
+          },
+        });
+
+        // 订阅周期列表
+        const createPeriods = [
+          { key: 'continuousMonth', label: '连续包月' },
+          { key: 'continuousQuarter', label: '连续包季' },
+          { key: 'continuousYear', label: '连续包年' },
+          { key: 'monthCard', label: '月卡' },
+          { key: 'quarterCard', label: '季卡' },
+          { key: 'yearCard', label: '年卡' },
+          { key: 'weekCard', label: '周卡' },
+          { key: 'doubleMonthCard', label: '双月卡' },
+          { key: 'halfYearCard', label: '半年卡' },
+        ];
+
+        // 各周期的可选策略（线上真实选项）
+        const periodOptions = {
+          continuousMonth: [
+            { value: '26', label: '连续包月（首月6.8元）' },
+            { value: '49', label: '首6月6.8元连续包月学生套餐' },
+            { value: '88', label: '连续包月（首月8.8元）' },
+            { value: '1', label: '连续包月1' },
+            { value: 'copy', label: '连续包y测试-副本' },
+            { value: 'ytest', label: '连续包月（首月6.8元）y测试' },
+            { value: '0514', label: '0514-一分钱' },
+            { value: 'test0513hig', label: '连续包月test0513hig' },
+            { value: 'test0513low', label: '连续包月test0513low' },
+            { value: 'ygy410', label: 'ygy410免费试用14天' },
+          ],
+          continuousQuarter: [
+            { value: 'c1', label: '连续包季-基础' },
+            { value: 'c2', label: '首季6.8元连续包季' },
+            { value: 'c3', label: '连续包季学生套餐' },
+          ],
+          continuousYear: [
+            { value: 'cy1', label: '连续包年-基础' },
+            { value: 'cy2', label: '首年98元连续包年' },
+            { value: 'cy3', label: '连续包年学生套餐' },
+          ],
+          monthCard: [
+            { value: 'm1', label: '月卡-基础' },
+            { value: 'm2', label: '月卡-会员日特惠' },
+            { value: 'm3', label: '月卡-学生价' },
+            { value: 'm4', label: '月卡-iOS价' },
+          ],
+          quarterCard: [
+            { value: 'q1', label: '季卡-基础' },
+            { value: 'q2', label: '季卡-会员日特惠' },
+            { value: 'q3', label: '季卡-备孕专享' },
+            { value: 'q4', label: '季卡-618狂欢价' },
+          ],
+          yearCard: [
+            { value: 'y1', label: '年卡-基础' },
+            { value: 'y2', label: '年卡-会员日特惠' },
+            { value: 'y3', label: '年卡-新用户专享' },
+            { value: 'y4', label: '年卡-学生价' },
+            { value: 'y5', label: '年卡-育儿专享' },
+            { value: 'y6', label: '年卡-备孕专享' },
+            { value: 'y7', label: '年卡-双11狂欢价' },
+            { value: 'y8', label: '年卡（249元）' },
+          ],
+          weekCard: [
+            { value: 'w1', label: '周卡-基础' },
+            { value: 'w2', label: '周卡-体验价' },
+          ],
+          doubleMonthCard: [
+            { value: 'd1', label: '双月卡-基础' },
+            { value: 'd2', label: '双月卡-限时特惠' },
+          ],
+          halfYearCard: [
+            { value: 'h1', label: '半年卡_99元-基础' },
+            { value: 'h2', label: '半年卡-育儿专享' },
+            { value: 'h3', label: '半年卡-双11狂欢价' },
+          ],
+        };
+
+        // 可选的价格套餐
+        const availablePackages = [
+          { id: '1', name: '连续包月（首月9元）-基础' },
+          { id: '25', name: '连续包月（首2月9元）-基础' },
+          { id: '3', name: '连续包季-基础' },
+          { id: '43', name: '连续包年-基础' },
+          { id: '5', name: '月卡-基础' },
+          { id: '12', name: '月卡-会员日特惠' },
+          { id: '31', name: '月卡-学生价' },
+          { id: '41', name: '月卡-iOS价' },
+          { id: '6', name: '季卡-基础' },
+          { id: '15', name: '季卡-会员日特惠' },
+          { id: '44', name: '季卡-iOS价' },
+          { id: '61', name: '季卡-备孕专享' },
+          { id: '84', name: '季卡-618狂欢价' },
+          { id: '73', name: '半年卡_99元-基础' },
+          { id: '52', name: '半年卡-育儿专享' },
+          { id: '72', name: '半年卡-双11狂欢价' },
+          { id: '8', name: '年卡-基础' },
+          { id: '18', name: '年卡-会员日特惠' },
+          { id: '22', name: '年卡-新用户专享' },
+          { id: '32', name: '年卡-学生价' },
+          { id: '45', name: '年卡-iOS价' },
+          { id: '51', name: '年卡-育儿专享' },
+          { id: '62', name: '年卡-备孕专享' },
+          { id: '71', name: '年卡-双11狂欢价' },
+          { id: '78', name: '年卡（249元）' },
+          { id: '81', name: '年卡-618狂欢价' },
+          { id: '82', name: '亲友年卡3人价_174' },
+          { id: '83', name: '亲友年卡2人价_136' },
+        ];
+
+        const allData = reactive([]);
+
+        // Mock data - 价格策略
+        const mockRows = [
+          {
+            id: 1154, name: '亲友卡活动页_ios',
+            plans: [
+              { period: '年卡', packageId: '83', packageName: '亲友年卡2人价_136', price: '136', originalPrice: '456' },
+              { period: '年卡', packageId: '82', packageName: '亲友年卡3人价_174', price: '174', originalPrice: '684' },
+            ],
+            status: '启用', updater: '王靖予', updateTime: '2026-06-01 18:35:50',
+          },
+          {
+            id: 1152, name: '26年618-历史非育儿(首2',
+            plans: [
+              { period: '连续包月', packageId: '25', packageName: '连续包月（首2月9元）-基础', price: '首2月 9 元，续费12 元', originalPrice: '19' },
+              { period: '连续包季', packageId: '3', packageName: '连续包季-基础', price: '首季 33 元，续费33 元', originalPrice: '57' },
+              { period: '连续包年', packageId: '43', packageName: '连续包年-基础', price: '首年 128 元，续费128 元', originalPrice: '228' },
+              { period: '月卡', packageId: '5', packageName: '月卡-基础', price: '19', originalPrice: '' },
+              { period: '季卡', packageId: '6', packageName: '季卡-基础', price: '52', originalPrice: '57' },
+              { period: '年卡', packageId: '8', packageName: '年卡-基础', price: '199', originalPrice: '228' },
+              { period: '半年卡', packageId: '73', packageName: '半年卡_99元-基础', price: '99', originalPrice: '114' },
+            ],
+            status: '启用', updater: '张家敏', updateTime: '2026-06-01 15:37:50',
+          },
+          {
+            id: 1151, name: '26年618-历史非怀孕(首2',
+            plans: [
+              { period: '连续包月', packageId: '25', packageName: '连续包月（首2月9元）-基础', price: '首2月 9 元，续费12 元', originalPrice: '19' },
+              { period: '连续包季', packageId: '3', packageName: '连续包季-基础', price: '首季 33 元，续费33 元', originalPrice: '57' },
+              { period: '连续包年', packageId: '43', packageName: '连续包年-基础', price: '首年 128 元，续费128 元', originalPrice: '228' },
+              { period: '月卡', packageId: '5', packageName: '月卡-基础', price: '19', originalPrice: '' },
+              { period: '季卡', packageId: '6', packageName: '季卡-基础', price: '52', originalPrice: '57' },
+              { period: '年卡', packageId: '8', packageName: '年卡-基础', price: '199', originalPrice: '228' },
+              { period: '年卡', packageId: '78', packageName: '年卡（249元）', price: '249', originalPrice: '457' },
+            ],
+            status: '启用', updater: '张家敏', updateTime: '2026-06-01 15:36:57',
+          },
+          {
+            id: 1150, name: '26年618-过期用户>=2',
+            plans: [
+              { period: '连续包月', packageId: '1', packageName: '连续包月（首月9元）-基础', price: '首月 9 元，续费12 元', originalPrice: '19' },
+              { period: '连续包季', packageId: '3', packageName: '连续包季-基础', price: '首季 33 元，续费33 元', originalPrice: '57' },
+              { period: '连续包年', packageId: '43', packageName: '连续包年-基础', price: '首年 128 元，续费128 元', originalPrice: '228' },
+              { period: '月卡', packageId: '5', packageName: '月卡-基础', price: '19', originalPrice: '' },
+              { period: '季卡', packageId: '6', packageName: '季卡-基础', price: '52', originalPrice: '57' },
+              { period: '年卡', packageId: '8', packageName: '年卡-基础', price: '199', originalPrice: '228' },
+              { period: '半年卡', packageId: '73', packageName: '半年卡_99元-基础', price: '99', originalPrice: '114' },
+            ],
+            status: '启用', updater: '张家敏', updateTime: '2026-05-29 14:06:48',
+          },
+          {
+            id: 1149, name: '26年618-过期用户<2',
+            plans: [
+              { period: '连续包月', packageId: '1', packageName: '连续包月（首月9元）-基础', price: '首月 9 元，续费12 元', originalPrice: '19' },
+              { period: '月卡', packageId: '5', packageName: '月卡-基础', price: '19', originalPrice: '' },
+              { period: '季卡', packageId: '6', packageName: '季卡-基础', price: '52', originalPrice: '57' },
+              { period: '年卡', packageId: '8', packageName: '年卡-基础', price: '199', originalPrice: '228' },
+              { period: '半年卡', packageId: '73', packageName: '半年卡_99元-基础', price: '99', originalPrice: '114' },
+            ],
+            status: '启用', updater: '张家敏', updateTime: '2026-05-29 13:55:12',
+          },
+          // 额外 mock
+          {
+            id: 1148, name: '会员日常规策略',
+            plans: [
+              { period: '月卡', packageId: '12', packageName: '月卡-会员日特惠', price: '9.9', originalPrice: '19' },
+              { period: '季卡', packageId: '15', packageName: '季卡-会员日特惠', price: '39', originalPrice: '57' },
+              { period: '年卡', packageId: '18', packageName: '年卡-会员日特惠', price: '159', originalPrice: '228' },
+            ],
+            status: '启用', updater: '李思雨', updateTime: '2026-05-25 10:22:35',
+          },
+          {
+            id: 1147, name: '新用户专享策略',
+            plans: [
+              { period: '连续包月', packageId: '1', packageName: '连续包月（首月9元）-基础', price: '首月 1 元，续费12 元', originalPrice: '19' },
+              { period: '年卡', packageId: '22', packageName: '年卡-新用户专享', price: '99', originalPrice: '228' },
+            ],
+            status: '启用', updater: '王靖予', updateTime: '2026-05-20 16:40:18',
+          },
+          {
+            id: 1146, name: '学生认证专属',
+            plans: [
+              { period: '月卡', packageId: '31', packageName: '月卡-学生价', price: '9.9', originalPrice: '19' },
+              { period: '年卡', packageId: '32', packageName: '年卡-学生价', price: '109', originalPrice: '228' },
+            ],
+            status: '失效', updater: '陈小明', updateTime: '2026-05-18 09:15:42',
+          },
+          {
+            id: 1145, name: 'iOS专享策略',
+            plans: [
+              { period: '月卡', packageId: '41', packageName: '月卡-iOS价', price: '22', originalPrice: '' },
+              { period: '季卡', packageId: '43', packageName: '季卡-iOS价', price: '68', originalPrice: '' },
+              { period: '年卡', packageId: '45', packageName: '年卡-iOS价', price: '258', originalPrice: '' },
+            ],
+            status: '启用', updater: '张家敏', updateTime: '2026-05-15 11:30:05',
+          },
+          {
+            id: 1144, name: '育儿人群策略',
+            plans: [
+              { period: '年卡', packageId: '51', packageName: '年卡-育儿专享', price: '179', originalPrice: '228' },
+              { period: '半年卡', packageId: '52', packageName: '半年卡-育儿专享', price: '89', originalPrice: '114' },
+            ],
+            status: '启用', updater: '李思雨', updateTime: '2026-05-12 14:22:10',
+          },
+          {
+            id: 1143, name: '备孕人群策略',
+            plans: [
+              { period: '季卡', packageId: '61', packageName: '季卡-备孕专享', price: '45', originalPrice: '57' },
+              { period: '年卡', packageId: '62', packageName: '年卡-备孕专享', price: '179', originalPrice: '228' },
+            ],
+            status: '启用', updater: '王靖予', updateTime: '2026-05-10 17:08:33',
+          },
+          {
+            id: 1142, name: '双11大促策略',
+            plans: [
+              { period: '年卡', packageId: '71', packageName: '年卡-双11狂欢价', price: '139', originalPrice: '228' },
+              { period: '半年卡', packageId: '72', packageName: '半年卡-双11狂欢价', price: '69', originalPrice: '114' },
+            ],
+            status: '失效', updater: '赵明明', updateTime: '2025-12-01 10:00:00',
+          },
+          {
+            id: 1141, name: '618大促策略',
+            plans: [
+              { period: '年卡', packageId: '81', packageName: '年卡-618狂欢价', price: '149', originalPrice: '228' },
+              { period: '季卡', packageId: '82', packageName: '季卡-618狂欢价', price: '38', originalPrice: '57' },
+            ],
+            status: '启用', updater: '张家敏', updateTime: '2026-06-01 10:15:00',
+          },
+        ];
+
+        onMounted(() => {
+          allData.push(...mockRows);
+        });
+
+        // Compute
+        const filteredData = computed(() => {
+          let result = [...allData];
+          if (searchText.value.trim()) {
+            const kw = searchText.value.trim().toLowerCase();
+            result = result.filter(r =>
+              r.name.toLowerCase().includes(kw) ||
+              String(r.id).includes(kw)
+            );
+          }
+          if (onlyEnabled.value) {
+            result = result.filter(r => r.status === '启用');
+          }
+          return result;
+        });
+
+        const totalFiltered = computed(() => filteredData.value.length);
+        const totalPages = computed(() => Math.max(1, Math.ceil(totalFiltered.value / pageSize.value)));
+
+        const pageNumbers = computed(() => {
+          const total = totalPages.value;
+          const cur = currentPage.value;
+          const nums = [];
+          if (total <= 7) {
+            for (let i = 1; i <= total; i++) nums.push(i);
+          } else {
+            nums.push(1);
+            let start = Math.max(2, cur - 2);
+            let end = Math.min(total - 1, cur + 2);
+            if (start > 2) nums.push('...');
+            for (let i = start; i <= end; i++) nums.push(i);
+            if (end < total - 1) nums.push('...');
+            nums.push(total);
+          }
+          return nums;
+        });
+
+        const pageData = computed(() => {
+          const start = (currentPage.value - 1) * pageSize.value;
+          return filteredData.value.slice(start, start + pageSize.value);
+        });
+
+        // Methods
+        function handleSearch() {
+          currentPage.value = 1;
+        }
+
+        function goPage(p) {
+          if (typeof p === 'number' && p >= 1 && p <= totalPages.value) {
+            currentPage.value = p;
+          }
+        }
+
+        function goCreate() {
+          resetCreateForm();
+          createModal.visible = true;
+        }
+
+        function resetCreateForm() {
+          createForm.name = '';
+          createForm.mapping = {
+            continuousMonth: '', continuousQuarter: '', continuousYear: '',
+            monthCard: '', quarterCard: '', yearCard: '',
+            weekCard: '', doubleMonthCard: '', halfYearCard: '',
+          };
+        }
+
+        const canCreate = computed(() => {
+          return createForm.name.trim().length > 0;
+        });
+
+        function handleCreateSave() {
+          if (!canCreate.value) return;
+          const hasAnySelection = Object.values(createForm.mapping).some(v => v);
+          if (!hasAnySelection) {
+            alert('请至少选择一个订阅周期并关联价格策略');
+            return;
+          }
+
+          // 根据选中的策略ID构建 plans 展示数据
+          const plans = [];
+          const periodLabelMap = {
+            continuousMonth: '连续包月', continuousQuarter: '连续包季', continuousYear: '连续包年',
+            monthCard: '月卡', quarterCard: '季卡', yearCard: '年卡',
+            weekCard: '周卡', doubleMonthCard: '双月卡', halfYearCard: '半年卡',
+          };
+          for (const [key, value] of Object.entries(createForm.mapping)) {
+            if (value) {
+              const options = periodOptions[key] || [];
+              const found = options.find(o => o.value === value);
+              plans.push({
+                period: periodLabelMap[key] || key,
+                packageId: value,
+                packageName: found ? found.label : value,
+              });
+            }
+          }
+
+          const newId = Math.max(...allData.map(r => r.id), 0) + 1;
+          const newRow = {
+            id: newId,
+            name: createForm.name.trim(),
+            plans,
+            status: '启用',
+            updater: '张家敏',
+            updateTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+          };
+
+          allData.unshift(newRow);
+          currentPage.value = 1;
+          createModal.visible = false;
+          resetCreateForm();
+        }
+
+        function goView(row) {
+          viewModal.data = { ...row };
+          viewModal.visible = true;
+        }
+
+        function goCopy(row) {
+          const params = new URLSearchParams();
+          params.set('id', row.id);
+          params.set('copy', '1');
+          window.location.href = 'price-strategy-create.html?' + params.toString();
+        }
+
+        function confirmDisable(row) {
+          disableModal.record = row;
+          disableModal.action = 'disable';
+          disableModal.message = `确认将策略「${row.name}」失效？失效后该策略不再生效。`;
+          disableModal.visible = true;
+        }
+
+        function confirmEnable(row) {
+          disableModal.record = row;
+          disableModal.action = 'enable';
+          disableModal.message = `确认将策略「${row.name}」重新启用？`;
+          disableModal.visible = true;
+        }
+
+        function handleDisableOk() {
+          if (disableModal.record) {
+            if (disableModal.action === 'disable') {
+              disableModal.record.status = '失效';
+            } else {
+              disableModal.record.status = '启用';
+            }
+            disableModal.record.updater = '张家敏';
+            disableModal.record.updateTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+          }
+          disableModal.visible = false;
+        }
+
+        return {
+          siderCollapsed, opToolsOpen, deployOpen, priceManageOpen, lotteryManageOpen, subMenuMaxHeight,
+          currentPage, pageSize, searchText, onlyEnabled,
+          disableModal, viewModal, createModal,
+          createForm, createPeriods, periodOptions, canCreate,
+          allData, filteredData, totalFiltered, totalPages, pageNumbers, pageData,
+          handleSearch, goPage, goCreate, goView, goCopy,
+          confirmDisable, confirmEnable, handleDisableOk,
+          handleCreateSave,
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

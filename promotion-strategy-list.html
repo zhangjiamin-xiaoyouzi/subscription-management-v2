@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>限时促销策略 - 完整还原版</title>
+  <link rel="stylesheet" href="https://unpkg.com/ant-design-vue@3.2.20/dist/antd.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: #f5f5f5; color: #333;
+    }
+    #app { min-height: 100vh; }
+
+    .app-header {
+      height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03); z-index: 100;
+      position: sticky; top: 0;
+    }
+    .app-header .header-left { display: flex; align-items: center; gap: 4px; }
+    .header-left .menu-fold-btn {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s;
+    }
+    .header-left .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .header-left .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; user-select: none; }
+    .app-header .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .header-right .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+    .layout-body { display: flex; height: calc(100vh - 48px); }
+    .app-sider {
+      width: 200px; background: #fff; border-right: 1px solid #f0f0f0;
+      transition: width .2s; overflow: hidden; flex-shrink: 0;
+    }
+    .app-sider.collapsed { width: 60px; }
+    .sider-logo { height: 48px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+    .sider-logo .logo-icon { font-size: 22px; color: #ff4d88; }
+    .sider-logo .logo-text { font-size: 14px; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+    .sider-menu { padding: 8px 0; }
+    .sider-menu-item {
+      display: flex; align-items: center; height: 44px; padding: 0 16px;
+      font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none;
+      transition: all .15s; cursor: pointer; white-space: nowrap;
+    }
+    .sider-menu-item:hover { background: #fff0f6; color: #ff4d88; }
+    .sider-menu-item.active { color: #fff; background: #ff4d88; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .sider-submenu { overflow: hidden; transition: max-height .25s ease; }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; }
+    .sider-submenu .sider-menu-item.active { background: #ff4d88; color: #fff; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: #fff0f6; color: #ff4d88; }
+
+    .content-area { flex: 1; background: #f0f2f5; overflow-x: auto; }
+    .page-body { background: #fff; padding: 0 24px 24px; min-height: 100%; }
+
+    .toolbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 16px; flex-wrap: wrap; padding-top: 16px; }
+    .toolbar-left { display: flex; align-items: center; gap: 12px; }
+    .toolbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 16px; font-size: 13px;
+      background: #ff4d88; color: #fff; border: 1px solid #ff4d88;
+      border-radius: 4px; cursor: pointer; transition: all .2s;
+    }
+    .btn-primary:hover { background: #ff3875; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-cancel { background: #fff; color: #666; border: 1px solid #d9d9d9; height: 32px; padding: 0 16px; font-size: 13px; border-radius: 4px; cursor: pointer; }
+    .btn-ok { background: #ff4d88; color: #fff; border: none; height: 32px; padding: 0 20px; font-size: 13px; border-radius: 4px; cursor: pointer; margin-left: 8px; }
+    .btn-link { background: none; border: none; color: #ff4d88; font-size: 13px; cursor: pointer; padding: 0; }
+    .btn-link:hover { color: #ff3875; }
+    .input-field { height: 32px; padding: 0 10px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; }
+    .input-field:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .select-field { height: 32px; padding: 0 8px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; background: #fff; cursor: pointer; }
+    .checkbox-label { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #666; cursor: pointer; white-space: nowrap; }
+
+    .top-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-top: 16px; }
+    .top-bar .hint-icon { color: #bbb; cursor: help; font-size: 14px; }
+
+    .tabs { display: flex; border-bottom: 1px solid #f0f0f0; margin-bottom: 16px; }
+    .tab-item { padding: 10px 20px; font-size: 13px; cursor: pointer; color: #666; border-bottom: 2px solid transparent; transition: all .2s; }
+    .tab-item:hover { color: #ff4d88; }
+    .tab-item.active { color: #ff4d88; border-bottom-color: #ff4d88; font-weight: 500; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+    .data-table thead th {
+      background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 500;
+      border-bottom: 1px solid #f0f0f0; white-space: nowrap; user-select: none;
+    }
+    .data-table thead th.sortable { cursor: pointer; }
+    .data-table thead th.sortable:hover { background: #fff0f6; }
+    .sort-icons { display: inline-flex; flex-direction: column; line-height: 1; margin-left: 4px; font-size: 9px; color: #bbb; vertical-align: middle; }
+    .sort-icons span.active { color: #ff4d88; }
+    .data-table tbody td { padding: 10px 12px; border-bottom: 1px solid #f5f5f5; overflow: hidden; text-overflow: ellipsis; }
+    .data-table tbody tr:hover { background: #fafafa; }
+    .empty-state { text-align: center; padding: 60px 0; color: #bbb; }
+
+    .badge { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .badge-dot.success { background: #52c41a; }
+    .badge-dot.default { background: #d9d9d9; }
+    .status-text { font-size: 11px; color: #999; margin-top: 2px; }
+
+    .condition-text { font-size: 12px; color: #666; line-height: 1.6; }
+    .condition-text .cond-group { margin-bottom: 2px; }
+    .expand-btn { color: #ff4d88; cursor: pointer; font-size: 12px; }
+
+    .editable-priority { cursor: pointer; color: #ff4d88; border-bottom: 1px dashed #ff4d88; }
+
+    .dropdown-wrapper { position: relative; display: inline-block; margin-left: 8px; }
+    .dropdown-trigger { cursor: pointer; color: #666; font-size: 13px; user-select: none; }
+    .dropdown-trigger:hover { color: #ff4d88; }
+    .dropdown-menu {
+      position: absolute; top: 100%; right: 0; z-index: 200;
+      background: #fff; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,.12);
+      min-width: 100px; padding: 4px 0;
+    }
+    .dropdown-item { padding: 7px 16px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .dropdown-item:hover { background: #fff0f6; color: #ff4d88; }
+
+    .pagination-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 16px 0; font-size: 13px; color: #666; }
+    .pagination-bar button {
+      height: 28px; padding: 0 12px; font-size: 12px; border: 1px solid #d9d9d9;
+      border-radius: 4px; background: #fff; cursor: pointer;
+    }
+    .pagination-bar button:hover { border-color: #ff4d88; color: #ff4d88; }
+    .pagination-bar button:disabled { opacity: .4; cursor: not-allowed; }
+
+    .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+    .modal-box { background: #fff; border-radius: 6px; width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,.15); }
+    .modal-hd { padding: 14px 20px; font-size: 15px; font-weight: 600; border-bottom: 1px solid #f0f0f0; }
+    .modal-bd { padding: 20px; font-size: 14px; }
+    .modal-ft { padding: 10px 20px; text-align: right; border-top: 1px solid #f0f0f0; }
+
+    .preview-hint { font-size: 13px; color: #999; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="header-left">
+        <span class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed">✕</span>
+        <span class="brand">订阅管理系统</span>
+      </div>
+      <div class="header-right">
+        <span class="user-info">
+          <span class="user-avatar">张</span>
+          <span>张三</span>
+          <span>▾</span>
+        </span>
+      </div>
+    </header>
+
+    <div class="layout-body">
+      <aside class="app-sider" :class="{ collapsed: siderCollapsed }">
+        <div class="sider-logo">
+          <span class="logo-icon">♥</span>
+          <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
+        </div>
+        <div class="sider-menu">
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="sider-menu-item parent-open" @click="opToolsOpen = !opToolsOpen">
+            <span class="menu-icon">🔧</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+            <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">弹窗</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">兑换码</span></a>
+            <a class="sider-menu-item" href="gift-strategy-list.html"><span class="menu-label">赠礼发放策略</span></a>
+            <a class="sider-menu-item active" href="promotion-strategy-list.html"><span class="menu-label">限时促销策略</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">赠礼物流管理</span></a>
+            <a class="sider-menu-item" href="event-pricing-strategy-list.html"><span class="menu-label">活动价格策略</span></a>
+            <a class="sider-menu-item" href="event-operations-strategy-list.html"><span class="menu-label">活动投放策略</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="deployOpen = !deployOpen">
+            <span class="menu-icon">📢</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
+            <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+            <a class="sider-menu-item" href="rights-pay-list.html"><span class="menu-label">投放策略</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">页面模块展示</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="priceManageOpen = !priceManageOpen">
+            <span class="menu-icon">💰</span>
+            <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+            <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">价格套餐</span></a>
+            <a class="sider-menu-item" href="price-strategy-list.html"><span class="menu-label">价格策略</span></a>
+            <a class="sider-menu-item active" href="promotion-strategy-list.html"><span class="menu-label">促销套餐</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
+          <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
+            <span class="menu-icon">🎯</span>
+            <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="prize-list.html"><span class="menu-label">奖品管理</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">⚙️</span><span class="menu-label" v-show="!siderCollapsed">设置管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏪</span><span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📚</span><span class="menu-label" v-show="!siderCollapsed">知识库</span></a>
+        </div>
+      </aside>
+
+      <main class="content-area">
+        <div class="page-body">
+          <!-- 顶部操作栏 -->
+          <div class="top-bar">
+            <button class="btn-primary" style="background:#fff; color:#666; border:1px solid #d9d9d9;">全局频控设置</button>
+            <span class="hint-icon" title="全局频控设置说明">?</span>
+          </div>
+
+          <!-- 工具栏 -->
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn-primary" @click="goCreate">＋ 新增促销策略</button>
+              <button class="btn-primary" style="background:#fff; color:#ff4d88; border:1px solid #ff4d88;" @click="openBatchPriority" :disabled="selectedIds.size === 0">
+                批量修改优先级
+                <template v-if="selectedIds.size > 0">({{ selectedIds.size }})</template>
+              </button>
+            </div>
+            <div class="toolbar-right">
+              <select class="select-field" v-model="searchForm.scene">
+                <option value="">全部</option>
+                <option value="进入支付转化页即发放">进入支付转化页即发放</option>
+                <option value="进入权益详情页即发放">进入权益详情页即发放</option>
+                <option value="进入H5支付转化页即发放">进入H5支付转化页即发放</option>
+              </select>
+              <input class="input-field" v-model="searchForm.keyword" placeholder="根据弹窗名或id" style="width:180px;" />
+              <button class="btn-primary" style="height:32px; padding:0 14px; font-size:13px;" @click="handleSearch">查 找</button>
+              <label class="checkbox-label">
+                <input type="checkbox" :checked="isActiveOnly" @change="handleActiveOnlyChange" />
+                仅看"投放中"
+              </label>
+            </div>
+          </div>
+
+          <!-- 标签页 -->
+          <div class="tabs">
+            <div class="tab-item" :class="{ active: activeTab === 'pay' }" @click="switchTab('pay')">支付转化页/弹窗</div>
+            <div class="tab-item" :class="{ active: activeTab === 'detail' }" @click="switchTab('detail')">权益详情页</div>
+            <div class="tab-item" :class="{ active: activeTab === 'h5' }" @click="switchTab('h5')">H5支付转化页</div>
+          </div>
+
+          <!-- 数据表格 -->
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:40px;">
+                    <input type="checkbox" :checked="isPageAllSelected" @change="toggleSelectAll" style="accent-color:#ff4d88; cursor:pointer;" />
+                  </th>
+                  <th style="width:70px;">弹窗id</th>
+                  <th style="width:200px;">弹窗名称</th>
+                  <th style="width:140px;">促销场景</th>
+                  <th style="width:100px;" class="sortable" @click="toggleSort">
+                    优先级
+                    <span class="sort-icons">
+                      <span :class="{ active: sortDir === 'asc' }">▲</span>
+                      <span :class="{ active: sortDir === 'desc' }">▼</span>
+                    </span>
+                  </th>
+                  <th style="width:220px;">投放条件</th>
+                  <th style="width:180px;">投放时间</th>
+                  <th style="width:130px;">关联订阅计划</th>
+                  <th style="width:180px;">促销套餐</th>
+                  <th style="width:160px;">状态</th>
+                  <th style="width:120px;">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in tableData" :key="row.id">
+                  <td>
+                    <input type="checkbox" :checked="selectedIds.has(row.id)" @change="toggleSelectRow(row.id)" style="accent-color:#ff4d88; cursor:pointer;" />
+                  </td>
+                  <td>{{ row.id }}</td>
+                  <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ row.name }}</td>
+                  <td>{{ row.scene }}</td>
+                  <td>
+                    <template v-if="editingRowId === row.id">
+                      <input class="input-field" type="number" v-model.number="editingValue" min="1"
+                        style="width:70px; height:28px;" @keyup.enter="savePriority(row)" @blur="savePriority(row)" />
+                    </template>
+                    <template v-else>
+                      <span class="editable-priority" @click="startEdit(row)">{{ row.priority }}</span>
+                    </template>
+                  </td>
+                  <td>
+                    <div class="condition-text" v-if="row.conditions && row.conditions.length > 0">
+                      <div class="cond-group" v-for="(c, ci) in (row.expanded ? row.conditions : row.conditions.slice(0, 3))" :key="ci">
+                        {{ c.typeName }} {{ c.opName }} {{ c.val }}
+                      </div>
+                      <span v-if="row.conditions.length > 3" class="expand-btn" @click="row.expanded = !row.expanded">
+                        {{ row.expanded ? '收起' : '展开' }}
+                      </span>
+                    </div>
+                    <span v-else style="color:#bbb;">-</span>
+                  </td>
+                  <td>{{ row.startTime }} ~ {{ row.endTime }}</td>
+                  <td>{{ row.planName }}</td>
+                  <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" :title="row.packages">{{ row.packages }}</td>
+                  <td>
+                    <div class="badge">
+                      <span class="badge-dot" :class="row.status === 1 ? 'success' : 'default'"></span>
+                      {{ statusText[row.status] || '未知' }}
+                    </div>
+                    <div class="status-text">{{ row.operator }} 最后修改于 {{ row.updatedAt }}</div>
+                  </td>
+                  <td>
+                    <button class="btn-link" @click="goDetail(row)">查看</button>
+                    <span class="dropdown-wrapper">
+                      <span class="dropdown-trigger" @click="toggleDropdown(row.id)">更多 ▾</span>
+                      <div class="dropdown-menu" v-if="openDropdownId === row.id" @mouseleave="openDropdownId = null">
+                        <div class="dropdown-item" @click="goEdit(row); openDropdownId=null;">修改</div>
+                        <div class="dropdown-item" @click="goCopy(row); openDropdownId=null;">复制</div>
+                        <div class="dropdown-item" @click="confirmToggle(row); openDropdownId=null;">{{ row.status === 1 ? '下线' : '投放上线' }}</div>
+                        <div class="dropdown-item" @click="showPreview(row); openDropdownId=null;">预览</div>
+                      </div>
+                    </span>
+                  </td>
+                </tr>
+                <tr v-if="tableData.length === 0 && !loading">
+                  <td colspan="11" class="empty-state">暂无数据</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 分页 -->
+          <div class="pagination-bar" v-if="totalCount > 0">
+            <span>共 {{ totalCount }} 条</span>
+            <button :disabled="currentPage <= 1" @click="goPage(currentPage - 1)">‹ 上一页</button>
+            <span><strong style="color:#ff4d88;">{{ currentPage }}</strong> / {{ maxPage }}</span>
+            <button :disabled="currentPage >= maxPage" @click="goPage(currentPage + 1)">下一页 ›</button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- 确认弹窗 -->
+    <div class="modal-mask" v-if="confirmModal.visible" @click.self="confirmModal.visible = false">
+      <div class="modal-box">
+        <div class="modal-hd">提示</div>
+        <div class="modal-bd"><p>{{ confirmModal.message }}</p></div>
+        <div class="modal-ft">
+          <button class="btn-cancel" @click="confirmModal.visible = false">取消</button>
+          <button class="btn-ok" @click="handleConfirmOk">确认</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 预览弹窗 -->
+    <div class="modal-mask" v-if="previewModal.visible" @click.self="previewModal.visible = false">
+      <div class="modal-box" style="min-width:480px;">
+        <div class="modal-hd">打开美柚App扫一扫预览，重启App即刻生效</div>
+        <div class="modal-bd" style="text-align:center;">
+          <div class="preview-hint">使用预览功能前请联系江淮添加白名单</div>
+          <div style="display:flex; justify-content:center;">
+            <div style="width:200px; height:200px; background:#f5f5f5; display:flex; align-items:center; justify-content:center; color:#bbb;">二维码占位</div>
+          </div>
+        </div>
+        <div class="modal-ft">
+          <button class="btn-cancel" @click="previewModal.visible = false">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 批量修改优先级弹窗 -->
+    <div class="modal-mask" v-if="batchModal.visible" @click.self="batchModal.visible = false">
+      <div class="modal-box" style="width:520px;">
+        <div class="modal-hd">
+          <span>批量修改优先级</span>
+          <button class="modal-close" @click="batchModal.visible = false">✕</button>
+        </div>
+        <div class="modal-bd">
+          <p style="margin-bottom:12px; font-size:13px; color:#666;">
+            已选择 <strong style="color:#ff4d88;">{{ selectedIds.size }}</strong> 条策略，请逐一输入优先级：
+          </p>
+          <div style="max-height:360px; overflow-y:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:13px;">
+              <thead>
+                <tr style="background:#fafafa;">
+                  <th style="padding:8px 12px; text-align:left; font-weight:500; color:#666; border-bottom:1px solid #f0f0f0;">ID</th>
+                  <th style="padding:8px 12px; text-align:left; font-weight:500; color:#666; border-bottom:1px solid #f0f0f0;">策略名称</th>
+                  <th style="padding:8px 12px; text-align:left; font-weight:500; color:#666; border-bottom:1px solid #f0f0f0; width:140px;">优先级</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in getSelectedItems()" :key="item.id" style="border-bottom:1px solid #f5f5f5;">
+                  <td style="padding:6px 12px; color:#999;">{{ item.id }}</td>
+                  <td style="padding:6px 12px;">{{ item.name }}</td>
+                  <td style="padding:6px 12px;">
+                    <input class="input-field" type="number" v-model.number="batchModal.priorities[item.id]" min="1"
+                      style="width:100%; height:32px; font-size:13px;" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-ft">
+          <button class="btn-cancel" @click="batchModal.visible = false">取消</button>
+          <button class="btn-ok" @click="confirmBatchPriority">确认修改</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
+  <script>
+    const { createApp, ref, reactive, computed, onMounted, nextTick, watch } = Vue;
+
+    // ====== Mock 数据 ======
+    const sceneList = ['进入支付转化页即发放', '进入权益详情页即发放', '进入H5支付转化页即发放'];
+    const names = [
+      '历史非育儿ios兜底-618', '育儿_非会员非价敏 & 7.8元-618', '育儿_非会员价敏&iOS6.8元-618',
+      '育儿_非会员价敏&安卓 5.8元-618', '非育儿_通用底价-618', '育儿_会员专享-618',
+      '全量_连续包月优惠', 'iOS专属_首购特惠', '安卓专属_首购特惠', '新用户_限时特惠',
+      '老用户_回馈专享', '会员升级_特惠套餐', '沉睡用户_唤醒计划', '流失用户_召回活动', '双旦活动_特惠'
+    ];
+    const planNames = ['订阅计划-大于等于876版本', '订阅计划-基础版', '订阅计划-高级版', '订阅计划-旗舰版'];
+    const operators = ['张三', '李四', '王五', '赵六', '陈七'];
+    const pkgOptions = [
+      '过期用户首1月8.8元，周年庆_半年卡_普通_48元，年卡_88元（非首购），连续包季非首购28元',
+      '周年庆_半年卡_首购_48元，年卡_88元，连续包月首2月7.8元，连续包季首季28元',
+      '周年庆_半年卡_首购_45元，年卡_88元，25感恩_连包季首季25元_首_线上，连续包月首2月6.8元',
+      '周年庆_半年卡_首购_45元，周年庆_包月_首购_首2月5.8元，年卡_88元',
+      '连续包月首月5.8元，连续包季首季25元，年卡_88元'
+    ];
+    const condTemplates = [
+      [{ typeName:'会员状态', opName:'包含', val:'从未开通过' }, { typeName:'用户拥有首购特惠资格', opName:'包含', val:'否' }, { typeName:'应用版本', opName:'>=', val:'9.07.0' }],
+      [{ typeName:'会员状态', opName:'包含', val:'从未开通过' }, { typeName:'用户拥有首购特惠资格', opName:'包含', val:'是' }, { typeName:'应用版本', opName:'>=', val:'9.07.0' }],
+      [{ typeName:'平台', opName:'=', val:'iOS' }, { typeName:'用户注册天数', opName:'>', val:'30' }],
+      [{ typeName:'会员等级', opName:'>=', val:'2' }, { typeName:'平台', opName:'=', val:'Android' }],
+      [{ typeName:'用户注册天数', opName:'>', val:'7' }]
+    ];
+
+    function generateAllMockData() {
+      const allItems = [];
+      const priorities = Array.from({ length: 56 }, (_, i) => i + 1);
+      for (let i = priorities.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [priorities[i], priorities[j]] = [priorities[j], priorities[i]];
+      }
+      for (let i = 1; i <= 56; i++) {
+        const status = i % 4 === 0 ? 2 : 1;
+        const scene = sceneList[i % 3];
+        const st = dayjs('2026-06-09').add(i, 'day').format('YYYY-MM-DD 00:00');
+        const et = dayjs('2026-06-19').add(i, 'day').format('YYYY-MM-DD 00:00');
+        allItems.push({
+          id: 400 + i,
+          name: names[i % names.length],
+          scene,
+          priority: priorities[i - 1],
+          conditions: condTemplates[i % condTemplates.length].map(c => ({...c})),
+          expanded: false,
+          startTime: st,
+          endTime: et,
+          planName: planNames[i % planNames.length],
+          packages: pkgOptions[i % pkgOptions.length],
+          status,
+          operator: operators[i % operators.length],
+          updatedAt: dayjs('2026-06-11 10:5' + (i % 10)).format('YYYY-MM-DD HH:mm'),
+        });
+      }
+      return allItems;
+    }
+
+    const app = createApp({
+      setup() {
+        const loading = ref(false);
+        const tableData = ref([]);
+        const totalCount = ref(0);
+        const currentPage = ref(1);
+        const pageSize = ref(20);
+        const sortDir = ref('desc');
+        const searchForm = reactive({ scene: '', keyword: '' });
+        const isActiveOnly = ref(true);
+        const activeTab = ref('pay');
+        const editingRowId = ref(null);
+        const editingValue = ref(null);
+        const openDropdownId = ref(null);
+        const confirmModal = reactive({ visible: false, message: '', record: null, callback: null });
+        const previewModal = reactive({ visible: false, id: null, name: '' });
+        const statusText = { 1: '投放中', 2: '下线中' };
+        const siderCollapsed = ref(false);
+        const opToolsOpen = ref(true);
+        const deployOpen = ref(false);
+        const priceManageOpen = ref(true);
+        const lotteryManageOpen = ref(true);
+        const subMenuMaxHeight = ref('2000px');
+
+        const allData = reactive(generateAllMockData());
+        const selectedIds = reactive(new Set());
+        const batchModal = reactive({ visible: false, priorities: {} });
+
+        const maxPage = computed(() => Math.max(1, Math.ceil(totalCount.value / pageSize.value)));
+        const isPageAllSelected = computed(() => {
+          if (tableData.value.length === 0) return false;
+          return tableData.value.every(r => selectedIds.has(r.id));
+        });
+
+        function checkPriorityConflict(value, excludeIds) {
+          return allData.some(item => !excludeIds.has(item.id) && item.priority === value);
+        }
+
+        function fetchList() {
+          loading.value = true;
+          setTimeout(() => {
+            let filtered = allData.filter(item => {
+              if (activeTab.value === 'pay' && item.scene !== '进入支付转化页即发放') return false;
+              if (activeTab.value === 'detail' && item.scene !== '进入权益详情页即发放') return false;
+              if (activeTab.value === 'h5' && item.scene !== '进入H5支付转化页即发放') return false;
+              if (searchForm.scene && item.scene !== searchForm.scene) return false;
+              if (searchForm.keyword) {
+                const kw = searchForm.keyword.toLowerCase();
+                if (!item.name.toLowerCase().includes(kw) && String(item.id) !== kw) return false;
+              }
+              if (isActiveOnly.value && item.status !== 1) return false;
+              return true;
+            });
+            if (sortDir.value) {
+              filtered = [...filtered].sort((a, b) => {
+                return sortDir.value === 'desc' ? b.priority - a.priority : a.priority - b.priority;
+              });
+            }
+            totalCount.value = filtered.length;
+            const start = (currentPage.value - 1) * pageSize.value;
+            tableData.value = filtered.slice(start, start + pageSize.value);
+            loading.value = false;
+          }, 150);
+        }
+
+        function handleSearch() { currentPage.value = 1; selectedIds.clear(); fetchList(); }
+        function handleActiveOnlyChange(e) { isActiveOnly.value = e.target.checked; currentPage.value = 1; fetchList(); }
+        function switchTab(tab) { activeTab.value = tab; currentPage.value = 1; selectedIds.clear(); fetchList(); }
+
+        function toggleSort() {
+          if (sortDir.value === 'desc') sortDir.value = 'asc';
+          else if (sortDir.value === 'asc') sortDir.value = null;
+          else sortDir.value = 'desc';
+          currentPage.value = 1;
+          fetchList();
+        }
+
+        function goPage(page) { if (page >= 1 && page <= maxPage.value) { currentPage.value = page; fetchList(); } }
+
+        function toggleSelectAll() {
+          if (isPageAllSelected.value) {
+            tableData.value.forEach(r => selectedIds.delete(r.id));
+          } else {
+            tableData.value.forEach(r => selectedIds.add(r.id));
+          }
+        }
+
+        function toggleSelectRow(id) {
+          if (selectedIds.has(id)) selectedIds.delete(id);
+          else selectedIds.add(id);
+        }
+
+        function getSelectedItems() {
+          return allData.filter(item => selectedIds.has(item.id));
+        }
+
+        function openBatchPriority() {
+          if (selectedIds.size === 0) {
+            confirmModal.message = '请先勾选需要修改的策略';
+            confirmModal.visible = true;
+            confirmModal.callback = () => { confirmModal.visible = false; };
+            return;
+          }
+          const priorities = {};
+          getSelectedItems().forEach(item => {
+            priorities[item.id] = item.priority;
+          });
+          batchModal.priorities = priorities;
+          batchModal.visible = true;
+        }
+
+        function confirmBatchPriority() {
+          const selectedItems = getSelectedItems();
+          // 1. 检测选中项之间是否有重复
+          const valMap = {};
+          for (const item of selectedItems) {
+            const newVal = parseInt(batchModal.priorities[item.id]) || item.priority;
+            if (!valMap[newVal]) valMap[newVal] = [];
+            valMap[newVal].push(item.id);
+          }
+          const dupVals = Object.keys(valMap).filter(k => valMap[k].length > 1);
+          if (dupVals.length > 0) {
+            confirmModal.message = `优先级 ${dupVals.join('、')} 存在重复，每条策略的优先级必须唯一`;
+            confirmModal.visible = true;
+            confirmModal.callback = () => { confirmModal.visible = false; };
+            return;
+          }
+          // 2. 检测与非选中项是否冲突
+          for (const item of selectedItems) {
+            const newVal = parseInt(batchModal.priorities[item.id]) || item.priority;
+            if (newVal !== item.priority && checkPriorityConflict(newVal, selectedIds)) {
+              confirmModal.message = `优先级 ${newVal} 已被其他策略占用，请调整后重试`;
+              confirmModal.visible = true;
+              confirmModal.callback = () => { confirmModal.visible = false; };
+              return;
+            }
+          }
+          selectedItems.forEach(item => {
+            const newVal = parseInt(batchModal.priorities[item.id]);
+            if (newVal && newVal !== item.priority) {
+              item.priority = newVal;
+            }
+          });
+          selectedIds.clear();
+          batchModal.visible = false;
+          fetchList();
+        }
+
+        function goCreate() { alert('跳转至新增促销策略页面'); }
+        function goDetail(r) { alert(`查看促销策略详情 id=${r.id}`); }
+        function goEdit(r) { alert(`编辑促销策略 id=${r.id}`); }
+        function goCopy(r) { alert(`复制促销策略 id=${r.id}`); }
+        function toggleDropdown(id) { openDropdownId.value = openDropdownId.value === id ? null : id; }
+
+        function confirmToggle(record) {
+          confirmModal.record = record;
+          confirmModal.message = record.status === 1 ? '确认下线？' : '确认投放上线？';
+          confirmModal.visible = true;
+          confirmModal.callback = null;
+        }
+
+        async function handleConfirmOk() {
+          if (confirmModal.callback) { confirmModal.callback(); return; }
+          if (confirmModal.record) {
+            const r = confirmModal.record;
+            r.status = r.status === 1 ? 2 : 1;
+          }
+          confirmModal.visible = false;
+        }
+
+        function showPreview(record) {
+          previewModal.id = record.id;
+          previewModal.name = record.name;
+          previewModal.visible = true;
+        }
+
+        function startEdit(record) {
+          editingRowId.value = record.id;
+          editingValue.value = record.priority;
+          nextTick(() => {
+            const el = document.querySelector('.data-table input[type="number"]');
+            if (el) el.focus();
+          });
+        }
+
+        function savePriority(record) {
+          if (editingRowId.value !== record.id) return;
+          const newVal = parseInt(editingValue.value) || 1;
+          if (newVal !== record.priority) {
+            if (checkPriorityConflict(newVal, new Set([record.id]))) {
+              confirmModal.message = `优先级 ${newVal} 已被其他策略占用，请更换`;
+              confirmModal.visible = true;
+              confirmModal.callback = () => { confirmModal.visible = false; };
+              editingRowId.value = null;
+              editingValue.value = null;
+              return;
+            }
+            record.priority = newVal;
+          }
+          editingRowId.value = null;
+          editingValue.value = null;
+        }
+
+        onMounted(() => { fetchList(); });
+
+        return {
+          loading, tableData, totalCount, currentPage, pageSize, maxPage,
+          sortDir, searchForm, isActiveOnly, activeTab,
+          editingRowId, editingValue, openDropdownId,
+          confirmModal, previewModal, statusText,
+          siderCollapsed, opToolsOpen, deployOpen, priceManageOpen, lotteryManageOpen, subMenuMaxHeight,
+          selectedIds, isPageAllSelected, batchModal,
+          handleSearch, handleActiveOnlyChange, switchTab, toggleSort, goPage,
+          toggleSelectAll, toggleSelectRow,
+          openBatchPriority, confirmBatchPriority, getSelectedItems,
+          goCreate, goDetail, goEdit, goCopy,
+          toggleDropdown, confirmToggle, handleConfirmOk, showPreview,
+          startEdit, savePriority,
+        };
+      }
+    });
+
+    app.mount('#app');
+  </script>
+</body>
+</html>

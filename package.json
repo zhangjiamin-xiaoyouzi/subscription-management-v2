@@ -1,0 +1,11 @@
+{
+  "name": "gift-strategy-recreated",
+  "version": "1.0.0",
+  "private": true,
+  "description": "赠礼发放策略页面 - 完整还原版",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  }
+}
