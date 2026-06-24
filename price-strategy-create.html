@@ -44,15 +44,16 @@
     .sider-menu-item {
       display: flex; align-items: center; height: 44px; padding: 0 16px;
       font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none;
-      transition: all .15s; cursor: pointer; white-space: nowrap;
+      transition: all .2s ease; cursor: pointer; white-space: nowrap;
+      border-left: 3px solid transparent;
     }
-    .sider-menu-item:hover { background: #fff0f6; color: #ff4d88; }
-    .sider-menu-item.active { color: #fff; background: #ff4d88; }
+    .sider-menu-item:hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
+    .sider-menu-item.active { color: #ff4d88; background: linear-gradient(90deg,rgba(255,77,136,.08),rgba(255,77,136,.01)); border-left-color: #ff4d88; }
     .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
-    .sider-submenu { overflow: hidden; transition: max-height .25s ease; }
-    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; }
-    .sider-submenu .sider-menu-item.active { background: #ff4d88; color: #fff; }
-    .sider-submenu .sider-menu-item:not(.active):hover { background: #fff0f6; color: #ff4d88; }
+    .sider-submenu { overflow: hidden; transition: max-height .3s cubic-bezier(0.4,0,0.2,1); }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; border-left: 3px solid transparent; }
+    .sider-submenu .sider-menu-item.active { color: #ff4d88; background: #fff0f6; border-left-color: #ff4d88; font-weight: 500; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
 
     .content-area { flex: 1; background: #f0f2f5; overflow-x: auto; }
     .page-body { background: #fff; padding: 16px 24px 24px; min-height: 100%; }
@@ -146,41 +147,56 @@
           <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
         </div>
         <nav class="sider-menu">
-          <a class="sider-menu-item" href="javascript:;">📋 订单管理</a>
-          <a class="sider-menu-item" href="javascript:;">👥 用户管理</a>
-          <a class="sider-menu-item" href="javascript:;">🖼️ 素材管理</a>
-          <a class="sider-menu-item" href="javascript:;">🔗 拼团管理</a>
-
-          <div class="sider-menu-item" :class="{ 'parent-open': opToolsOpen }" @click="opToolsOpen = !opToolsOpen" style="cursor:pointer;">
-            🔧 运营工具
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="sider-menu-item" :class="{ 'parent-open': opToolsOpen }" @click="opToolsOpen = !opToolsOpen">
+            <span class="menu-icon">🔧</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+            <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
           </div>
-          <div class="sider-submenu" :style="{ maxHeight: opToolsOpen ? subMenuMaxHeight : '0' }">
-            <a class="sider-menu-item" href="rights-pay-list.html">运营位投放策略</a>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">弹窗</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">兑换码</span></a>
+            <a class="sider-menu-item" href="gift-strategy-list.html"><span class="menu-label">赠礼发放策略</span></a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">限时促销策略</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">赠礼物流管理</span></a>
+            <a class="sider-menu-item" href="event-pricing-strategy-list.html"><span class="menu-label">活动价格策略</span></a>
+            <a class="sider-menu-item" href="event-operations-strategy-list.html"><span class="menu-label">活动投放策略</span></a>
           </div>
-
-          <div class="sider-menu-item" :class="{ 'parent-open': priceManageOpen, active: activeParents.includes('price') }" @click="priceManageOpen = !priceManageOpen" style="cursor:pointer;">
-            💰 价格管理
+          <div class="sider-menu-item" :class="{ 'parent-open': deployOpen }" @click="deployOpen = !deployOpen">
+            <span class="menu-icon">📢</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
+            <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
           </div>
-          <div class="sider-submenu" :style="{ maxHeight: priceManageOpen ? subMenuMaxHeight : '0' }">
-            <a class="sider-menu-item" href="javascript:;">价格套餐</a>
-            <a class="sider-menu-item active" href="price-strategy-list.html">价格策略</a>
-            <a class="sider-menu-item" href="promotion-strategy-list.html">促销套餐</a>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+            <a class="sider-menu-item" href="rights-pay-list.html"><span class="menu-label">投放策略</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">页面模块展示</span></a>
           </div>
-
-          <a class="sider-menu-item" href="javascript:;">📦 产品管理</a>
-
-          <div class="sider-menu-item" :class="{ 'parent-open': lotteryManageOpen }" @click="lotteryManageOpen = !lotteryManageOpen" style="cursor:pointer;">
-            🎯 抽奖管理 ▸
+          <div class="sider-menu-item" :class="{ 'parent-open': priceManageOpen, active: activeParents.includes('price') }" @click="priceManageOpen = !priceManageOpen">
+            <span class="menu-icon">💰</span>
+            <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+            <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
           </div>
-          <div class="sider-submenu" :style="{ maxHeight: lotteryManageOpen ? subMenuMaxHeight : '0' }">
-            <a class="sider-menu-item" href="prize-list.html">奖品管理</a>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">价格套餐</span></a>
+            <a class="sider-menu-item active" href="price-strategy-list.html"><span class="menu-label">价格策略</span></a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">促销套餐</span></a>
           </div>
-
-          <a class="sider-menu-item" href="javascript:;">🏆 中奖管理</a>
-          <a class="sider-menu-item" href="javascript:;">📜 订阅管理</a>
-          <a class="sider-menu-item" href="javascript:;">📁 素材库</a>
-          <a class="sider-menu-item" href="javascript:;">⚙️ 设置管理</a>
-          <a class="sider-menu-item" href="javascript:;">📚 知识库</a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
+          <div class="sider-menu-item" :class="{ 'parent-open': lotteryManageOpen }" @click="lotteryManageOpen = !lotteryManageOpen">
+            <span class="menu-icon">🎯</span>
+            <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="prize-list.html" @click.stop><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="coupon-list.html" @click.stop><span class="menu-label">抽奖券管理</span></a>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
         </nav>
       </aside>
 
@@ -254,6 +270,7 @@
         const opToolsOpen = ref(true);
         const priceManageOpen = ref(true);
         const lotteryManageOpen = ref(true);
+        const deployOpen = ref(true);
         const activeParents = ref(['price']);
         const subMenuMaxHeight = '400px';
 
@@ -425,7 +442,7 @@
         }
 
         return {
-          siderCollapsed, opToolsOpen, priceManageOpen, lotteryManageOpen, subMenuMaxHeight, activeParents,
+          siderCollapsed, opToolsOpen, priceManageOpen, lotteryManageOpen, deployOpen, subMenuMaxHeight, activeParents,
           isEdit,
           periods, periodOptions,
           form,

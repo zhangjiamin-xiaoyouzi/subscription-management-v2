@@ -44,15 +44,16 @@
     .sider-menu-item {
       display: flex; align-items: center; height: 44px; padding: 0 16px;
       font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none;
-      transition: all .15s; cursor: pointer; white-space: nowrap;
+      transition: all .2s ease; cursor: pointer; white-space: nowrap;
+      border-left: 3px solid transparent;
     }
-    .sider-menu-item:hover { background: #fff0f6; color: #ff4d88; }
-    .sider-menu-item.active { color: #fff; background: #ff4d88; }
+    .sider-menu-item:hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
+    .sider-menu-item.active { color: #ff4d88; background: linear-gradient(90deg,rgba(255,77,136,.08),rgba(255,77,136,.01)); border-left-color: #ff4d88; }
     .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
-    .sider-submenu { overflow: hidden; transition: max-height .25s ease; }
-    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; }
-    .sider-submenu .sider-menu-item.active { background: #ff4d88; color: #fff; }
-    .sider-submenu .sider-menu-item:not(.active):hover { background: #fff0f6; color: #ff4d88; }
+    .sider-submenu { overflow: hidden; transition: max-height .3s cubic-bezier(0.4,0,0.2,1); }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; border-left: 3px solid transparent; }
+    .sider-submenu .sider-menu-item.active { color: #ff4d88; background: #fff0f6; border-left-color: #ff4d88; font-weight: 500; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
 
     .content-area { flex: 1; background: #f0f2f5; overflow-x: auto; }
     .page-body { background: #fff; padding: 0 24px 24px; min-height: 100%; }
@@ -171,7 +172,7 @@
             <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
             <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
           </div>
-          <div class="sider-submenu" :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">弹窗</span></a>
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">兑换码</span></a>
             <a class="sider-menu-item" href="gift-strategy-list.html"><span class="menu-label">赠礼发放策略</span></a>
@@ -185,7 +186,7 @@
             <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
             <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
           </div>
-          <div class="sider-submenu" :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
             <a class="sider-menu-item" href="rights-pay-list.html"><span class="menu-label">投放策略</span></a>
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">页面模块展示</span></a>
           </div>
@@ -194,10 +195,10 @@
             <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
             <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
           </div>
-          <div class="sider-submenu" :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">价格套餐</span></a>
             <a class="sider-menu-item" href="price-strategy-list.html"><span class="menu-label">价格策略</span></a>
-            <a class="sider-menu-item active" href="promotion-strategy-list.html" @click.stop><span class="menu-label">促销套餐</span></a>
+            <a class="sider-menu-item" href="promotion-strategy-list.html" @click.stop><span class="menu-label">促销套餐</span></a>
           </div>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
           <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
@@ -205,8 +206,9 @@
             <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
             <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
           </div>
-          <div class="sider-submenu" :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
-            <a class="sider-menu-item" href="prize-list.html"><span class="menu-label">奖品管理</span></a>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="prize-list.html" @click.stop><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="coupon-list.html" @click.stop><span class="menu-label">抽奖券管理</span></a>
           </div>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
@@ -501,10 +503,10 @@
         const statusText = { 1: '投放中', 2: '下线中' };
         const siderCollapsed = ref(false);
         const opToolsOpen = ref(true);
-        const deployOpen = ref(false);
+        const deployOpen = ref(true);
         const priceManageOpen = ref(true);
         const lotteryManageOpen = ref(true);
-        const activeParents = ref(['opTools', 'price']);
+        const activeParents = ref(['opTools']);
         const subMenuMaxHeight = ref('2000px');
 
         const allData = reactive(generateAllMockData());

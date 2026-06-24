@@ -76,8 +76,9 @@
     .sider-menu-item {
       display: flex; align-items: center; gap: 10px;
       padding: 0 16px; height: 40px; font-size: 13px; color: rgba(0,0,0,.6);
-      cursor: pointer; text-decoration: none; transition: all .15s;
+      cursor: pointer; text-decoration: none; transition: all .2s ease;
       white-space: nowrap; overflow: hidden; position: relative;
+      border-left: 3px solid transparent;
     }
     .sider-menu-item .menu-icon { font-size: 14px; width: 16px; text-align: center; flex-shrink: 0; }
     .sider-menu-item .menu-label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
@@ -86,16 +87,17 @@
       transition: transform .2s;
     }
     .sider-menu-item .menu-arrow.open { transform: rotate(90deg); }
-    .sider-menu-item:hover { color: #ff4d88; background: #fff0f6; }
-    .sider-menu-item.active { color: #fff; background: #ff4d88; }
+    .sider-menu-item:hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
+    .sider-menu-item.active { color: #ff4d88; background: linear-gradient(90deg,rgba(255,77,136,.08),rgba(255,77,136,.01)); border-left-color: #ff4d88; }
     .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
 
-    .sider-submenu { overflow: hidden; transition: max-height .25s ease; }
+    .sider-submenu { overflow: hidden; transition: max-height .3s cubic-bezier(0.4,0,0.2,1); }
     .sider-submenu .sider-menu-item {
       padding-left: 40px; height: 36px; font-size: 12px;
+      border-left: 3px solid transparent;
     }
-    .sider-submenu .sider-menu-item.active { background: #ff4d88; color: #fff; }
-    .sider-submenu .sider-menu-item:not(.active):hover { background: #fff0f6; color: #ff4d88; }
+    .sider-submenu .sider-menu-item.active { color: #ff4d88; background: #fff0f6; border-left-color: #ff4d88; font-weight: 500; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
 
     .content-area {
       flex: 1; background: #f0f2f5;
@@ -310,7 +312,7 @@
             <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
             <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
           </div>
-          <div class="sider-submenu" :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="javascript:;">
               <span class="menu-label">弹窗</span>
             </a>
@@ -333,16 +335,21 @@
               <span class="menu-label">活动投放策略</span>
             </a>
           </div>
-          <a class="sider-menu-item" href="javascript:;">
+          <div class="sider-menu-item parent-open" @click="deployOpen = !deployOpen">
             <span class="menu-icon">📢</span>
             <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
-          </a>
+            <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+            <a class="sider-menu-item" href="rights-pay-list.html"><span class="menu-label">投放策略</span></a>
+            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">页面模块展示</span></a>
+          </div>
           <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('price') }" @click="priceManageOpen = !priceManageOpen">
             <span class="menu-icon">💰</span>
             <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
             <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
           </div>
-          <div class="sider-submenu" :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">价格套餐</span></a>
             <a class="sider-menu-item" href="price-strategy-list.html"><span class="menu-label">价格策略</span></a>
             <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">促销套餐</span></a>
@@ -351,10 +358,15 @@
             <span class="menu-icon">📦</span>
             <span class="menu-label" v-show="!siderCollapsed">产品管理</span>
           </a>
-          <a class="sider-menu-item" href="javascript:;">
+          <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
             <span class="menu-icon">🎯</span>
             <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
-          </a>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="prize-list.html" @click.stop><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="coupon-list.html" @click.stop><span class="menu-label">抽奖券管理</span></a>
+          </div>
           <a class="sider-menu-item" href="javascript:;">
             <span class="menu-icon">🏆</span>
             <span class="menu-label" v-show="!siderCollapsed">中奖管理</span>
@@ -717,7 +729,9 @@
         const statusText = { 1: '投放中', 2: '下线中' };
         const siderCollapsed = ref(false);
         const opToolsOpen = ref(true);
-        const priceManageOpen = ref(false);
+        const deployOpen = ref(true);
+        const priceManageOpen = ref(true);
+        const lotteryManageOpen = ref(true);
         const activeParents = ref(['opTools']);
         const subMenuMaxHeight = ref('2000px');
 
@@ -973,7 +987,7 @@
           loading, tableData, totalCount, currentPage, pageSize, maxPage,
           sortDir, searchForm, isActiveOnly, editingRowId, editingValue, enumData,
           openDropdownId, confirmModal, previewModal, statusText,
-          siderCollapsed, opToolsOpen, subMenuMaxHeight, activeParents,
+          siderCollapsed, opToolsOpen, deployOpen, subMenuMaxHeight, activeParents,
           selectedIds, isPageAllSelected, batchModal,
           handleSearch, handleActiveOnlyChange, toggleSort, goPage,
           toggleSelectAll, toggleSelectRow,
