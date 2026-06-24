@@ -713,10 +713,10 @@
             <a class="sider-menu-item" href="promotion-strategy-list.html">促销套餐</a>
           </div>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
-          <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
+          <div class="sider-menu-item parent-open">
             <span class="menu-icon">🎯</span>
-            <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
-            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+            <a href="prize-list.html" @click.stop v-show="!siderCollapsed" style="text-decoration:none;color:inherit;flex:1;font-size:13px;">抽奖管理</a>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" @click.stop="lotteryManageOpen = !lotteryManageOpen" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="prize-list.html" @click.stop><span class="menu-label">奖品管理</span></a>
