@@ -14,6 +14,7 @@
       background: #f5f5f5; color: #333;
     }
     #app { min-height: 100vh; }
+    [v-cloak] { display: none !important; }
 
     /* ========== Layout: 顶部条 (白色) ========== */
     .app-header {
@@ -266,7 +267,7 @@
   </style>
 </head>
 <body>
-  <div id="app">
+  <div id="app" v-cloak>
     <!-- ====== 顶部条 (白色) ====== -->
     <header class="app-header">
       <div class="header-left">
@@ -332,7 +333,7 @@
             <a class="sider-menu-item" href="javascript:;">
               <span class="menu-label">活动价格策略</span>
             </a>
-            <a class="sider-menu-item" href="event-operations-strategy-list.html">
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('event-operations-strategy-list.html')">
               <span class="menu-label">活动投放策略</span>
             </a>
           </div>
@@ -342,7 +343,7 @@
             <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
-            <a class="sider-menu-item" href="rights-pay-list.html"><span class="menu-label">投放策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('rights-pay-list.html')"><span class="menu-label">投放策略</span></a>
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">页面模块展示</span></a>
           </div>
           <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('price') }" @click="priceManageOpen = !priceManageOpen">
@@ -352,21 +353,21 @@
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">价格套餐</span></a>
-            <a class="sider-menu-item" href="price-strategy-list.html"><span class="menu-label">价格策略</span></a>
-            <a class="sider-menu-item" href="promotion-strategy-list.html"><span class="menu-label">促销套餐</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('price-strategy-list.html')"><span class="menu-label">价格策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('promotion-strategy-list.html')"><span class="menu-label">促销套餐</span></a>
           </div>
           <a class="sider-menu-item" href="javascript:;">
             <span class="menu-icon">📦</span>
             <span class="menu-label" v-show="!siderCollapsed">产品管理</span>
           </a>
-          <div class="sider-menu-item parent-open">
+          <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
             <span class="menu-icon">🎯</span>
-            <a href="prize-list.html" @click.stop v-show="!siderCollapsed" style="text-decoration:none;color:inherit;flex:1;font-size:13px;">抽奖管理</a>
-            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" @click.stop="lotteryManageOpen = !lotteryManageOpen" v-show="!siderCollapsed">▶</span>
+            <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
-            <a class="sider-menu-item" href="prize-list.html" @click.stop><span class="menu-label">奖品管理</span></a>
-            <a class="sider-menu-item" href="coupon-list.html" @click.stop><span class="menu-label">抽奖券管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('prize-list.html')"><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('coupon-list.html')"><span class="menu-label">抽奖券管理</span></a>
           </div>
           <a class="sider-menu-item" href="javascript:;">
             <span class="menu-icon">🏆</span>
@@ -992,6 +993,8 @@
 
         onMounted(async () => { await fetchEnums(); fetchList(); });
 
+        function navigateTo(url) { window.location.href = url; }
+
         return {
           loading, tableData, totalCount, currentPage, pageSize, maxPage,
           sortDir, searchForm, isActiveOnly, editingRowId, editingValue, enumData,
@@ -1003,7 +1006,7 @@
           openBatchPriority, confirmBatchPriority,
           goCreate, goDetail, goEdit, goCopy,
           toggleDropdown, confirmToggle, handleConfirmOk, showPreview,
-          startEdit, savePriority,
+          startEdit, savePriority, navigateTo,
           formatTime, formatPageNames, getPlanName, describeConditions
         };
       }
