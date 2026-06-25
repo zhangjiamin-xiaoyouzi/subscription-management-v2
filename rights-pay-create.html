@@ -208,6 +208,157 @@
     .spin-btn:first-child { border-radius: 2px 0 0 2px; }
     .spin-btn:last-child { border-radius: 0 2px 2px 0; }
 
+    .record-banner-panel {
+      display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px;
+      align-items: start;
+    }
+    .record-banner-form {
+      padding: 20px 24px; border: 1px solid #f0f0f0; border-radius: 2px; background: #fff;
+    }
+    .record-banner-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px;
+    }
+    .record-banner-field {
+      display: flex; align-items: flex-start; min-width: 0;
+    }
+    .record-banner-field.full {
+      grid-column: 1 / -1;
+    }
+    .record-banner-label {
+      width: 170px; flex-shrink: 0; padding-right: 12px; text-align: right;
+      font-size: 13px; line-height: 32px; color: rgba(0,0,0,.85);
+    }
+    .record-banner-label.required::before {
+      content: '* '; color: #ff4d4f;
+    }
+    .record-banner-control {
+      flex: 1; min-width: 0;
+    }
+    .record-banner-control.disabled {
+      opacity: .72;
+    }
+    .record-banner-inline {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .record-banner-select {
+      position: relative;
+    }
+    .record-banner-select .select-trigger {
+      height: 32px;
+      border-color: #d9d9d9;
+      box-shadow: none;
+    }
+    .record-banner-select.is-disabled .select-trigger {
+      background: #f5f5f5; color: rgba(0,0,0,.45); cursor: not-allowed;
+    }
+    .record-banner-select .select-dropdown {
+      top: 34px;
+    }
+    .record-banner-tip {
+      font-size: 12px; line-height: 20px; color: rgba(0,0,0,.45); margin-top: 4px;
+    }
+    .record-banner-tip.emphasis {
+      color: rgba(0,0,0,.65);
+    }
+    .record-banner-material {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+    }
+    .record-banner-material .select-wrap,
+    .record-banner-material .record-banner-select {
+      flex: 1;
+    }
+    .record-banner-material-card {
+      border: 1px solid #f0f0f0; border-radius: 2px; background: #fafafa;
+      padding: 12px 14px;
+    }
+    .record-banner-material-option {
+      font-size: 13px; color: rgba(0,0,0,.65); margin-bottom: 10px;
+    }
+    .record-banner-material-meta {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px;
+    }
+    .record-banner-material-meta .meta-item {
+      min-width: 0;
+    }
+    .record-banner-material-meta .meta-label {
+      font-size: 12px; color: rgba(0,0,0,.45); margin-bottom: 4px;
+    }
+    .record-banner-material-meta .meta-value {
+      font-size: 13px; color: rgba(0,0,0,.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .record-banner-upload {
+      display: flex; align-items: stretch; gap: 16px;
+    }
+    .record-banner-upload-box {
+      width: 120px; height: 120px; border: 1px dashed #d9d9d9; border-radius: 2px;
+      background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #999; cursor: pointer; transition: all .2s;
+    }
+    .record-banner-upload-box:hover {
+      border-color: #ff4d88; color: #ff4d88; background: #fff7fa;
+    }
+    .record-banner-upload-plus {
+      font-size: 24px; line-height: 1; margin-bottom: 6px;
+    }
+    .record-banner-upload-preview {
+      width: 160px; height: 120px; border-radius: 8px; overflow: hidden;
+      box-shadow: 0 10px 24px rgba(255, 77, 136, 0.14); background: linear-gradient(135deg, #ffe3ee 0%, #fff8fb 100%);
+      border: 1px solid rgba(255, 77, 136, 0.18);
+    }
+    .record-banner-upload-actions {
+      display: flex; flex-direction: column; justify-content: space-between; gap: 10px; min-width: 0;
+    }
+    .record-banner-upload-btns {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .record-banner-upload-spec {
+      font-size: 12px; line-height: 20px; color: rgba(0,0,0,.45);
+    }
+    .record-banner-upload-preview img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .record-banner-preview {
+      background: linear-gradient(180deg, #fff 0%, #fff7fa 100%); border: 1px solid #f5d7e4;
+      border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(255, 77, 136, 0.08);
+      position: sticky; top: 88px;
+    }
+    .record-banner-preview-title {
+      font-size: 13px; color: rgba(0,0,0,.65); margin-bottom: 14px;
+    }
+    .record-banner-preview-card {
+      border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 10px 20px rgba(255, 77, 136, 0.12);
+    }
+    .record-banner-preview-media {
+      height: 148px; background: linear-gradient(135deg, #ffd7e6 0%, #fff1f6 100%);
+      display: flex; align-items: center; justify-content: center; color: #ff7ca8; font-size: 14px;
+    }
+    .record-banner-preview-body {
+      padding: 14px 16px 16px;
+    }
+    .record-banner-preview-tag {
+      display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px;
+      background: #fff0f6; color: #ff4d88; font-size: 12px; margin-bottom: 10px;
+    }
+    .record-banner-preview-main {
+      font-size: 16px; line-height: 24px; color: rgba(0,0,0,.88); font-weight: 600;
+    }
+    .record-banner-preview-sub {
+      font-size: 12px; line-height: 20px; color: rgba(0,0,0,.45); margin-top: 6px;
+    }
+    .record-banner-preview-meta {
+      margin-top: 14px; padding-top: 12px; border-top: 1px solid #f0f0f0; font-size: 12px; color: rgba(0,0,0,.45);
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    @media (max-width: 1280px) {
+      .record-banner-panel {
+        grid-template-columns: 1fr;
+      }
+      .record-banner-preview {
+        position: static;
+      }
+    }
+
     /* Condition Group */
     .condition-group {
       background: #fafafa; border: 1px solid #f0f0f0; border-radius: 2px;
@@ -688,11 +839,11 @@
           <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="javascript:;">弹窗</a>
             <a class="sider-menu-item" href="javascript:;">兑换码</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('gift-strategy-list.html')">赠礼发放策略</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('promotion-strategy-list.html')">限时促销策略</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift-strategy/list')">赠礼发放策略</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')">限时促销策略</a>
             <a class="sider-menu-item" href="javascript:;">赠礼物流管理</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('event-pricing-strategy-list.html')">活动价格策略</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('event-operations-strategy-list.html')">活动投放策略</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-pricing-strategy/list')">活动价格策略</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-operations-strategy/list')">活动投放策略</a>
           </div>
           <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('deploy') }" @click="deployOpen = !deployOpen">
             <span class="menu-icon">📢</span>
@@ -700,7 +851,7 @@
             <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
-            <a class="sider-menu-item active" href="javascript:void(0)" @click.stop="navigateTo('rights-pay-list.html')">投放策略</a>
+            <a class="sider-menu-item active" href="javascript:void(0)" @click.stop="navigateTo('/rights-pay/list')">投放策略</a>
             <a class="sider-menu-item" href="javascript:;">页面模块展示</a>
           </div>
           <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('price') }" @click="priceManageOpen = !priceManageOpen">
@@ -710,8 +861,8 @@
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="javascript:;">价格套餐</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('price-strategy-list.html')">价格策略</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('promotion-strategy-list.html')">促销套餐</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/price-strategy/list')">价格策略</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')">促销套餐</a>
           </div>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
           <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
@@ -720,8 +871,8 @@
             <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('prize-list.html')"><span class="menu-label">奖品管理</span></a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('coupon-list.html')"><span class="menu-label">抽奖券管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/prize/list')"><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/coupon/list')"><span class="menu-label">抽奖券管理</span></a>
           </div>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
@@ -737,7 +888,7 @@
         <div class="page-body">
           <!-- Breadcrumb -->
           <div class="breadcrumb">
-            <a href="javascript:void(0)" @click.stop="navigateTo('rights-pay-list.html')">投放策略</a>
+            <a href="javascript:void(0)" @click.stop="navigateTo('/rights-pay/list')">投放策略</a>
             <span class="sep">/</span>
             <span class="current">新增</span>
           </div>
@@ -1021,6 +1172,242 @@
             </div>
 
             <!-- Empty: show only dashed button -->
+            <div class="record-banner-panel" v-else-if="isRecordBannerPath">
+              <div class="record-banner-form">
+                <div class="record-banner-grid">
+                  <div class="record-banner-field full">
+                    <div class="record-banner-label required">类型:</div>
+                    <div class="record-banner-control">
+                      <div class="radio-group">
+                        <label class="radio-item">
+                          <input type="radio" value="period" v-model="recordBannerForm.typeMode">
+                          <span>时期</span>
+                        </label>
+                        <label class="radio-item">
+                          <input type="radio" value="cycle_day" v-model="recordBannerForm.typeMode">
+                          <span>月经第x天</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field">
+                    <div class="record-banner-label">时期:</div>
+                    <div class="record-banner-control">
+                      <div class="record-banner-select" :class="{ 'is-disabled': recordBannerForm.typeMode !== 'period' }" v-click-outside="() => closeRecordBannerSelect('period')">
+                        <div class="select-trigger" :class="{ open: recordBannerForm.periodOpen }" @click="toggleRecordBannerSelect('period', recordBannerForm.typeMode !== 'period')">
+                          <span :class="{ placeholder: !recordBannerForm.period }">{{ recordBannerForm.period || '请选择' }}</span>
+                        </div>
+                        <span class="select-arrow">▾</span>
+                        <div class="select-dropdown" v-show="recordBannerForm.periodOpen && recordBannerForm.typeMode === 'period'">
+                          <div class="select-option" :class="{ selected: recordBannerForm.period === '' }" @click.stop="updateRecordBannerField('period', '')">请选择</div>
+                          <div class="select-option" v-for="item in recordBannerOptions.periods" :key="item" :class="{ selected: recordBannerForm.period === item }" @click.stop="updateRecordBannerField('period', item)">{{ item }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field">
+                    <div class="record-banner-label">记录项:</div>
+                    <div class="record-banner-control">
+                      <div class="record-banner-select" v-click-outside="() => closeRecordBannerSelect('recordItem')">
+                        <div class="select-trigger" :class="{ open: recordBannerForm.recordItemOpen }" @click="toggleRecordBannerSelect('recordItem')">
+                          <span :class="{ placeholder: !recordBannerForm.recordItem }">{{ recordBannerForm.recordItem || '请选择' }}</span>
+                        </div>
+                        <span class="select-arrow">▾</span>
+                        <div class="select-dropdown" v-show="recordBannerForm.recordItemOpen">
+                          <div class="select-option" :class="{ selected: recordBannerForm.recordItem === '' }" @click.stop="updateRecordBannerField('recordItem', '')">请选择</div>
+                          <div class="select-option" v-for="item in recordBannerOptions.recordItems" :key="item" :class="{ selected: recordBannerForm.recordItem === item }" @click.stop="updateRecordBannerField('recordItem', item, handleRecordItemChange)">{{ item }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field">
+                    <div class="record-banner-label">分析结果(8.97.0及以上版本配置):</div>
+                    <div class="record-banner-control" :class="{ disabled: !recordBannerForm.recordItem }">
+                      <div class="record-banner-select" :class="{ 'is-disabled': !recordBannerForm.recordItem }" v-click-outside="() => closeRecordBannerSelect('analysisResultNew')">
+                        <div class="select-trigger" :class="{ open: recordBannerForm.analysisResultNewOpen }" @click="toggleRecordBannerSelect('analysisResultNew', !recordBannerForm.recordItem)">
+                          <span :class="{ placeholder: !recordBannerForm.analysisResultNew }">{{ recordBannerForm.analysisResultNew || '请选择' }}</span>
+                        </div>
+                        <span class="select-arrow">▾</span>
+                        <div class="select-dropdown" v-show="recordBannerForm.analysisResultNewOpen && recordBannerForm.recordItem">
+                          <div class="select-option" :class="{ selected: recordBannerForm.analysisResultNew === '' }" @click.stop="updateRecordBannerField('analysisResultNew', '')">请选择</div>
+                          <div class="select-option" v-for="item in recordBannerAnalysisOptionsNew" :key="item" :class="{ selected: recordBannerForm.analysisResultNew === item }" @click.stop="updateRecordBannerField('analysisResultNew', item)">{{ item }}</div>
+                        </div>
+                      </div>
+                      <div class="record-banner-tip">高版本（版本号大于等于8.97.0版本分析结果选择）</div>
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field">
+                    <div class="record-banner-label">分析结果(8.93.0~8.96.0版本配置):</div>
+                    <div class="record-banner-control" :class="{ disabled: !recordBannerForm.recordItem }">
+                      <div class="record-banner-select" :class="{ 'is-disabled': !recordBannerForm.recordItem }" v-click-outside="() => closeRecordBannerSelect('analysisResultOld')">
+                        <div class="select-trigger" :class="{ open: recordBannerForm.analysisResultOldOpen }" @click="toggleRecordBannerSelect('analysisResultOld', !recordBannerForm.recordItem)">
+                          <span :class="{ placeholder: !recordBannerForm.analysisResultOld }">{{ recordBannerForm.analysisResultOld || '请选择' }}</span>
+                        </div>
+                        <span class="select-arrow">▾</span>
+                        <div class="select-dropdown" v-show="recordBannerForm.analysisResultOldOpen && recordBannerForm.recordItem">
+                          <div class="select-option" :class="{ selected: recordBannerForm.analysisResultOld === '' }" @click.stop="updateRecordBannerField('analysisResultOld', '')">请选择</div>
+                          <div class="select-option" v-for="item in recordBannerAnalysisOptionsOld" :key="item" :class="{ selected: recordBannerForm.analysisResultOld === item }" @click.stop="updateRecordBannerField('analysisResultOld', item)">{{ item }}</div>
+                        </div>
+                      </div>
+                      <div class="record-banner-tip">兼容8.93.0~8.96.0版本配置，若策略对8.97.0及以上版本生效，此项可以不配置</div>
+                      <div class="record-banner-tip emphasis">设置8.93.0~8.96.0版本配置，使用此项</div>
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field full">
+                    <div class="record-banner-label">具体子记录项:</div>
+                    <div class="record-banner-control" :class="{ disabled: recordBannerSubRecordOptions.length === 0 }">
+                      <div class="record-banner-select" :class="{ 'is-disabled': recordBannerSubRecordOptions.length === 0 }" v-click-outside="() => closeRecordBannerSelect('subRecordItem')">
+                        <div class="select-trigger" :class="{ open: recordBannerForm.subRecordItemOpen }" @click="toggleRecordBannerSelect('subRecordItem', recordBannerSubRecordOptions.length === 0)">
+                          <span :class="{ placeholder: !recordBannerForm.subRecordItem }">{{ recordBannerForm.subRecordItem || '请选择' }}</span>
+                        </div>
+                        <span class="select-arrow">▾</span>
+                        <div class="select-dropdown" v-show="recordBannerForm.subRecordItemOpen && recordBannerSubRecordOptions.length > 0">
+                          <div class="select-option" :class="{ selected: recordBannerForm.subRecordItem === '' }" @click.stop="updateRecordBannerField('subRecordItem', '')">请选择</div>
+                          <div class="select-option" v-for="item in recordBannerSubRecordOptions" :key="item" :class="{ selected: recordBannerForm.subRecordItem === item }" @click.stop="updateRecordBannerField('subRecordItem', item)">{{ item }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field full">
+                    <div class="record-banner-label required">选择素材:</div>
+                    <div class="record-banner-control">
+                      <div class="record-banner-material">
+                        <div class="record-banner-select" v-click-outside="() => closeRecordBannerSelect('material')">
+                          <div class="select-trigger" :class="{ open: recordBannerForm.materialOpen }" @click="recordBannerForm.materialOpen = !recordBannerForm.materialOpen">
+                            <span :class="{ placeholder: !recordBannerForm.materialId }">{{ selectedRecordBannerMaterialLabel }}</span>
+                          </div>
+                          <span class="select-arrow">▾</span>
+                          <div class="select-dropdown" v-show="recordBannerForm.materialOpen">
+                            <div class="select-option" :class="{ selected: recordBannerForm.materialId === '' }" @click.stop="selectRecordBannerMaterial('')">请选择</div>
+                            <div class="select-option" v-for="item in recordBannerOptions.materials" :key="item.id" :class="{ selected: recordBannerForm.materialId === item.id }" @click.stop="selectRecordBannerMaterial(item.id)">{{ item.name }}</div>
+                          </div>
+                        </div>
+                        <a class="btn-cancel" href="https://test-admin.meiyou.com/app/test-sub-admin.seeyouyima.com/material-library/list?tab_id=8" target="_blank" rel="noopener noreferrer">管理素材</a>
+                        <button class="btn-cancel" type="button" @click="refreshRecordBannerMaterials">刷新</button>
+                      </div>
+                      <div class="record-banner-material-card" v-if="selectedRecordBannerMaterial">
+                        <div class="record-banner-material-option">选项1：</div>
+                        <div class="record-banner-material-meta">
+                          <div class="meta-item">
+                            <div class="meta-label">主标题</div>
+                            <div class="meta-value">{{ recordBannerForm.title || selectedRecordBannerMaterial.title }}</div>
+                          </div>
+                          <div class="meta-item">
+                            <div class="meta-label">副标题</div>
+                            <div class="meta-value">{{ recordBannerForm.subtitle || selectedRecordBannerMaterial.subtitle }}</div>
+                          </div>
+                          <div class="meta-item">
+                            <div class="meta-label">素材ID</div>
+                            <div class="meta-value">{{ selectedRecordBannerMaterial.id }}</div>
+                          </div>
+                          <div class="meta-item">
+                            <div class="meta-label">推荐场景</div>
+                            <div class="meta-value">{{ selectedRecordBannerMaterial.scene }}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field">
+                    <div class="record-banner-label">主标题:</div>
+                    <div class="record-banner-control">
+                      <input class="input-field" type="text" placeholder="请输入" v-model="recordBannerForm.title">
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field">
+                    <div class="record-banner-label">副标题:</div>
+                    <div class="record-banner-control">
+                      <input class="input-field" type="text" placeholder="请输入" v-model="recordBannerForm.subtitle">
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field full">
+                    <div class="record-banner-label">横幅图片:</div>
+                    <div class="record-banner-control">
+                      <div class="record-banner-upload">
+                        <div class="record-banner-upload-box" @click="mockUploadRecordBannerImage">
+                          <div class="record-banner-upload-plus">＋</div>
+                          <div>上传图片</div>
+                        </div>
+                        <div class="record-banner-upload-preview">
+                          <img :src="recordBannerPreviewImage" alt="横幅预览">
+                        </div>
+                        <div class="record-banner-upload-actions">
+                          <div class="record-banner-upload-btns">
+                            <button class="btn-cancel" type="button" @click="mockUploadRecordBannerImage">重新上传</button>
+                            <button class="btn-cancel" type="button" @click="useSelectedMaterialImage">使用素材图</button>
+                          </div>
+                          <div class="record-banner-upload-spec">
+                            <div>建议尺寸：1035 × 390</div>
+                            <div>支持 jpg、png，大小不超过 2MB</div>
+                            <div>当前素材：{{ selectedRecordBannerMaterialLabel }}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field">
+                    <div class="record-banner-label">跳转地址:</div>
+                    <div class="record-banner-control">
+                      <div class="record-banner-select" v-click-outside="() => closeRecordBannerSelect('jumpTarget')">
+                        <div class="select-trigger" :class="{ open: recordBannerForm.jumpTargetOpen }" @click="toggleRecordBannerSelect('jumpTarget')">
+                          <span :class="{ placeholder: !recordBannerForm.jumpTarget }">{{ recordBannerForm.jumpTarget || '请选择' }}</span>
+                        </div>
+                        <span class="select-arrow">▾</span>
+                        <div class="select-dropdown" v-show="recordBannerForm.jumpTargetOpen">
+                          <div class="select-option" :class="{ selected: recordBannerForm.jumpTarget === '' }" @click.stop="updateRecordBannerField('jumpTarget', '')">请选择</div>
+                          <div class="select-option" v-for="item in recordBannerOptions.jumpTargets" :key="item" :class="{ selected: recordBannerForm.jumpTarget === item }" @click.stop="updateRecordBannerField('jumpTarget', item)">{{ item }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field">
+                    <div class="record-banner-label">横幅过期天数:</div>
+                    <div class="record-banner-control">
+                      <div class="record-banner-inline">
+                        <div class="spinbutton-wrap" style="max-width: 120px;">
+                          <button class="spin-btn" type="button" @click="changeRecordBannerExpireDays(-1)">−</button>
+                          <input class="spin-input" type="number" min="0" v-model.number="recordBannerForm.expireDays">
+                          <button class="spin-btn" type="button" @click="changeRecordBannerExpireDays(1)">＋</button>
+                        </div>
+                        <span class="record-banner-tip" style="margin-top:0;">天</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="record-banner-preview">
+                <div class="record-banner-preview-title">预览</div>
+                <div class="record-banner-preview-card">
+                  <div class="record-banner-preview-media">
+                    <img v-if="recordBannerPreviewImage" :src="recordBannerPreviewImage" alt="记录横幅预览" style="width:100%;height:100%;object-fit:cover;display:block;">
+                    <span v-else>横幅预览</span>
+                  </div>
+                  <div class="record-banner-preview-body">
+                    <div class="record-banner-preview-tag">{{ recordBannerPreviewTag }}</div>
+                    <div class="record-banner-preview-main">{{ recordBannerForm.title || '主标题预览' }}</div>
+                    <div class="record-banner-preview-sub">{{ recordBannerForm.subtitle || '副标题预览' }}</div>
+                    <div class="record-banner-preview-meta">
+                      <span>跳转地址：{{ recordBannerForm.jumpTarget || '未选择' }}</span>
+                      <span>素材：{{ selectedRecordBannerMaterialLabel }}</span>
+                      <span>过期天数：{{ recordBannerForm.expireDays || 0 }}天</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <button class="btn-dashed-block" @click="openCompModal" v-else-if="selectedComponents.length === 0">
               <span style="font-size:14px;">＋</span> 从组件库选择
             </button>
@@ -1440,7 +1827,7 @@
           <!-- Action Buttons -->
           <div class="form-actions">
             <button class="btn-primary" @click="handleSave">保&ensp;存</button>
-            <a class="btn-cancel" href="javascript:void(0)" @click.stop="navigateTo('rights-pay-list.html')">取&ensp;消</a>
+            <a class="btn-cancel" href="javascript:void(0)" @click.stop="navigateTo('/rights-pay/list')">取&ensp;消</a>
           </div>
         </div>
       </main>
@@ -1521,6 +1908,10 @@
         modules: [{ key: 'PRICE', name: '价格卡片' }],
         locations: [{ key: 'PRICE_SORT_DISPLAY', name: '价格排序与展示', icon: '💳' }],
       },
+      RECORD: {
+        modules: [{ key: 'BANNER', name: '记录横幅' }],
+        locations: [{ key: 'RECORD_BANNER', name: '记录横幅', icon: '📋' }],
+      },
     };
 
     createApp({
@@ -1548,7 +1939,7 @@
             { key: 'ACTIVITY_1', name: '会员日活动页', tags: ['活动'], desc: '618/双11等大促活动专属落地页', icon: '🎉', category: 'activity' },
             { key: 'ACTIVITY_2', name: '限时秒杀页', tags: ['活动', '下单转化'], desc: '限时秒杀活动页面，营造紧迫感促进转化', icon: '⏰', category: 'activity' },
             { key: 'ACTIVITY_3', name: '签到有礼页', tags: ['活动', '促活'], desc: '每日签到获取积分/奖品，提升用户活跃度', icon: '📅', category: 'activity' },
-            { key: 'RIGHTS_1', name: '记录Tab', tags: ['个性化数据', '曝光转化'], desc: '展示用户行为记录和相关数据的页面', icon: '📊', category: 'rights' },
+            { key: 'RECORD', name: '记录Tab', tags: ['个性化数据', '曝光转化'], desc: '展示用户行为记录和相关数据的页面', icon: '📊', category: 'rights' },
             { key: 'RIGHTS_2', name: '排卵试纸页', tags: ['备孕身份', '个性化数据'], desc: '针对备孕用户展示排卵试纸相关功能', icon: '🔬', category: 'rights' },
             { key: 'RIGHTS_3', name: '爱康国宾免费体检', tags: ['买赠', '下单转化'], desc: '购买后可获得体检权益', icon: '🏥', category: 'rights' },
           ],
@@ -1572,6 +1963,7 @@
           pageNameMap: {
             'PAY_STUDENT': '学生开卡页', 'PAY_WINDOW': '支付转化页',
             'MY_TAB': '我tab页面', 'RIGHTS_DETAIL': '权益详情页', 'VIP_CENTER': '会员中心页',
+            'RECORD': '记录Tab',
           },
           moduleNameMap: {
             'PRICE': '价格卡片', 'CARD_TOP': '价格上方banner',
@@ -1579,9 +1971,10 @@
             'VIP_CENTER_INFO_STREAM': '信息流', 'BOTTOM_RESOURCE': '底部运营位',
             'MY_TAB_RIGHT_MARKETING': '右侧运营位', 'MY_TAB_BTN_BADGE': '按钮角标',
             'PRICE_TAG': '限时标签',
+            'BANNER': '记录横幅',
           },
           locationNameMap: {
-            'INFO_FLOW': '信息流', 'DEFAULT': '默认', 'PRICE_SORT_DISPLAY': '价格排序与展示',
+            'INFO_FLOW': '信息流', 'DEFAULT': '默认', 'PRICE_SORT_DISPLAY': '价格排序与展示', 'RECORD_BANNER': '记录横幅',
           },
 
           planOptions: [
@@ -1612,6 +2005,78 @@
           selectedComponents: [],
           dragIndex: null,
           dragOverIndex: null,
+          recordBannerOptions: {
+            periods: ['经期', '排卵期', '备孕期', '孕早期', '孕中期', '孕晚期'],
+            recordItems: ['大姨妈来了', '大姨妈走了', '流量', '痛经', '颜色', '爱爱', '症状', '白带'],
+            analysisByRecordItem: {
+              '大姨妈来了': {
+                newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
+                older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
+                subRecords: ['状态']
+              },
+              '大姨妈走了': {
+                newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
+                older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
+                subRecords: ['状态']
+              },
+              '流量': {
+                newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
+                older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
+                subRecords: ['颜色', '血块']
+              },
+              '痛经': {
+                newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
+                older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
+                subRecords: ['程度']
+              },
+              '颜色': {
+                newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
+                older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
+                subRecords: ['状态']
+              },
+              '爱爱': {
+                newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
+                older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
+                subRecords: ['频率']
+              },
+              '症状': {
+                newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
+                older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
+                subRecords: ['程度']
+              },
+              '白带': {
+                newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
+                older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
+                subRecords: ['颜色', '状态']
+              }
+            },
+            materials: [
+              { id: 'material_1', name: '记录横幅素材A', title: '记录结果已更新', subtitle: '根据最新记录给你准备了专属福利', scene: '经期 / 体重 / 高版本', image: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%23ffd7e6"/><stop offset="100%" stop-color="%23fff4f8"/></linearGradient></defs><rect width="640" height="360" rx="24" fill="url(%23g1)"/><circle cx="500" cy="92" r="58" fill="rgba(255,255,255,.55)"/><circle cx="548" cy="160" r="34" fill="rgba(255,255,255,.4)"/><text x="42" y="118" font-size="42" fill="%23a94269" font-family="Arial">记录横幅</text><text x="42" y="170" font-size="24" fill="%23ff5d93" font-family="Arial">根据记录结果展示专属福利</text><rect x="42" y="220" width="180" height="52" rx="26" fill="%23ffffff" opacity="0.88"/><text x="72" y="254" font-size="24" fill="%23ff5d93" font-family="Arial">立即查看</text></svg>' },
+              { id: 'material_2', name: '记录横幅素材B', title: '周期提醒已生成', subtitle: '智能分析后为你推荐更适合的内容', scene: '试纸 / 强阳 / 旧版本兼容', image: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360"><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%23ffe9d6"/><stop offset="100%" stop-color="%23fff8f2"/></linearGradient></defs><rect width="640" height="360" rx="24" fill="url(%23g2)"/><rect x="386" y="54" width="196" height="252" rx="28" fill="rgba(255,255,255,.72)"/><text x="42" y="116" font-size="40" fill="%23b96d39" font-family="Arial">周期提醒</text><text x="42" y="170" font-size="24" fill="%23ff8f57" font-family="Arial">智能推荐适合你的内容</text><text x="430" y="144" font-size="24" fill="%23b96d39" font-family="Arial">智能分析</text><text x="430" y="188" font-size="18" fill="%23ff8f57" font-family="Arial">专属权益</text></svg>' }
+            ],
+            jumpTargets: ['会员中心页', '会员权益页', '记录tab活动页', 'H5链接']
+          },
+          recordBannerForm: {
+            typeMode: 'period',
+            period: '',
+            recordItem: '',
+            analysisResultNew: '',
+            analysisResultOld: '',
+            subRecordItem: '',
+            materialId: '',
+            materialOpen: false,
+            periodOpen: false,
+            recordItemOpen: false,
+            analysisResultNewOpen: false,
+            analysisResultOldOpen: false,
+            subRecordItemOpen: false,
+            jumpTargetOpen: false,
+            title: '',
+            subtitle: '',
+            bannerImage: '',
+            jumpTarget: '',
+            expireDays: 7,
+          },
           componentLibrary: [
             {
               key: 'static_banner', icon: '🖼️', name: '静态banner', desc: '静态图片banner组件',
@@ -1753,9 +2218,46 @@
             && this.form.moduleKey === 'PRICE'
             && this.form.locationKey === 'PRICE_SORT_DISPLAY';
         },
+        isRecordBannerPath() {
+          return this.form.pageKey === 'RECORD'
+            && this.form.moduleKey === 'BANNER'
+            && this.form.locationKey === 'RECORD_BANNER';
+        },
         fixedPriceCardComponent() {
           if (!this.isFixedPriceCardPath) return null;
           return this.selectedComponents.find(comp => comp.key === 'price_card_display') || null;
+        },
+        recordBannerConfig() {
+          return this.recordBannerOptions.analysisByRecordItem[this.recordBannerForm.recordItem] || null;
+        },
+        recordBannerAnalysisOptionsNew() {
+          return this.recordBannerConfig ? this.recordBannerConfig.newer : [];
+        },
+        recordBannerAnalysisOptionsOld() {
+          return this.recordBannerConfig ? this.recordBannerConfig.older : [];
+        },
+        recordBannerSubRecordOptions() {
+          return this.recordBannerConfig ? this.recordBannerConfig.subRecords : [];
+        },
+        selectedRecordBannerMaterial() {
+          return this.recordBannerOptions.materials.find(item => item.id === this.recordBannerForm.materialId) || null;
+        },
+        selectedRecordBannerMaterialLabel() {
+          return this.selectedRecordBannerMaterial ? this.selectedRecordBannerMaterial.name : '请选择';
+        },
+        recordBannerPreviewImage() {
+          return this.recordBannerForm.bannerImage || (this.selectedRecordBannerMaterial && this.selectedRecordBannerMaterial.image) || '';
+        },
+        recordBannerPreviewTag() {
+          const tags = [];
+          if (this.recordBannerForm.typeMode === 'period') {
+            tags.push(this.recordBannerForm.period || '时期');
+          } else {
+            tags.push('月经第x天');
+          }
+          if (this.recordBannerForm.recordItem) tags.push(this.recordBannerForm.recordItem);
+          if (this.recordBannerForm.analysisResultNew) tags.push(this.recordBannerForm.analysisResultNew);
+          return tags.join(' · ') || '记录横幅';
         },
         useRightSideGlobalPreview() {
           return this.form.pageKey === 'VIP_CENTER'
@@ -1803,7 +2305,17 @@
         if (pageKey) this.form.pageKey = pageKey;
         if (moduleKey) this.form.moduleKey = moduleKey;
         if (locationKey) this.form.locationKey = locationKey;
-        if (this.form.pageKey === 'VIP_CENTER' && this.form.moduleKey === 'VIP_CENTER_INFO_STREAM' && this.form.locationKey === 'INFO_FLOW') {
+        this.initializePlacementContent();
+      },
+
+      methods: {
+        initializePlacementContent() {
+          if (this.isRecordBannerPath) {
+            this.selectedComponents = [];
+            this.ensureRecordBannerDefaults();
+            return;
+          }
+          if (this.form.pageKey === 'VIP_CENTER' && this.form.moduleKey === 'VIP_CENTER_INFO_STREAM' && this.form.locationKey === 'INFO_FLOW') {
           const defaultComp = this.componentLibrary.find(comp => comp.key === 'static_banner');
           if (defaultComp) {
             const comp = JSON.parse(JSON.stringify(defaultComp));
@@ -1811,7 +2323,7 @@
             comp.collapsed = false;
             this.selectedComponents = [comp];
           }
-        } else if (this.form.pageKey === 'PAY_WINDOW' && this.form.moduleKey === 'PRICE' && this.form.locationKey === 'PRICE_SORT_DISPLAY') {
+          } else if (this.form.pageKey === 'PAY_WINDOW' && this.form.moduleKey === 'PRICE' && this.form.locationKey === 'PRICE_SORT_DISPLAY') {
           const defaultComp = this.componentLibrary.find(comp => comp.key === 'price_card_display');
           if (defaultComp) {
             const comp = JSON.parse(JSON.stringify(defaultComp));
@@ -1819,10 +2331,80 @@
             comp.collapsed = false;
             this.selectedComponents = [comp];
           }
-        }
-      },
-
-      methods: {
+          }
+        },
+        ensureRecordBannerDefaults() {
+          if (!this.recordBannerForm.materialId && this.recordBannerOptions.materials.length > 0) {
+            this.recordBannerForm.materialId = this.recordBannerOptions.materials[0].id;
+          }
+          if (!this.recordBannerForm.recordItem && this.recordBannerOptions.recordItems.length > 0) {
+            this.recordBannerForm.recordItem = this.recordBannerOptions.recordItems[0];
+          }
+          if (!this.recordBannerForm.period && this.recordBannerOptions.periods.length > 0) {
+            this.recordBannerForm.period = this.recordBannerOptions.periods[0];
+          }
+          this.syncRecordBannerDependentOptions();
+        },
+        syncRecordBannerDependentOptions() {
+          if (!this.recordBannerAnalysisOptionsNew.includes(this.recordBannerForm.analysisResultNew)) {
+            this.recordBannerForm.analysisResultNew = this.recordBannerAnalysisOptionsNew[0] || '';
+          }
+          if (!this.recordBannerAnalysisOptionsOld.includes(this.recordBannerForm.analysisResultOld)) {
+            this.recordBannerForm.analysisResultOld = this.recordBannerAnalysisOptionsOld[0] || '';
+          }
+          if (!this.recordBannerSubRecordOptions.includes(this.recordBannerForm.subRecordItem)) {
+            this.recordBannerForm.subRecordItem = this.recordBannerSubRecordOptions[0] || '';
+          }
+          if (!this.recordBannerForm.bannerImage) {
+            this.recordBannerForm.bannerImage = this.recordBannerPreviewImage;
+          }
+        },
+        handleRecordItemChange() {
+          this.syncRecordBannerDependentOptions();
+        },
+        toggleRecordBannerSelect(field, disabled = false) {
+          if (disabled) return;
+          const openKey = `${field}Open`;
+          ['periodOpen', 'recordItemOpen', 'analysisResultNewOpen', 'analysisResultOldOpen', 'subRecordItemOpen', 'materialOpen', 'jumpTargetOpen'].forEach(key => {
+            this.recordBannerForm[key] = key === openKey ? !this.recordBannerForm[key] : false;
+          });
+        },
+        closeRecordBannerSelect(field) {
+          const openKey = `${field}Open`;
+          if (Object.prototype.hasOwnProperty.call(this.recordBannerForm, openKey)) {
+            this.recordBannerForm[openKey] = false;
+          }
+        },
+        updateRecordBannerField(field, value, callback) {
+          this.recordBannerForm[field] = value;
+          this.closeRecordBannerSelect(field);
+          if (typeof callback === 'function') callback();
+        },
+        selectRecordBannerMaterial(materialId) {
+          this.recordBannerForm.materialId = materialId;
+          this.recordBannerForm.materialOpen = false;
+          if (!this.recordBannerForm.bannerImage && this.selectedRecordBannerMaterial) {
+            this.recordBannerForm.bannerImage = this.selectedRecordBannerMaterial.image;
+          }
+        },
+        refreshRecordBannerMaterials() {
+          this.showToast('素材列表已刷新');
+        },
+        mockUploadRecordBannerImage() {
+          this.recordBannerForm.bannerImage = (this.selectedRecordBannerMaterial && this.selectedRecordBannerMaterial.image) || this.recordBannerOptions.materials[0]?.image || '';
+          this.showToast('已更新横幅图片');
+        },
+        useSelectedMaterialImage() {
+          if (!this.selectedRecordBannerMaterial) return;
+          this.recordBannerForm.bannerImage = this.selectedRecordBannerMaterial.image;
+          if (!this.recordBannerForm.title) this.recordBannerForm.title = this.selectedRecordBannerMaterial.title;
+          if (!this.recordBannerForm.subtitle) this.recordBannerForm.subtitle = this.selectedRecordBannerMaterial.subtitle;
+          this.showToast('已应用素材默认内容');
+        },
+        changeRecordBannerExpireDays(delta) {
+          const nextValue = Number(this.recordBannerForm.expireDays || 0) + delta;
+          this.recordBannerForm.expireDays = Math.max(0, nextValue);
+        },
         showToast(msg, isError = false) {
           this.toast = msg;
           this.toastError = isError;
@@ -1952,6 +2534,24 @@
             })).filter(g => g.conditions.length > 0),
             components: this.selectedComponents.map(c => c.key),
           };
+
+          if (this.isRecordBannerPath) {
+            payload.recordBannerContent = {
+              typeMode: this.recordBannerForm.typeMode,
+              period: this.recordBannerForm.period,
+              recordItem: this.recordBannerForm.recordItem,
+              analysisResultNew: this.recordBannerForm.analysisResultNew,
+              analysisResultOld: this.recordBannerForm.analysisResultOld,
+              subRecordItem: this.recordBannerForm.subRecordItem,
+              materialId: this.recordBannerForm.materialId,
+              materialName: this.selectedRecordBannerMaterial ? this.selectedRecordBannerMaterial.name : '',
+              title: this.recordBannerForm.title,
+              subtitle: this.recordBannerForm.subtitle,
+              bannerImage: this.recordBannerPreviewImage,
+              jumpTarget: this.recordBannerForm.jumpTarget,
+              expireDays: this.recordBannerForm.expireDays,
+            };
+          }
 
           console.log('保存数据:', JSON.stringify(payload, null, 2));
           this.showToast('保存成功！');
@@ -2110,27 +2710,7 @@
           this.form.moduleKey = this.pageSelectModal.selectedModule;
           this.form.locationKey = this.pageSelectModal.selectedLocation;
           this.pageSelectModal.visible = false;
-
-          // Re-evaluate default component for new path
-          if (this.form.pageKey === 'VIP_CENTER' && this.form.moduleKey === 'VIP_CENTER_INFO_STREAM' && this.form.locationKey === 'INFO_FLOW') {
-            if (this.selectedComponents.length === 0) {
-              const defaultComp = this.componentLibrary.find(comp => comp.key === 'static_banner');
-              if (defaultComp) {
-                const comp = JSON.parse(JSON.stringify(defaultComp));
-                comp.cid = 'comp_' + Date.now();
-                comp.collapsed = false;
-                this.selectedComponents = [comp];
-              }
-            }
-          } else if (this.form.pageKey === 'PAY_WINDOW' && this.form.moduleKey === 'PRICE' && this.form.locationKey === 'PRICE_SORT_DISPLAY') {
-            const defaultComp = this.componentLibrary.find(comp => comp.key === 'price_card_display');
-            if (defaultComp) {
-              const comp = JSON.parse(JSON.stringify(defaultComp));
-              comp.cid = 'comp_' + Date.now();
-              comp.collapsed = false;
-              this.selectedComponents = [comp];
-            }
-          }
+          this.initializePlacementContent();
         },
 
         toggleComponentCollapse(index) {

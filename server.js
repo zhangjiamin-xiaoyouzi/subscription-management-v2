@@ -65,10 +65,19 @@ const server = http.createServer((req, res) => {
   // ====== 路由映射 ======
   const ROUTES = {
     '/': 'index.html',
-    '/gift-strategy/list': 'index.html',
+    '/gift-strategy/list': 'gift-strategy-list.html',
     '/gift-strategy/create': 'gift-strategy-create.html',
+    '/gift-strategy/detail': 'gift-strategy-detail.html',
+    '/rights-pay/list': 'rights-pay-list.html',
+    '/rights-pay/create': 'rights-pay-create.html',
+    '/price-strategy/list': 'price-strategy-list.html',
+    '/price-strategy/create': 'price-strategy-create.html',
+    '/promotion-strategy/list': 'promotion-strategy-list.html',
     '/event-operations-strategy/list': 'event-operations-strategy-list.html',
     '/event-operations-strategy/create': 'event-operations-strategy-create.html',
+    '/event-pricing-strategy/list': 'event-pricing-strategy-list.html',
+    '/prize/list': 'prize-list.html',
+    '/coupon/list': 'coupon-list.html',
   };
 
   // ====== 静态文件 ======

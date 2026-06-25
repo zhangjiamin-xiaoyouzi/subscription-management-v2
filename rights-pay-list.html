@@ -208,11 +208,11 @@
           <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="javascript:;">弹窗</a>
             <a class="sider-menu-item" href="javascript:;">兑换码</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('gift-strategy-list.html')">赠礼发放策略</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('promotion-strategy-list.html')">限时促销策略</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift-strategy/list')">赠礼发放策略</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')">限时促销策略</a>
             <a class="sider-menu-item" href="javascript:;">赠礼物流管理</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('event-pricing-strategy-list.html')">活动价格策略</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('event-operations-strategy-list.html')">活动投放策略</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-pricing-strategy/list')">活动价格策略</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-operations-strategy/list')">活动投放策略</a>
           </div>
           <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('deploy') }" @click="deployOpen = !deployOpen">
             <span class="menu-icon">📢</span>
@@ -220,7 +220,7 @@
             <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
-            <a class="sider-menu-item active" href="javascript:void(0)" @click.stop="navigateTo('rights-pay-list.html')">投放策略</a>
+            <a class="sider-menu-item active" href="javascript:void(0)" @click.stop="navigateTo('/rights-pay/list')">投放策略</a>
             <a class="sider-menu-item" href="javascript:;">页面模块展示</a>
           </div>
           <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('price') }" @click="priceManageOpen = !priceManageOpen">
@@ -230,8 +230,8 @@
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="javascript:;">价格套餐</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('price-strategy-list.html')">价格策略</a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('promotion-strategy-list.html')">促销套餐</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/price-strategy/list')">价格策略</a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')">促销套餐</a>
           </div>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
           <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
@@ -240,8 +240,8 @@
             <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('prize-list.html')"><span class="menu-label">奖品管理</span></a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('coupon-list.html')"><span class="menu-label">抽奖券管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/prize/list')"><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/coupon/list')"><span class="menu-label">抽奖券管理</span></a>
           </div>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
@@ -588,6 +588,10 @@
             modules: [{ key: 'VIP_CENTER_INFO_STREAM', name: '信息流' }],
             locations: [{ key: 'INFO_FLOW', name: '信息流', icon: '🖼️' }],
           },
+          RECORD: {
+            modules: [{ key: 'BANNER', name: '记录横幅' }],
+            locations: [{ key: 'RECORD_BANNER', name: '记录横幅', icon: '📋' }],
+          },
         };
 
         // 内联编辑
@@ -873,7 +877,7 @@
           { key: 'ACTIVITY_1', name: '会员日活动页', tags: ['活动'], desc: '618/双11等大促活动专属落地页', icon: '🎉', category: 'activity' },
           { key: 'ACTIVITY_2', name: '限时秒杀页', tags: ['活动', '下单转化'], desc: '限时秒杀活动页面，营造紧迫感促进转化', icon: '⏰', category: 'activity' },
           { key: 'ACTIVITY_3', name: '签到有礼页', tags: ['活动', '促活'], desc: '每日签到获取积分/奖品，提升用户活跃度', icon: '📅', category: 'activity' },
-          { key: 'RIGHTS_1', name: '记录Tab', tags: ['个性化数据', '曝光转化'], desc: '展示用户行为记录和相关数据的页面', icon: '📊', category: 'rights' },
+          { key: 'RECORD', name: '记录Tab', tags: ['个性化数据', '曝光转化'], desc: '展示用户行为记录和相关数据的页面', icon: '📊', category: 'rights' },
           { key: 'RIGHTS_2', name: '排卵试纸页', tags: ['备孕身份', '个性化数据'], desc: '针对备孕用户展示排卵试纸相关功能', icon: '🔬', category: 'rights' },
           { key: 'RIGHTS_3', name: '爱康国宾免费体检', tags: ['买赠', '下单转化'], desc: '购买后可获得体检权益', icon: '🏥', category: 'rights' },
         ];
@@ -929,7 +933,7 @@
           params.set('page_keys', pageSelectModal.selected);
           if (pageSelectModal.selectedModule) params.set('module_key', pageSelectModal.selectedModule);
           if (pageSelectModal.selectedLocation) params.set('location_key', pageSelectModal.selectedLocation);
-          window.location.href = 'rights-pay-create.html?' + params.toString();
+          window.location.href = '/rights-pay/create?' + params.toString();
         }
 
         function goCreate() {
@@ -951,7 +955,7 @@
           if (filterForm.page) searchParams.set('page', filterForm.page);
           if (filterForm.name) searchParams.set('name', filterForm.name);
           params.set('searchParams', searchParams.toString());
-          window.location.href = 'rights-pay-create.html?' + params.toString();
+          window.location.href = '/rights-pay/create?' + params.toString();
         }
         function goView(row) {
           const params = new URLSearchParams();
@@ -971,7 +975,7 @@
           if (filterForm.page) searchParams.set('page', filterForm.page);
           if (filterForm.name) searchParams.set('name', filterForm.name);
           params.set('searchParams', searchParams.toString());
-          window.location.href = 'rights-pay-create.html?' + params.toString();
+          window.location.href = '/rights-pay/create?' + params.toString();
         }
 
         function extractPageKey(path) {

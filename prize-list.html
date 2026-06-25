@@ -262,11 +262,11 @@
           <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">弹窗</span></a>
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">兑换码</span></a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('gift-strategy-list.html')"><span class="menu-label">赠礼发放策略</span></a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('promotion-strategy-list.html')"><span class="menu-label">限时促销策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift-strategy/list')"><span class="menu-label">赠礼发放策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')"><span class="menu-label">限时促销策略</span></a>
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">赠礼物流管理</span></a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('event-pricing-strategy-list.html')"><span class="menu-label">活动价格策略</span></a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('event-operations-strategy-list.html')"><span class="menu-label">活动投放策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-pricing-strategy/list')"><span class="menu-label">活动价格策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-operations-strategy/list')"><span class="menu-label">活动投放策略</span></a>
           </div>
           <div class="sider-menu-item parent-open" @click="deployOpen = !deployOpen">
             <span class="menu-icon">📢</span>
@@ -274,7 +274,7 @@
             <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('rights-pay-list.html')"><span class="menu-label">投放策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/rights-pay/list')"><span class="menu-label">投放策略</span></a>
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">页面模块展示</span></a>
           </div>
           <div class="sider-menu-item parent-open" @click="priceManageOpen = !priceManageOpen">
@@ -284,8 +284,8 @@
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
             <a class="sider-menu-item" href="javascript:;"><span class="menu-label">价格套餐</span></a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('price-strategy-list.html')"><span class="menu-label">价格策略</span></a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('promotion-strategy-list.html')"><span class="menu-label">促销套餐</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/price-strategy/list')"><span class="menu-label">价格策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')"><span class="menu-label">促销套餐</span></a>
           </div>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
           <div class="sider-menu-item parent-open" :class="{ active: activeParent === 'lottery' }" @click="lotteryManageOpen = !lotteryManageOpen">
@@ -294,8 +294,8 @@
             <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
-            <a class="sider-menu-item active" href="javascript:void(0)" @click.stop="navigateTo('prize-list.html')"><span class="menu-label">奖品管理</span></a>
-            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('coupon-list.html')"><span class="menu-label">抽奖券管理</span></a>
+            <a class="sider-menu-item active" href="javascript:void(0)" @click.stop="navigateTo('/prize/list')"><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/coupon/list')"><span class="menu-label">抽奖券管理</span></a>
           </div>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
           <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
