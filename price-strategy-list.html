@@ -933,7 +933,7 @@
           const params = new URLSearchParams();
           params.set('id', row.id);
           params.set('copy', '1');
-          window.location.href = '/price-strategy/create?' + params.toString();
+          navigateTo('/price-strategy/create?' + params.toString());
         }
 
         function confirmDisable(row) {

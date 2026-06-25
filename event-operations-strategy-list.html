@@ -739,15 +739,15 @@
         }
 
         function goCreate() {
-          window.location.href = '/event-operations-strategy/create';
+          navigateTo('/event-operations-strategy/create');
         }
 
         function goEdit(row) {
-          window.location.href = '/event-operations-strategy/create?id=' + row.id + '&mode=edit';
+          navigateTo('/event-operations-strategy/create?id=' + row.id + '&mode=edit');
         }
 
         function goCopy(row) {
-          window.location.href = '/event-operations-strategy/create?id=' + row.id + '&listType=copy';
+          navigateTo('/event-operations-strategy/create?id=' + row.id + '&listType=copy');
         }
 
         function confirmDelete(row) {

@@ -933,7 +933,7 @@
           params.set('page_keys', pageSelectModal.selected);
           if (pageSelectModal.selectedModule) params.set('module_key', pageSelectModal.selectedModule);
           if (pageSelectModal.selectedLocation) params.set('location_key', pageSelectModal.selectedLocation);
-          window.location.href = '/rights-pay/create?' + params.toString();
+          navigateTo('/rights-pay/create?' + params.toString());
         }
 
         function goCreate() {
@@ -955,7 +955,7 @@
           if (filterForm.page) searchParams.set('page', filterForm.page);
           if (filterForm.name) searchParams.set('name', filterForm.name);
           params.set('searchParams', searchParams.toString());
-          window.location.href = '/rights-pay/create?' + params.toString();
+          navigateTo('/rights-pay/create?' + params.toString());
         }
         function goView(row) {
           const params = new URLSearchParams();
@@ -975,7 +975,7 @@
           if (filterForm.page) searchParams.set('page', filterForm.page);
           if (filterForm.name) searchParams.set('name', filterForm.name);
           params.set('searchParams', searchParams.toString());
-          window.location.href = '/rights-pay/create?' + params.toString();
+          navigateTo('/rights-pay/create?' + params.toString());
         }
 
         function extractPageKey(path) {

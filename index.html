@@ -906,7 +906,7 @@
           await fetchListReal();
         }
 
-        function goCreate() { window.location.href = '/gift-strategy/create'; }
+        function goCreate() { navigateTo('/gift-strategy/create'); }
         function goDetail(r) { window.open(`gift-strategy-detail.html?id=${r.id}&type=1`, '_blank'); }
         function goEdit(r) { window.open(`gift-strategy-create.html?id=${r.id}&mode=edit&type=1`, '_blank'); }
         function goCopy(r) { window.open(`gift-strategy-create.html?id=${r.id}&type=1&listType=copy`, '_blank'); }
