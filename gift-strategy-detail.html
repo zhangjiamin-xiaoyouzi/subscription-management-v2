@@ -520,6 +520,16 @@
           navigateTo('/gift-strategy/list');
         }
 
+        function navigateTo(url) {
+          if (location.hostname.includes('github.io')) {
+            const [path, query] = url.split('?');
+            const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
+            window.location.href = parts.join('-') + '.html' + (query ? '?' + query : '');
+          } else {
+            window.location.href = url;
+          }
+        }
+
         function formatTime(ts) {
           if (!ts) return '-';
           const d = new Date(ts);
@@ -566,7 +576,7 @@
         return {
           siderCollapsed, deployOpen, priceManageOpen, lotteryManageOpen, activeParents, urlId, record,
           pageNames, planName, conditionGroups, promoGroups,
-          goBack, formatTime,
+          goBack, formatTime, navigateTo,
           getConditionMetaName, getConditionOpName, getPromoPlanLabel
         };
       }
