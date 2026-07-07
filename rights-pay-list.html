@@ -286,6 +286,8 @@
                   <option value="MY_TAB">我tab页面</option>
                   <option value="RIGHTS_DETAIL">权益详情页</option>
                   <option value="VIP_CENTER">会员中心页</option>
+                  <option value="PERIOD_REPORT">经期今日密报</option>
+                  <option value="RECORD">记录Tab</option>
                 </select>
                 <span class="filter-label">模块 :</span>
                 <select class="select-field" v-model="filterForm.module" style="width:120px;">
@@ -295,6 +297,8 @@
                   <option value="MY_TAB_MEMBER_CARD">我tab会员卡片</option>
                   <option value="TOP_RESOURCE">顶部资源位</option>
                   <option value="VIP_CENTER_INFO_STREAM">信息流</option>
+                  <option value="BANNER">记录横幅</option>
+                  <option value="PERIOD_REPORT_BANNER">经期今日密报模块横幅</option>
                 </select>
                 <span class="filter-label">资源位 :</span>
                 <select class="select-field" v-model="filterForm.location" style="width:120px;">
@@ -306,6 +310,8 @@
                   <option value="TOP_RESOURCE">顶部资源位</option>
                   <option value="MY_TAB_BTN_BADGE">按钮角标</option>
                   <option value="INFO_FLOW">信息流</option>
+                  <option value="RECORD_BANNER">记录横幅</option>
+                  <option value="PERIOD_REPORT_BANNER">经期今日密报模块横幅</option>
                 </select>
                 <span class="filter-label">策略名称 :</span>
                 <input class="input-field" v-model="filterForm.name" placeholder="策略名称" style="width:130px;" />
@@ -592,6 +598,10 @@
             modules: [{ key: 'BANNER', name: '记录横幅' }],
             locations: [{ key: 'RECORD_BANNER', name: '记录横幅', icon: '📋' }],
           },
+          PERIOD_REPORT: {
+            modules: [{ key: 'PERIOD_REPORT_BANNER', name: '经期今日密报模块横幅' }],
+            locations: [{ key: 'PERIOD_REPORT_BANNER', name: '经期今日密报模块横幅', icon: '📰' }],
+          },
         };
 
         // 内联编辑
@@ -707,6 +717,7 @@
           const map = {
             PAY_STUDENT: '学生开卡页', PAY_WINDOW: '支付转化弹窗',
             MY_TAB: '我tab页面', RIGHTS_DETAIL: '权益详情页', VIP_CENTER: '会员中心页',
+            PERIOD_REPORT: '经期今日密报', RECORD: '记录Tab',
           };
           return map[key] || '';
         }
@@ -878,6 +889,7 @@
           { key: 'ACTIVITY_2', name: '限时秒杀页', tags: ['活动', '下单转化'], desc: '限时秒杀活动页面，营造紧迫感促进转化', icon: '⏰', category: 'activity' },
           { key: 'ACTIVITY_3', name: '签到有礼页', tags: ['活动', '促活'], desc: '每日签到获取积分/奖品，提升用户活跃度', icon: '📅', category: 'activity' },
           { key: 'RECORD', name: '记录Tab', tags: ['个性化数据', '曝光转化'], desc: '展示用户行为记录和相关数据的页面', icon: '📊', category: 'rights' },
+          { key: 'PERIOD_REPORT', name: '经期今日密报', tags: ['个性化数据', '曝光转化'], desc: '展示经期当天密报和相关数据的页面', icon: '📰', category: 'rights' },
           { key: 'RIGHTS_2', name: '排卵试纸页', tags: ['备孕身份', '个性化数据'], desc: '针对备孕用户展示排卵试纸相关功能', icon: '🔬', category: 'rights' },
           { key: 'RIGHTS_3', name: '爱康国宾免费体检', tags: ['买赠', '下单转化'], desc: '购买后可获得体检权益', icon: '🏥', category: 'rights' },
         ];
@@ -986,6 +998,8 @@
             '权益详情页': 'RIGHTS_DETAIL',
             '会员中心页': 'VIP_CENTER',
             '育儿会员主页': 'VIP_CENTER',
+            '经期今日密报': 'PERIOD_REPORT',
+            '记录Tab': 'RECORD',
           };
           for (const [name, key] of Object.entries(pageMap)) {
             if (path.includes(name)) return key;

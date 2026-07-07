@@ -1289,7 +1289,7 @@
                     </div>
                   </div>
 
-                  <div class="record-banner-field">
+                  <div class="record-banner-field" v-if="!isPeriodReportPath">
                     <div class="record-banner-label">时期:</div>
                     <div class="record-banner-control">
                       <div class="record-banner-select" :class="{ 'is-disabled': recordBannerForm.typeMode !== 'period' }" v-click-outside="() => closeRecordBannerSelect('period')">
@@ -1305,7 +1305,36 @@
                     </div>
                   </div>
 
-                  <div class="record-banner-field full">
+                  <div class="record-banner-field full" v-if="isPeriodReportPath">
+                    <div class="record-banner-label">时期:</div>
+                    <div class="record-banner-control" style="display:flex;gap:12px;align-items:center;">
+                      <div class="record-banner-select" style="flex:0 0 auto;width:160px;" :class="{ 'is-disabled': recordBannerForm.typeMode !== 'period' }" v-click-outside="() => closeRecordBannerSelect('period')">
+                        <div class="select-trigger" :class="{ open: recordBannerForm.periodOpen }" @click="toggleRecordBannerSelect('period', recordBannerForm.typeMode !== 'period')">
+                          <span :class="{ placeholder: !recordBannerForm.period }">{{ recordBannerForm.period || '经期周期阶段' }}</span>
+                        </div>
+                        <span class="select-arrow">▾</span>
+                        <div class="select-dropdown" v-show="recordBannerForm.periodOpen && recordBannerForm.typeMode === 'period'">
+                          <div class="select-option" :class="{ selected: recordBannerForm.period === '' }" @click.stop="updateRecordBannerField('period', '')">请选择</div>
+                          <div class="select-option" v-for="item in recordBannerOptions.periods" :key="item" :class="{ selected: recordBannerForm.period === item }" @click.stop="updateRecordBannerField('period', item)">{{ item }}</div>
+                        </div>
+                      </div>
+                      <div class="record-banner-select record-banner-multi-select" style="flex:1;" v-click-outside="() => closeRecordBannerSelect('periodStages')">
+                        <div class="multi-select-tags" :class="{ open: recordBannerForm.periodStagesOpen }" @click="toggleRecordBannerSelect('periodStages')">
+                          <span class="tag-item" v-for="(item, idx) in recordBannerForm.periodStages" :key="item">
+                            {{ item }}
+                            <span class="tag-close" @click.stop="removePeriodStageTag(idx)">×</span>
+                          </span>
+                          <span v-if="recordBannerForm.periodStages.length === 0" class="placeholder-text">请选择周期阶段</span>
+                        </div>
+                        <span class="select-arrow">▾</span>
+                        <div class="select-dropdown" v-show="recordBannerForm.periodStagesOpen">
+                          <div class="select-option" v-for="item in periodStageOptions" :key="item" :class="{ selected: recordBannerForm.periodStages.includes(item) }" @click.stop="togglePeriodStageOption(item)">{{ item }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="record-banner-field full" v-if="!isPeriodReportPath">
                     <div class="record-banner-label">记录项:</div>
                     <div class="record-banner-control">
                       <div class="record-banner-select" v-click-outside="() => closeRecordBannerSelect('recordItem')">
@@ -1349,7 +1378,7 @@
                     </div>
                   </div>
 
-                  <div class="record-banner-field full">
+                  <div class="record-banner-field full" v-if="!isPeriodReportPath">
                     <div class="record-banner-label">分析结果(8.97.0及以上版本配置):</div>
                     <div class="record-banner-control" :class="{ disabled: !recordBannerForm.recordItem }">
                       <div class="record-banner-select" :class="{ 'is-disabled': !recordBannerForm.recordItem }" v-click-outside="() => closeRecordBannerSelect('analysisResultNew')">
@@ -1366,7 +1395,7 @@
                     </div>
                   </div>
 
-                  <div class="record-banner-field full">
+                  <div class="record-banner-field full" v-if="!isPeriodReportPath">
                     <div class="record-banner-label">分析结果(8.93.0~8.96.0版本配置):</div>
                     <div class="record-banner-control" :class="{ disabled: !recordBannerForm.recordItem }">
                       <div class="record-banner-select" :class="{ 'is-disabled': !recordBannerForm.recordItem }" v-click-outside="() => closeRecordBannerSelect('analysisResultOld')">
@@ -1384,17 +1413,34 @@
                     </div>
                   </div>
 
+                  <div class="record-banner-field full" v-if="isPeriodReportPath">
+                    <div class="record-banner-label">分析结果(9.09.0以下版本配置):</div>
+                    <div class="record-banner-control">
+                      <div class="record-banner-select" v-click-outside="() => closeRecordBannerSelect('analysisResultBelow909')">
+                        <div class="select-trigger" :class="{ open: recordBannerForm.analysisResultBelow909Open }" @click="toggleRecordBannerSelect('analysisResultBelow909')">
+                          <span :class="{ placeholder: !recordBannerForm.analysisResultBelow909 }">{{ recordBannerForm.analysisResultBelow909 || '请选择' }}</span>
+                        </div>
+                        <span class="select-arrow">▾</span>
+                        <div class="select-dropdown" v-show="recordBannerForm.analysisResultBelow909Open">
+                          <div class="select-option" :class="{ selected: recordBannerForm.analysisResultBelow909 === '' }" @click.stop="updateRecordBannerField('analysisResultBelow909', '')">请选择</div>
+                          <div class="select-option" v-for="item in recordBannerAnalysisOptionsBelow909" :key="item" :class="{ selected: recordBannerForm.analysisResultBelow909 === item }" @click.stop="updateRecordBannerField('analysisResultBelow909', item)">{{ item }}</div>
+                        </div>
+                      </div>
+                      <div class="record-banner-tip">9.09.0以下版本分析结果选择</div>
+                    </div>
+                  </div>
+
                   <div class="record-banner-field full">
-                    <div class="record-banner-label">具体子记录项:</div>
-                    <div class="record-banner-control" :class="{ disabled: recordBannerSubRecordOptions.length === 0 }">
-                      <div class="record-banner-select" :class="{ 'is-disabled': recordBannerSubRecordOptions.length === 0 }" v-click-outside="() => closeRecordBannerSelect('subRecordItem')">
-                        <div class="select-trigger" :class="{ open: recordBannerForm.subRecordItemOpen }" @click="toggleRecordBannerSelect('subRecordItem', recordBannerSubRecordOptions.length === 0)">
+                    <div class="record-banner-label">{{ isPeriodReportPath ? '模块位置:' : '具体子记录项:' }}</div>
+                    <div class="record-banner-control" :class="{ disabled: isPeriodReportPath ? false : recordBannerSubRecordOptions.length === 0 }">
+                      <div class="record-banner-select" :class="{ 'is-disabled': !isPeriodReportPath && recordBannerSubRecordOptions.length === 0 }" v-click-outside="() => closeRecordBannerSelect('subRecordItem')">
+                        <div class="select-trigger" :class="{ open: recordBannerForm.subRecordItemOpen }" @click="toggleRecordBannerSelect('subRecordItem', !isPeriodReportPath && recordBannerSubRecordOptions.length === 0)">
                           <span :class="{ placeholder: !recordBannerForm.subRecordItem }">{{ recordBannerForm.subRecordItem || '请选择' }}</span>
                         </div>
                         <span class="select-arrow">▾</span>
-                        <div class="select-dropdown" v-show="recordBannerForm.subRecordItemOpen && recordBannerSubRecordOptions.length > 0">
+                        <div class="select-dropdown" v-show="recordBannerForm.subRecordItemOpen && (isPeriodReportPath || recordBannerSubRecordOptions.length > 0)">
                           <div class="select-option" :class="{ selected: recordBannerForm.subRecordItem === '' }" @click.stop="updateRecordBannerField('subRecordItem', '')">请选择</div>
-                          <div class="select-option" v-for="item in recordBannerSubRecordOptions" :key="item" :class="{ selected: recordBannerForm.subRecordItem === item }" @click.stop="updateRecordBannerField('subRecordItem', item)">{{ item }}</div>
+                          <div class="select-option" v-for="item in (isPeriodReportPath ? moduleLocationOptions : recordBannerSubRecordOptions)" :key="item" :class="{ selected: recordBannerForm.subRecordItem === item }" @click.stop="updateRecordBannerField('subRecordItem', item)">{{ item }}</div>
                         </div>
                       </div>
                     </div>
@@ -1496,7 +1542,7 @@
                     </div>
                   </div>
 
-                  <div class="record-banner-field full">
+                  <div class="record-banner-field full" v-if="!isPeriodReportPath">
                     <div class="record-banner-label">横幅过期天数:</div>
                     <div class="record-banner-control">
                       <input class="input-field" type="text" placeholder="请输入天数，≤30" v-model="recordBannerForm.expireDays" style="max-width:200px;">
@@ -1540,7 +1586,21 @@
               </div>
             </div>
 
-            <template v-if="!isRecordBannerPath && !isFixedPriceCardPath">
+            <!-- MY_TAB_MEMBER_CARD: 仅文案字段 -->
+            <div class="record-banner-panel" v-else-if="isMyTabMemberCardPath">
+              <div class="record-banner-form">
+                <div class="record-banner-grid">
+                  <div class="record-banner-field full">
+                    <div class="record-banner-label required">文案:</div>
+                    <div class="record-banner-control">
+                      <input class="input-field" type="text" v-model="myTabMemberCardForm.cardText" placeholder="请输入卡片文案，≤50字" maxlength="50" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <template v-if="!isRecordBannerPath && !isFixedPriceCardPath && !isMyTabMemberCardPath">
               <button class="btn-dashed-block" @click="openCompModal" v-if="selectedComponents.length === 0">
                 <span style="font-size:14px;">＋</span> 从组件库选择
               </button>
@@ -2046,6 +2106,14 @@
         modules: [{ key: 'BANNER', name: '记录横幅' }],
         locations: [{ key: 'RECORD_BANNER', name: '记录横幅', icon: '📋' }],
       },
+      PERIOD_REPORT: {
+        modules: [{ key: 'PERIOD_REPORT_BANNER', name: '经期今日密报模块横幅' }],
+        locations: [{ key: 'PERIOD_REPORT_BANNER', name: '经期今日密报模块横幅', icon: '📰' }],
+      },
+      MY_TAB: {
+        modules: [{ key: 'MY_TAB_MEMBER_CARD', name: '我tab会员卡片' }],
+        locations: [{ key: 'MY_TAB_MEMBER_CARD_TEXT', name: '卡片文案', icon: '📝' }],
+      },
     };
 
     createApp({
@@ -2074,6 +2142,7 @@
             { key: 'ACTIVITY_2', name: '限时秒杀页', tags: ['活动', '下单转化'], desc: '限时秒杀活动页面，营造紧迫感促进转化', icon: '⏰', category: 'activity' },
             { key: 'ACTIVITY_3', name: '签到有礼页', tags: ['活动', '促活'], desc: '每日签到获取积分/奖品，提升用户活跃度', icon: '📅', category: 'activity' },
             { key: 'RECORD', name: '记录Tab', tags: ['个性化数据', '曝光转化'], desc: '展示用户行为记录和相关数据的页面', icon: '📊', category: 'rights' },
+            { key: 'PERIOD_REPORT', name: '经期今日密报', tags: ['个性化数据', '曝光转化'], desc: '展示经期当天密报和相关数据的页面', icon: '📰', category: 'rights' },
             { key: 'RIGHTS_2', name: '排卵试纸页', tags: ['备孕身份', '个性化数据'], desc: '针对备孕用户展示排卵试纸相关功能', icon: '🔬', category: 'rights' },
             { key: 'RIGHTS_3', name: '爱康国宾免费体检', tags: ['买赠', '下单转化'], desc: '购买后可获得体检权益', icon: '🏥', category: 'rights' },
           ],
@@ -2097,7 +2166,7 @@
           pageNameMap: {
             'PAY_STUDENT': '学生开卡页', 'PAY_WINDOW': '支付转化页',
             'MY_TAB': '我tab页面', 'RIGHTS_DETAIL': '权益详情页', 'VIP_CENTER': '会员中心页',
-            'RECORD': '记录Tab',
+            'RECORD': '记录Tab', 'PERIOD_REPORT': '经期今日密报',
           },
           moduleNameMap: {
             'PRICE': '价格卡片', 'CARD_TOP': '价格上方banner',
@@ -2105,10 +2174,12 @@
             'VIP_CENTER_INFO_STREAM': '信息流', 'BOTTOM_RESOURCE': '底部运营位',
             'MY_TAB_RIGHT_MARKETING': '右侧运营位', 'MY_TAB_BTN_BADGE': '按钮角标',
             'PRICE_TAG': '限时标签',
-            'BANNER': '记录横幅',
+            'BANNER': '记录横幅', 'PERIOD_REPORT_BANNER': '经期今日密报模块横幅',
           },
           locationNameMap: {
             'INFO_FLOW': '信息流', 'DEFAULT': '默认', 'PRICE_SORT_DISPLAY': '价格排序与展示', 'RECORD_BANNER': '记录横幅',
+            'PERIOD_REPORT_BANNER': '经期今日密报模块横幅',
+            'MY_TAB_MEMBER_CARD_TEXT': '卡片文案',
           },
 
           planOptions: [
@@ -2132,6 +2203,11 @@
 
           conditionGroups: [],
 
+          // MY_TAB_MEMBER_CARD form
+          myTabMemberCardForm: {
+            cardText: '',
+          },
+
           // Component library
           compModalVisible: false,
           componentSearch: '',
@@ -2142,29 +2218,31 @@
           recordBannerOptions: {
             periods: ['经期周期阶段', '备孕经期周期阶段', '宝宝月龄', '孕周阶段'],
             recordItems: ['1-大姨妈来了', '100-大姨妈走了', '24-流量', '23-痛经', '39-颜色', '2-爱爱', '7-经期症状', '8-非经期症状', '13-白带'],
+            periodStageOptions: ['月经期', '卵泡期', '排卵日', '黄体期', '预测经期', '推迟期'],
+            moduleLocationOptions: ['圆环', '症状预测', '白带变化', '血量变化', '怀孕几率', '月经期知识', '经前期知识', '推迟期知识'],
             analysisByRecordItem: {
               '1-大姨妈来了': {
                 newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
                 older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
-                latest: ['【201-1-1】本周期-周期天数-正常', '【201-1-2】本周期-周期偏短-轻度偏离', '【201-1-3】本周期-周期偏长-轻度偏离', '【201-1-4】本周期-周期过短-异常', '【201-1-5】本周期-周期过长-异常', '【201-1-6】本周期-周期过短-严重异常', '【201-1-7】本周期-周期过长-严重异常', '【201-1-8】本周期-周期天数-数据不足', '【201-2-1】本周期-周期规律-正常', '【201-2-2】本周期-周期规律-轻度偏离', '【201-2-3】本周期-周期规律-中度偏离', '【201-2-4】本周期-周期不规律-异常', '【201-2-5】本周期-周期规律性-数据不足', '【202-1-1】近2个周期对比-周期天数-周期缩短', '【202-1-2】近2个周期对比-周期天数-周期稳定', '【202-1-3】近2个周期对比-周期天数-周期延长', '【203-1-1】近3个周期对比-周期天数-逐渐延长', '【203-1-2】近3个周期对比-周期天数-逐渐缩短', '【203-1-3】近3个周期对比-周期天数-忽长忽短', '【203-1-4】近3个周期对比-周期天数-周期稳定', '【203-1-5】近3个周期对比-周期天数-单次变化'],
+                latest: ['【201-1-1】本周期-周期天数-正常', '【201-1-2】本周期-周期偏短-轻度偏离', '【201-1-3】本周期-周期偏长-轻度偏离', '【201-1-4】本周期-周期过短-异常', '【201-1-5】本周期-周期过长-异常', '【201-1-6】本周期-周期过短-严重异常', '【201-1-7】本周期-周期过长-严重异常', '【201-1-8】本周期-周期天数-数据不足', '【201-2-1】本周期-周期规律-正常', '【201-2-2】本周期-周期规律-轻度偏离', '【201-2-3】本周期-周期规律-中度偏离', '【201-2-4】本周期-周期不规律-异常', '【201-2-5】本周期-周期规律性-数据不足', '【202-1-1】上周期-周期天数-周期缩短', '【202-1-2】上周期-周期天数-周期稳定', '【202-1-3】上周期-周期天数-周期延长', '【203-1-1】近3个周期对比-周期天数-逐渐延长', '【203-1-2】近3个周期对比-周期天数-逐渐缩短', '【203-1-3】近3个周期对比-周期天数-忽长忽短', '【203-1-4】近3个周期对比-周期天数-周期稳定', '【203-1-5】近3个周期对比-周期天数-单次变化'],
                 subRecords: ['状态']
               },
               '100-大姨妈走了': {
                 newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
                 older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
-                latest: ['【201-3-1】本周期-经期天数-正常', '【201-3-2】本周期-月经偏短-轻度偏离', '【201-3-3】本周期-月经偏长-轻度偏离', '【201-3-4】本周期-月经过长-异常', '【201-3-5】本周期-经期天数-数据不足', '【202-2-1】近2个周期对比-经期天数-经期缩短', '【202-2-2】近2个周期对比-经期天数-经期稳定', '【202-2-3】近2个周期对比-经期天数-经期延长', '【203-2-1】近3个周期对比-经期天数-逐渐延长', '【203-2-2】近3个周期对比-经期天数-逐渐缩短', '【203-2-3】近3个周期对比-经期天数-忽长忽短', '【203-2-4】近3个周期对比-经期天数-经期稳定', '【203-2-5】近3个周期对比-经期天数-单次变化'],
+                latest: ['【201-3-1】本周期-经期天数-正常', '【201-3-2】本周期-月经偏短-轻度偏离', '【201-3-3】本周期-月经偏长-轻度偏离', '【201-3-4】本周期-月经过长-异常', '【201-3-5】本周期-经期天数-数据不足', '【202-2-1】上周期-经期天数-经期缩短', '【202-2-2】上周期-经期天数-经期稳定', '【202-2-3】上周期-经期天数-经期延长', '【203-2-1】近3个周期对比-经期天数-逐渐延长', '【203-2-2】近3个周期对比-经期天数-逐渐缩短', '【203-2-3】近3个周期对比-经期天数-忽长忽短', '【203-2-4】近3个周期对比-经期天数-经期稳定', '【203-2-5】近3个周期对比-经期天数-单次变化'],
                 subRecords: ['状态']
               },
               '24-流量': {
                 newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
                 older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
-                latest: ['【201-4-1】本周期-流量-正常', '【201-4-2】本周期-流量偏少-中度偏离', '【201-4-3】本周期-流量过多-异常', '【201-4-4】本周期-流量过多-严重异常', '【201-4-5】本周期-经期流量-数据不足', '【202-4-1】近2个周期对比-流量-流量减少', '【202-4-2】近2个周期对比-流量-流量稳定', '【202-4-3】近2个周期对比-流量-流量增加', '【203-4-1】近3个周期对比-流量-逐渐增加', '【203-4-2】近3个周期对比-流量-逐渐减少', '【203-4-3】近3个周期对比-流量-忽多忽少', '【203-4-4】近3个周期对比-流量-流量稳定', '【203-4-5】近3个周期对比-流量-单次变化'],
+                latest: ['【201-4-1】本周期-流量-正常', '【201-4-2】本周期-流量偏少-中度偏离', '【201-4-3】本周期-流量过多-异常', '【201-4-4】本周期-流量过多-严重异常', '【201-4-5】本周期-经期流量-数据不足', '【202-4-1】上周期-流量-流量减少', '【202-4-2】上周期-流量-流量稳定', '【202-4-3】上周期-流量-流量增加', '【203-4-1】近3个周期对比-流量-逐渐增加', '【203-4-2】近3个周期对比-流量-逐渐减少', '【203-4-3】近3个周期对比-流量-忽多忽少', '【203-4-4】近3个周期对比-流量-流量稳定', '【203-4-5】近3个周期对比-流量-单次变化'],
                 subRecords: ['颜色', '血块']
               },
               '23-痛经': {
                 newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
                 older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
-                latest: ['【201-5-1】本周期-痛经-正常', '【201-5-2】本周期-痛经轻微-轻度偏离', '【201-5-3】本周期-痛经明显-中度偏离', '【201-5-4】本周期-痛经严重-异常', '【201-5-5】本周期-进行性痛经-严重异常', '【201-5-6】本周期-痛经程度-数据不足', '【202-5-1】近2个周期对比-痛经-痛经减轻', '【202-5-2】近2个周期对比-痛经-痛经稳定', '【202-5-3】近2个周期对比-痛经-痛经加重', '【203-5-1】近3个周期对比-痛经-逐渐加重', '【203-5-2】近3个周期对比-痛经-逐渐减轻', '【203-5-3】近3个周期对比-痛经-忽轻忽重', '【203-5-4】近3个周期对比-痛经-程度稳定', '【203-5-5】近3个周期对比-痛经-单次变化'],
+                latest: ['【201-5-1】本周期-痛经-正常', '【201-5-2】本周期-痛经轻微-轻度偏离', '【201-5-3】本周期-痛经明显-中度偏离', '【201-5-4】本周期-痛经严重-异常', '【201-5-5】本周期-进行性痛经-严重异常', '【201-5-6】本周期-痛经程度-数据不足', '【202-5-1】上周期-痛经-痛经减轻', '【202-5-2】上周期-痛经-痛经稳定', '【202-5-3】上周期-痛经-痛经加重', '【203-5-1】近3个周期对比-痛经-逐渐加重', '【203-5-2】近3个周期对比-痛经-逐渐减轻', '【203-5-3】近3个周期对比-痛经-忽轻忽重', '【203-5-4】近3个周期对比-痛经-程度稳定', '【203-5-5】近3个周期对比-痛经-单次变化'],
                 subRecords: ['程度']
               },
               '39-颜色': {
@@ -2182,13 +2260,13 @@
               '7-经期症状': {
                 newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
                 older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
-                latest: ['【201-6-1】本周期-经期症状-无症状-正常', '【201-6-2】本周期-经期症状-症状较轻-轻度偏离', '【201-6-3】本周期-经期症状-症状较轻-中度偏离', '【201-6-4】本周期-经期症状-症状明显-异常', '【201-6-5】本周期-经期症状-症状明显-严重异常', '【201-6-6】本周期-经期症状-症状情况-数据不足', '【202-6-1】近2个周期对比-经期症状-症状减轻', '【202-6-2】近2个周期对比-经期症状-症状稳定', '【202-6-3】近2个周期对比-经期症状-症状加重', '【203-6-1】近3个周期对比-经期症状-逐渐加重', '【203-6-2】近3个周期对比-经期症状-逐渐减轻', '【203-6-3】近3个周期对比-经期症状-忽轻忽重', '【203-6-4】近3个周期对比-经期症状-症状稳定', '【203-6-5】近3个周期对比-经期症状-单次变化'],
+                latest: ['【201-6-1】本周期-经期症状-无症状-正常', '【201-6-2】本周期-经期症状-症状较轻-轻度偏离', '【201-6-3】本周期-经期症状-症状较轻-中度偏离', '【201-6-4】本周期-经期症状-症状明显-异常', '【201-6-5】本周期-经期症状-症状明显-严重异常', '【201-6-6】本周期-经期症状-症状情况-数据不足', '【202-6-1】上周期-经期症状-症状减轻', '【202-6-2】上周期-经期症状-症状稳定', '【202-6-3】上周期-经期症状-症状加重', '【203-6-1】近3个周期对比-经期症状-逐渐加重', '【203-6-2】近3个周期对比-经期症状-逐渐减轻', '【203-6-3】近3个周期对比-经期症状-忽轻忽重', '【203-6-4】近3个周期对比-经期症状-症状稳定', '【203-6-5】近3个周期对比-经期症状-单次变化'],
                 subRecords: ['程度']
               },
               '8-非经期症状': {
                 newer: ['【101-1-2】本周期-周期偏长-异常', '【101-1-3】本周期-周期偏短-异常', '【101-1-1】本周期-周期正常', '【101-2-1】近半年-本次周期缩短-明显变化', '【101-2-3】近半年-本次周期延长-明显变化', '【101-2-4】近半年-周期连续缩短-明显变化', '【101-2-5】近半年-周期连续延长-明显变化', '【101-2-8】近半年-周期偏短偶发-异常', '【101-2-9】近半年-周期偏短频发-明显异常', '【101-2-10】近半年-周期偏长偶发-异常', '【101-2-11】近半年-周期偏长频发-明显异常', '【102-1-2】本周期-不规律-异常', '【102-2-2】近半年-不规律偶发-异常', '【102-2-3】近半年-不规律频发-明显异常'],
                 older: ['【2】本周期-周期偏长-异常', '【3】本周期-周期偏短-异常', '【1】本周期-周期正常'],
-                latest: ['【201-7-1】本周期-非经期症状-无症状-正常', '【201-7-2】本周期-非经期症状-症状较轻-轻度偏离', '【201-7-3】本周期-非经期症状-症状较轻-中度偏离', '【201-7-4】本周期-非经期症状-症状明显-异常', '【201-7-5】本周期-非经期症状-症状明显-严重异常', '【201-7-6】本周期-非经期症状-症状情况-数据不足', '【202-7-1】近2个周期对比-非经期症状-症状减轻', '【202-7-2】近2个周期对比-非经期症状-症状稳定', '【202-7-3】近2个周期对比-非经期症状-症状加重', '【203-7-1】近3个周期对比-非经期症状-逐渐加重', '【203-7-2】近3个周期对比-非经期症状-逐渐减轻', '【203-7-3】近3个周期对比-非经期症状-忽轻忽重', '【203-7-4】近3个周期对比-非经期症状-症状稳定', '【203-7-5】近3个周期对比-非经期症状-单次变化'],
+                latest: ['【201-7-1】本周期-非经期症状-无症状-正常', '【201-7-2】本周期-非经期症状-症状较轻-轻度偏离', '【201-7-3】本周期-非经期症状-症状较轻-中度偏离', '【201-7-4】本周期-非经期症状-症状明显-异常', '【201-7-5】本周期-非经期症状-症状明显-严重异常', '【201-7-6】本周期-非经期症状-症状情况-数据不足', '【202-7-1】上周期-非经期症状-症状减轻', '【202-7-2】上周期-非经期症状-症状稳定', '【202-7-3】上周期-非经期症状-症状加重', '【203-7-1】近3个周期对比-非经期症状-逐渐加重', '【203-7-2】近3个周期对比-非经期症状-逐渐减轻', '【203-7-3】近3个周期对比-非经期症状-忽轻忽重', '【203-7-4】近3个周期对比-非经期症状-症状稳定', '【203-7-5】近3个周期对比-非经期症状-单次变化'],
                 subRecords: ['程度']
               },
               '13-白带': {
@@ -2208,21 +2286,25 @@
               id: 1,
               typeMode: 'period',
               period: '',
+              periodStages: [],
               recordItem: '',
               analysisResultNew: '',
               analysisResultOld: '',
               analysisResultLatest: [],
               analysisResultLatestSearch: '',
+              analysisResultBelow909: '',
               subRecordItem: '',
               materialOptions: [
                 { id: 1, materialId: '', materialOpen: false, title: '', subtitle: '', bannerImage: '', jumpTarget: '', jumpTargetOpen: false }
               ],
               activeMaterialOptionIndex: 0,
               periodOpen: false,
+              periodStagesOpen: false,
               recordItemOpen: false,
               analysisResultNewOpen: false,
               analysisResultOldOpen: false,
               analysisResultLatestOpen: false,
+              analysisResultBelow909Open: false,
               subRecordItemOpen: false,
               expireDays: '',
             }
@@ -2370,9 +2452,22 @@
             && this.form.locationKey === 'PRICE_SORT_DISPLAY';
         },
         isRecordBannerPath() {
-          return this.form.pageKey === 'RECORD'
+          return (this.form.pageKey === 'RECORD'
             && this.form.moduleKey === 'BANNER'
-            && this.form.locationKey === 'RECORD_BANNER';
+            && this.form.locationKey === 'RECORD_BANNER')
+            || (this.form.pageKey === 'PERIOD_REPORT'
+            && this.form.moduleKey === 'PERIOD_REPORT_BANNER'
+            && this.form.locationKey === 'PERIOD_REPORT_BANNER');
+        },
+        isPeriodReportPath() {
+          return this.form.pageKey === 'PERIOD_REPORT'
+            && this.form.moduleKey === 'PERIOD_REPORT_BANNER'
+            && this.form.locationKey === 'PERIOD_REPORT_BANNER';
+        },
+        isMyTabMemberCardPath() {
+          return this.form.pageKey === 'MY_TAB'
+            && this.form.moduleKey === 'MY_TAB_MEMBER_CARD'
+            && this.form.locationKey === 'MY_TAB_MEMBER_CARD_TEXT';
         },
         fixedPriceCardComponent() {
           if (!this.isFixedPriceCardPath) return null;
@@ -2390,12 +2485,33 @@
         recordBannerAnalysisOptionsOld() {
           return this.recordBannerConfig ? this.recordBannerConfig.older : [];
         },
+        recordBannerAnalysisOptionsBelow909() {
+          // 合并 newer 和 older 作为 9.09.0 以下版本的选项
+          if (this.isPeriodReportPath) {
+            // PERIOD_REPORT 路径：收集所有记录项的 newer 和 older 选项去重
+            const allOptions = new Set();
+            Object.values(this.recordBannerOptions.analysisByRecordItem).forEach(config => {
+              (config.newer || []).forEach(item => allOptions.add(item));
+              (config.older || []).forEach(item => allOptions.add(item));
+            });
+            return Array.from(allOptions);
+          }
+          if (!this.recordBannerConfig) return [];
+          const combined = [...(this.recordBannerConfig.newer || []), ...(this.recordBannerConfig.older || [])];
+          return [...new Set(combined)];
+        },
+        periodStageOptions() {
+          return this.recordBannerOptions.periodStageOptions || [];
+        },
+        moduleLocationOptions() {
+          return this.recordBannerOptions.moduleLocationOptions || [];
+        },
         recordBannerAnalysisOptionsLatest() {
           return (this.recordBannerConfig ? this.recordBannerConfig.latest : []);
         },
         filteredRecordBannerAnalysisOptionsLatest() {
           const search = (this.recordBannerForm.analysisResultLatestSearch || '').trim().toLowerCase();
-          const periodMap = { 201: '本周期', 202: '近2个周期对比', 203: '近3个周期对比' };
+          const periodMap = { 201: '本周期', 202: '上周期', 203: '近3个周期对比' };
           const categoryMap = { 1: '周期天数', 2: '周期规律性', 3: '经期天数', 4: '流量', 5: '痛经', 6: '经期症状', 7: '非经期症状' };
           const groups = new Map();
           this.recordBannerAnalysisOptionsLatest.forEach(item => {
@@ -2441,8 +2557,15 @@
           } else {
             tags.push('月经第x天');
           }
-          if (this.recordBannerForm.recordItem) tags.push(this.recordBannerForm.recordItem);
-          if (this.recordBannerForm.analysisResultNew) tags.push(this.recordBannerForm.analysisResultNew);
+          if (this.isPeriodReportPath) {
+            if (this.recordBannerForm.periodStages && this.recordBannerForm.periodStages.length > 0) {
+              tags.push(this.recordBannerForm.periodStages.join(', '));
+            }
+            if (this.recordBannerForm.subRecordItem) tags.push(this.recordBannerForm.subRecordItem);
+          } else {
+            if (this.recordBannerForm.recordItem) tags.push(this.recordBannerForm.recordItem);
+            if (this.recordBannerForm.analysisResultNew) tags.push(this.recordBannerForm.analysisResultNew);
+          }
           return tags.join(' · ') || '记录横幅';
         },
         useRightSideGlobalPreview() {
@@ -2488,7 +2611,15 @@
         const pageKey = params.get('page_keys');
         const moduleKey = params.get('module_key');
         const locationKey = params.get('location_key');
-        if (pageKey) this.form.pageKey = pageKey;
+        if (pageKey) {
+          this.form.pageKey = pageKey;
+          // Auto-fill module and location from PAGE_MODULE_OPTIONS if not provided
+          const config = PAGE_MODULE_OPTIONS[pageKey];
+          if (config) {
+            if (!moduleKey) this.form.moduleKey = config.modules[0]?.key || '';
+            if (!locationKey) this.form.locationKey = config.locations[0]?.key || '';
+          }
+        }
         if (moduleKey) this.form.moduleKey = moduleKey;
         if (locationKey) this.form.locationKey = locationKey;
         this.initializePlacementContent();
@@ -2520,6 +2651,10 @@
           }
         },
         ensureRecordBannerDefaults() {
+          // PERIOD_REPORT 路径下，时期字段默认值为"经期周期阶段"
+          if (this.isPeriodReportPath && !this.recordBannerForm.period) {
+            this.recordBannerForm.period = '经期周期阶段';
+          }
         },
         syncRecordBannerDependentOptions() {
           if (!this.recordBannerAnalysisOptionsNew.includes(this.recordBannerForm.analysisResultNew)) {
@@ -2528,10 +2663,13 @@
           if (!this.recordBannerAnalysisOptionsOld.includes(this.recordBannerForm.analysisResultOld)) {
             this.recordBannerForm.analysisResultOld = '';
           }
+          if (!this.recordBannerAnalysisOptionsBelow909.includes(this.recordBannerForm.analysisResultBelow909)) {
+            this.recordBannerForm.analysisResultBelow909 = '';
+          }
           this.recordBannerForm.analysisResultLatest = this.recordBannerForm.analysisResultLatest.filter(
             item => this.recordBannerAnalysisOptionsLatest.includes(item)
           );
-          if (!this.recordBannerSubRecordOptions.includes(this.recordBannerForm.subRecordItem)) {
+          if (!this.isPeriodReportPath && !this.recordBannerSubRecordOptions.includes(this.recordBannerForm.subRecordItem)) {
             this.recordBannerForm.subRecordItem = '';
           }
           if (!this.activeMaterialOption.bannerImage) {
@@ -2545,14 +2683,14 @@
         addContentGroup() {
           const newGroup = {
             id: Math.max(0, ...this.recordBannerContentGroups.map(g => g.id)) + 1,
-            typeMode: 'period', period: '', recordItem: '', analysisResultNew: '', analysisResultOld: '',
-            analysisResultLatest: [], analysisResultLatestSearch: '', subRecordItem: '',
+            typeMode: 'period', period: '', periodStages: [], recordItem: '', analysisResultNew: '', analysisResultOld: '',
+            analysisResultLatest: [], analysisResultLatestSearch: '', analysisResultBelow909: '', subRecordItem: '',
             materialOptions: [
               { id: 1, materialId: '', materialOpen: false, title: '', subtitle: '', bannerImage: '', jumpTarget: '', jumpTargetOpen: false }
             ],
             activeMaterialOptionIndex: 0,
-            periodOpen: false, recordItemOpen: false,
-            analysisResultNewOpen: false, analysisResultOldOpen: false, analysisResultLatestOpen: false,
+            periodOpen: false, periodStagesOpen: false, recordItemOpen: false,
+            analysisResultNewOpen: false, analysisResultOldOpen: false, analysisResultLatestOpen: false, analysisResultBelow909Open: false,
             subRecordItemOpen: false,
             expireDays: '',
           };
@@ -2644,10 +2782,21 @@
         removeLatestTag(idx) {
           this.recordBannerForm.analysisResultLatest.splice(idx, 1);
         },
+        togglePeriodStageOption(item) {
+          const idx = this.recordBannerForm.periodStages.indexOf(item);
+          if (idx >= 0) {
+            this.recordBannerForm.periodStages.splice(idx, 1);
+          } else {
+            this.recordBannerForm.periodStages.push(item);
+          }
+        },
+        removePeriodStageTag(idx) {
+          this.recordBannerForm.periodStages.splice(idx, 1);
+        },
         toggleRecordBannerSelect(field, disabled = false) {
           if (disabled) return;
           const openKey = `${field}Open`;
-          ['periodOpen', 'recordItemOpen', 'analysisResultNewOpen', 'analysisResultOldOpen', 'analysisResultLatestOpen', 'subRecordItemOpen'].forEach(key => {
+          ['periodOpen', 'periodStagesOpen', 'recordItemOpen', 'analysisResultNewOpen', 'analysisResultOldOpen', 'analysisResultLatestOpen', 'analysisResultBelow909Open', 'subRecordItemOpen'].forEach(key => {
             this.recordBannerForm[key] = key === openKey ? !this.recordBannerForm[key] : false;
           });
         },
