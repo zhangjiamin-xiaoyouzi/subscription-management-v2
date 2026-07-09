@@ -457,6 +457,81 @@
       }
     }
 
+    /* MY_TAB_MEMBER_CARD Conditions */
+    .mytab-conditions {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .mytab-condition-row {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .mytab-select {
+      height: 32px; padding: 0 12px; font-size: 13px; color: rgba(0,0,0,.85);
+      border: 1px solid #d9d9d9; border-radius: 2px; background: #fff;
+      min-width: 180px; cursor: pointer; transition: all .2s;
+    }
+    .mytab-select:hover { border-color: #ff4d88; }
+    .mytab-select:focus { outline: none; border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .mytab-range-sep { color: rgba(0,0,0,.45); font-size: 13px; }
+    .mytab-range-label { color: rgba(0,0,0,.65); font-size: 13px; white-space: nowrap; }
+    .mytab-operator-select {
+      height: 32px; padding: 0 12px; font-size: 13px; color: rgba(0,0,0,.85);
+      border: 1px solid #d9d9d9; border-radius: 2px; background: #fff;
+      min-width: 100px; cursor: pointer; transition: all .2s;
+    }
+    .mytab-operator-select:hover { border-color: #ff4d88; }
+    .mytab-operator-select:focus { outline: none; border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .mytab-single-input { width: 100px; }
+    .mytab-range-input {
+      width: 80px; height: 32px; padding: 0 8px; font-size: 13px; color: rgba(0,0,0,.85);
+      border: 1px solid #d9d9d9; border-radius: 2px; background: #fff; text-align: center;
+      transition: all .2s;
+    }
+    .mytab-range-input:hover { border-color: #ff4d88; }
+    .mytab-range-input:focus { outline: none; border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .mytab-cond-remove {
+      width: 28px; height: 28px; border: 1px solid #d9d9d9; border-radius: 2px; background: #fff;
+      cursor: pointer; font-size: 16px; color: rgba(0,0,0,.45); display: flex; align-items: center;
+      justify-content: center; transition: all .2s; flex-shrink: 0;
+    }
+    .mytab-cond-remove:hover { border-color: #ff4d4f; color: #ff4d4f; }
+    .mytab-cond-remove:disabled { opacity: .35; cursor: not-allowed; }
+    .mytab-add-cond {
+      align-self: flex-start; height: 28px; padding: 0 12px; font-size: 12px; color: #ff4d88;
+      background: #fff; border: 1px dashed #ff4d88; border-radius: 2px; cursor: pointer;
+      transition: all .2s;
+    }
+    .mytab-add-cond:hover { background: #fff0f6; }
+
+    /* Toggle Switch */
+    .mytab-toggle {
+      display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
+    }
+    .mytab-toggle input[type="checkbox"] { display: none; }
+    .mytab-toggle-slider {
+      width: 40px; height: 22px; background: #d9d9d9; border-radius: 11px;
+      position: relative; transition: all .2s; flex-shrink: 0;
+    }
+    .mytab-toggle-slider::after {
+      content: ''; position: absolute; width: 18px; height: 18px;
+      background: #fff; border-radius: 50%; top: 2px; left: 2px;
+      transition: all .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .mytab-toggle input:checked + .mytab-toggle-slider { background: #ff4d88; }
+    .mytab-toggle input:checked + .mytab-toggle-slider::after { left: 20px; }
+    .mytab-toggle-text { font-size: 13px; color: rgba(0,0,0,.65); }
+
+    /* Variable List */
+    .mytab-var-list {
+      margin-top: 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+    .mytab-var-label { font-size: 12px; color: rgba(0,0,0,.45); }
+    .mytab-var-item {
+      display: inline-block; padding: 2px 8px; font-size: 12px; color: #ff4d88;
+      background: #fff0f6; border: 1px solid #ffb3cc; border-radius: 2px;
+      cursor: pointer; transition: all .2s;
+    }
+    .mytab-var-item:hover { background: #ff4d88; color: #fff; }
+
     /* Condition Group */
     .condition-group {
       background: #fafafa; border: 1px solid #f0f0f0; border-radius: 2px;
@@ -470,9 +545,17 @@
       padding: 1px 8px; font-size: 12px; color: #ff4d88; background: #fff0f6;
       border-radius: 2px; border: 1px solid #ffb3cc; font-weight: 500;
     }
+    .logic-switcher { display: inline-flex; align-items: center; gap: 0; border-radius: 4px; overflow: hidden; border: 1px solid #ffb3cc; }
+    .logic-btn { padding: 4px 12px; font-size: 12px; font-weight: 500; border: none; background: #fff; color: #666; cursor: pointer; transition: all .15s; }
+    .logic-btn.active { background: #ff4d88; color: #fff; }
+    .logic-btn:hover:not(.active) { background: #fff0f6; color: #ff4d88; }
     .condition-row {
       display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
     }
+    .condition-row .select-wrap.field { width: 168px; }
+    .condition-row .select-wrap.operator { width: 110px; }
+    .condition-row .value-area { flex: 1; min-width: 120px; }
+    .group-logic-divider { display: flex; align-items: center; justify-content: center; margin: -4px 0; position: relative; z-index: 1; }
     .condition-row .select-wrap.field { width: 168px; }
     .condition-row .select-wrap.operator { width: 110px; }
     .condition-row .value-area { flex: 1; min-width: 120px; }
@@ -935,7 +1018,7 @@
             <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
-            <a class="sider-menu-item" href="javascript:;">弹窗</a>
+            <a class="sider-menu-item" href="/popup-list.html">弹窗</a>
             <a class="sider-menu-item" href="javascript:;">兑换码</a>
             <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift-strategy/list')">赠礼发放策略</a>
             <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')">限时促销策略</a>
@@ -1076,96 +1159,35 @@
             <div class="form-row">
               <span class="form-label">用户条件 :</span>
               <div class="form-control" style="max-width: 700px;">
-                <div v-for="(group, gi) in conditionGroups" :key="group.id" class="condition-group">
-                  <div class="condition-group-header">
-                    <span class="condition-logic">且</span>
-                  </div>
-                  <div v-for="(cond, ci) in group.conditions" :key="cond.id" class="condition-row">
-                    <!-- Field dropdown -->
-                    <div class="select-wrap field" :class="{ open: cond.fieldOpen }" v-click-outside="() => cond.fieldOpen = false">
-                      <div class="select-trigger" :class="{ open: cond.fieldOpen }" @click="cond.fieldOpen = !cond.fieldOpen">
-                        <span v-if="!cond.field" class="placeholder">请选择</span>
-                        <span v-else>{{ getFieldLabel(cond.field) }}</span>
-                      </div>
-                      <span class="select-arrow">▾</span>
-                      <div class="select-dropdown" v-show="cond.fieldOpen">
-                        <div class="select-option"
-                             v-for="opt in fieldOptions" :key="opt.value"
-                             :class="{ selected: cond.field === opt.value }"
-                             @click.stop="onFieldChange(cond, opt.value)">
-                          {{ opt.label }}
-                        </div>
-                      </div>
-                    </div>
-                    <!-- Operator dropdown -->
-                    <div class="select-wrap operator" :class="{ open: cond.opOpen }" v-click-outside="() => cond.opOpen = false">
-                      <div class="select-trigger" :class="{ open: cond.opOpen }" @click="cond.opOpen = !cond.opOpen">
-                        <span v-if="!cond.operator" class="placeholder">请选择</span>
-                        <span v-else>{{ getOperatorLabel(cond.operator) }}</span>
-                      </div>
-                      <span class="select-arrow">▾</span>
-                      <div class="select-dropdown" v-show="cond.opOpen">
-                        <div class="select-option"
-                             v-for="op in getOperatorsForField(cond.field)" :key="op"
-                             :class="{ selected: cond.operator === op }"
-                             @click.stop="cond.operator = op; cond.opOpen = false">
-                          {{ getOperatorLabel(op) }}
-                        </div>
-                      </div>
-                    </div>
-                    <!-- Value -->
-                    <div class="value-area">
-                      <!-- Multi-select value -->
-                      <div v-if="cond.field && isMultiValueField(cond.field)" class="multi-select-tags" :class="{ open: cond.valueOpen }" @click="cond.valueOpen = !cond.valueOpen">
-                        <span v-for="(v, vi) in cond.valueArr" :key="vi" class="tag-item">
-                          {{ v }}
-                          <span class="tag-close" @click.stop="removeMultiValue(cond, vi)">✕</span>
-                        </span>
-                        <input class="search-input" :placeholder="cond.valueArr.length === 0 ? '请选择' : ''"
-                               v-model="cond.searchText" @keydown.enter.prevent="addMultiValue(cond)" />
-                        <div class="select-dropdown" v-show="cond.valueOpen"
-                             v-click-outside="() => cond.valueOpen = false">
-                          <div class="select-option"
-                               v-for="vo in getValueOptionsForField(cond.field)" :key="vo"
-                               :class="{ selected: cond.valueArr.includes(vo) }"
-                               @click.stop="toggleMultiValue(cond, vo)">
-                            {{ vo }}
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Text value -->
-                      <input v-else-if="cond.field && isTextValueField(cond.field)" class="input-field"
-                             type="text" v-model="cond.textValue" placeholder="请输入" />
-                      <!-- Number value -->
-                      <div v-else-if="cond.field && isNumberValueField(cond.field)" class="spinbutton-wrap">
-                        <span class="spin-btn" @click="cond.numValue = Math.max(0, (cond.numValue||0) - 1)">−</span>
-                        <input class="spin-input" type="text" v-model.number="cond.numValue" @input="cond.numValue = parseInt(cond.numValue)||0" />
-                        <span class="spin-btn" @click="cond.numValue = (cond.numValue||0) + 1">＋</span>
-                      </div>
-                      <!-- Date range -->
-                      <div v-else-if="cond.field && isDateRangeField(cond.field)" class="date-range-wrap">
-                        <input class="date-input" type="text" v-model="cond.dateStart" placeholder="开始时间" />
-                        <span class="date-sep">至</span>
-                        <input class="date-input" type="text" v-model="cond.dateEnd" placeholder="结束时间" />
-                        <span class="date-range-clear" @click="cond.dateStart=''; cond.dateEnd=''" v-if="cond.dateStart || cond.dateEnd">✕</span>
-                      </div>
-                    </div>
-                    <!-- Action buttons -->
-                    <button class="cond-icon-btn" title="切换条件" @click="toggleCondition(cond)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-                    </button>
-                    <button class="cond-icon-btn" title="添加条件" @click="addConditionToGroup(group)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    </button>
-                    <button class="cond-icon-btn" title="删除条件" @click="removeConditionFromGroup(group, ci)" v-if="group.conditions.length > 1">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    </button>
-                  </div>
-                  <button class="clear-data-btn" @click="removeConditionGroup(gi)" v-if="conditionGroups.length > 1">清除数据</button>
-                </div>
-                <button class="btn-add-condition" style="margin-top:8px;" @click="addConditionGroup">
-                  <span style="font-size:14px;">＋</span> 添加条件组
-                </button>
+                <user-conditions
+                  v-model="conditionGroups"
+                  mode="advanced"
+                  :create-group="createConditionGroupItem"
+                  :create-condition="createConditionItem"
+                  group-key-field="id"
+                  condition-key-field="id"
+                  group-remove-button-class="clear-data-btn"
+                  group-remove-label="清除数据"
+                  group-remove-mode="hide"
+                  :show-group-footer-add="false"
+                  add-group-button-class="btn-add-condition"
+                  add-group-text="＋ 添加条件组"
+                  :show-condition-toggle-button="true"
+                  :field-options="fieldOptions"
+                  :get-field-label="getFieldLabel"
+                  :get-operator-label="getOperatorLabel"
+                  :get-operators-for-field="getOperatorsForField"
+                  :get-value-options-for-field="getValueOptionsForField"
+                  :is-multi-value-field="isMultiValueField"
+                  :is-text-value-field="isTextValueField"
+                  :is-number-value-field="isNumberValueField"
+                  :is-date-range-field="isDateRangeField"
+                  :on-field-change="onFieldChange"
+                  :on-add-multi-value="addMultiValue"
+                  :on-remove-multi-value="removeMultiValue"
+                  :on-toggle-multi-value="toggleMultiValue"
+                  :on-toggle-condition="toggleCondition"
+                />
               </div>
             </div>
           </div>
@@ -1352,9 +1374,9 @@
 
                   <div class="record-banner-field full">
                     <div class="record-banner-label">分析结果(9.09.0及以上版本配置):</div>
-                    <div class="record-banner-control" :class="{ disabled: !recordBannerForm.recordItem }">
-                      <div class="record-banner-select record-banner-multi-select" :class="{ 'is-disabled': !recordBannerForm.recordItem }" v-click-outside="() => closeRecordBannerSelect('analysisResultLatest')">
-                        <div class="multi-select-tags" :class="{ open: recordBannerForm.analysisResultLatestOpen, disabled: !recordBannerForm.recordItem }" @click="toggleRecordBannerSelect('analysisResultLatest', !recordBannerForm.recordItem)">
+                    <div class="record-banner-control" :class="{ disabled: !isPeriodReportPath && !recordBannerForm.recordItem }">
+                      <div class="record-banner-select record-banner-multi-select" :class="{ 'is-disabled': !isPeriodReportPath && !recordBannerForm.recordItem }" v-click-outside="() => closeRecordBannerSelect('analysisResultLatest')">
+                        <div class="multi-select-tags" :class="{ open: recordBannerForm.analysisResultLatestOpen, disabled: !isPeriodReportPath && !recordBannerForm.recordItem }" @click="toggleRecordBannerSelect('analysisResultLatest', !isPeriodReportPath && !recordBannerForm.recordItem)">
                           <span class="tag-item" v-for="(item, idx) in recordBannerForm.analysisResultLatest" :key="item">
                             {{ item }}
                             <span class="tag-close" @click.stop="removeLatestTag(idx)">×</span>
@@ -1362,7 +1384,7 @@
                           <span v-if="recordBannerForm.analysisResultLatest.length === 0" class="placeholder-text">请选择</span>
                         </div>
                         <span class="select-arrow">▾</span>
-                        <div class="select-dropdown select-dropdown-grouped" v-show="recordBannerForm.analysisResultLatestOpen && recordBannerForm.recordItem">
+                        <div class="select-dropdown select-dropdown-grouped" v-show="recordBannerForm.analysisResultLatestOpen && (isPeriodReportPath || recordBannerForm.recordItem)">
                           <div class="select-search-box" @click.stop>
                             <input class="select-search-input" v-model="recordBannerForm.analysisResultLatestSearch" placeholder="搜索分析结果..." />
                             <span v-if="recordBannerForm.analysisResultLatestSearch" class="search-clear" @click.stop="recordBannerForm.analysisResultLatestSearch = ''">×</span>
@@ -1586,18 +1608,135 @@
               </div>
             </div>
 
-            <!-- MY_TAB_MEMBER_CARD: 仅文案字段 -->
+            <!-- MY_TAB_MEMBER_CARD: 多组条件+文案 -->
             <div class="record-banner-panel" v-else-if="isMyTabMemberCardPath">
+              <!-- 条件组合开关 -->
+              <div class="record-banner-field full" style="margin-bottom: 16px;">
+                <div class="record-banner-label">条件组合:</div>
+                <div class="record-banner-control">
+                  <label class="mytab-toggle">
+                    <input type="checkbox" v-model="myTabMemberCardForm.enableConditions" @change="onMyTabToggleConditions" />
+                    <span class="mytab-toggle-slider"></span>
+                    <span class="mytab-toggle-text">{{ myTabMemberCardForm.enableConditions ? '已启用条件组合' : '未启用条件组合' }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <template v-if="myTabMemberCardForm.enableConditions">
               <div class="record-banner-form">
                 <div class="record-banner-grid">
+                  <!-- 条件组合区 -->
                   <div class="record-banner-field full">
-                    <div class="record-banner-label required">文案:</div>
+                    <div class="record-banner-label">条件配置:</div>
                     <div class="record-banner-control">
-                      <input class="input-field" type="text" v-model="myTabMemberCardForm.cardText" placeholder="请输入卡片文案，≤50字" maxlength="50" />
+                      <div class="mytab-conditions">
+                        <div class="mytab-condition-row" v-for="(cond, ci) in activeMyTabGroup.conditions" :key="ci">
+                          <select class="mytab-select" v-model="cond.type" @change="onMyTabCondTypeChange(ci)">
+                            <option value="currentHealthScore">本周期健康度分数</option>
+                            <option value="lastHealthScore">上周期健康度分数</option>
+                            <option value="currentAbnormalCount">本周期异常指标数</option>
+                            <option value="lastAbnormalCount">上周期异常指标数</option>
+                          </select>
+                          <select class="mytab-operator-select" v-model="cond.operator" @change="onMyTabOperatorChange(ci)">
+                            <option value="between">介于</option>
+                            <option value="gte">大于等于</option>
+                            <option value="gt">大于</option>
+                            <option value="lte">小于等于</option>
+                            <option value="lt">小于</option>
+                            <option value="eq">等于</option>
+                          </select>
+                          <template v-if="cond.operator === 'between'">
+                            <input class="mytab-range-input" type="number" v-model.number="cond.min" :min="getMyTabCondMin(cond.type)" :max="getMyTabCondMax(cond.type)" placeholder="数值1" />
+                            <span class="mytab-range-sep">~</span>
+                            <input class="mytab-range-input" type="number" v-model.number="cond.max" :min="getMyTabCondMin(cond.type)" :max="getMyTabCondMax(cond.type)" placeholder="数值2" />
+                          </template>
+                          <template v-else>
+                            <input class="mytab-range-input mytab-single-input" type="number" v-model.number="cond.value" :min="getMyTabCondMin(cond.type)" :max="getMyTabCondMax(cond.type)" placeholder="数值" />
+                          </template>
+                          <button class="mytab-cond-remove" type="button" @click="removeMyTabCondition(ci)" :disabled="activeMyTabGroup.conditions.length <= 1" title="删除条件">×</button>
+                        </div>
+                        <button class="mytab-add-cond" type="button" @click="addMyTabCondition">＋ 添加条件</button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- 文案配置 -->
+                  <div class="record-banner-field full">
+                    <div class="record-banner-label required">卡片文案:</div>
+                    <div class="record-banner-control">
+                      <input class="input-field" type="text" v-model="activeMyTabGroup.cardText" placeholder="≤50字，支持填入$触发变量标识列表，例如填写'{PRICE/月}'展示用户实际月卡价格" maxlength="50" />
+                      <div class="form-hint">当前组文案将展示给满足上述条件的用户</div>
+                      <div class="mytab-var-list">
+                        <span class="mytab-var-label">可用变量：</span>
+                        <span class="mytab-var-item" @click="insertMyTabVar('{PRICE/月}')">{PRICE/月}</span>
+                        <span class="mytab-var-item" @click="insertMyTabVar('{PRICE/季}')">{PRICE/季}</span>
+                        <span class="mytab-var-item" @click="insertMyTabVar('{PRICE/年}')">{PRICE/年}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+              <!-- 内容组目录 -->
+              <div class="record-banner-directory">
+                <div class="directory-header">
+                  <span class="directory-title">文案组目录</span>
+                  <button class="btn-dir-add" type="button" @click="addMyTabGroup">＋ 添加条件组</button>
+                </div>
+                <div class="directory-list">
+                  <div
+                    v-for="(group, gi) in myTabMemberCardForm.contentGroups"
+                    :key="group.id"
+                    class="directory-item"
+                    :class="{ active: gi === myTabMemberCardForm.activeContentGroupIndex }"
+                    @click="selectMyTabGroup(gi)"
+                  >
+                    <div class="directory-item-header">
+                      <span class="directory-item-num">{{ gi === 0 ? '默认组' : '第' + gi + '组' }}</span>
+                      <span class="directory-item-badge" v-if="gi === myTabMemberCardForm.activeContentGroupIndex">当前编辑</span>
+                      <div class="directory-item-actions" @click.stop>
+                        <button class="btn-dir-action" type="button" title="复制" @click="copyMyTabGroup(gi)" v-if="gi > 0">📋</button>
+                        <button class="btn-dir-action" type="button" title="删除" @click="deleteMyTabGroup(gi)" :disabled="myTabMemberCardForm.contentGroups.length <= 1 || gi === 0">🗑</button>
+                      </div>
+                    </div>
+                    <div class="directory-item-body">
+                      <template v-if="group.conditions.length > 0">
+                        <div class="dir-info" v-for="(cond, ci) in group.conditions" :key="ci">
+                          <span class="dir-label">{{ getMyTabCondLabel(cond.type) }}</span>
+                          <span class="dir-value">{{ formatMyTabCondValue(cond) }}</span>
+                        </div>
+                      </template>
+                      <div class="dir-info" v-else>
+                        <span class="dir-label">默认文案</span>
+                        <span class="dir-value">对所有用户展示</span>
+                      </div>
+                      <div class="dir-info">
+                        <span class="dir-label">文案</span>
+                        <span class="dir-value">{{ group.cardText ? group.cardText.substring(0, 20) + (group.cardText.length > 20 ? '...' : '') : '未设置' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              </template>
+
+              <template v-else>
+              <!-- 未启用条件组合：单组文案 -->
+              <div class="record-banner-form">
+                <div class="record-banner-grid">
+                  <div class="record-banner-field full">
+                    <div class="record-banner-label required">卡片文案:</div>
+                    <div class="record-banner-control">
+                      <input class="input-field" type="text" v-model="myTabMemberCardForm.contentGroups[0].cardText" placeholder="≤50字，支持填入$触发变量标识列表，例如填写'{PRICE/月}'展示用户实际月卡价格" maxlength="50" />
+                    </div>
+                    <div class="mytab-var-list">
+                      <span class="mytab-var-label">可用变量：</span>
+                      <span class="mytab-var-item" @click="insertMyTabVar('{PRICE/月}')">{PRICE/月}</span>
+                      <span class="mytab-var-item" @click="insertMyTabVar('{PRICE/季}')">{PRICE/季}</span>
+                      <span class="mytab-var-item" @click="insertMyTabVar('{PRICE/年}')">{PRICE/年}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              </template>
             </div>
 
             <template v-if="!isRecordBannerPath && !isFixedPriceCardPath && !isMyTabMemberCardPath">
@@ -2032,6 +2171,7 @@
   </div>
 
   <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script src="user-conditions-component.js"></script>
   <script>
     const { createApp, ref, reactive, nextTick } = Vue;
 
@@ -2205,7 +2345,15 @@
 
           // MY_TAB_MEMBER_CARD form
           myTabMemberCardForm: {
-            cardText: '',
+            enableConditions: false,
+            contentGroups: [
+              {
+                id: 1,
+                conditions: [],
+                cardText: '',
+              }
+            ],
+            activeContentGroupIndex: 0,
           },
 
           // Component library
@@ -2469,6 +2617,9 @@
             && this.form.moduleKey === 'MY_TAB_MEMBER_CARD'
             && this.form.locationKey === 'MY_TAB_MEMBER_CARD_TEXT';
         },
+        activeMyTabGroup() {
+          return this.myTabMemberCardForm.contentGroups[this.myTabMemberCardForm.activeContentGroupIndex] || this.myTabMemberCardForm.contentGroups[0];
+        },
         fixedPriceCardComponent() {
           if (!this.isFixedPriceCardPath) return null;
           return this.selectedComponents.find(comp => comp.key === 'price_card_display') || null;
@@ -2507,6 +2658,14 @@
           return this.recordBannerOptions.moduleLocationOptions || [];
         },
         recordBannerAnalysisOptionsLatest() {
+          if (this.isPeriodReportPath) {
+            // PERIOD_REPORT 路径：收集所有记录项的 latest 选项去重
+            const allOptions = new Set();
+            Object.values(this.recordBannerOptions.analysisByRecordItem).forEach(config => {
+              (config.latest || []).forEach(item => allOptions.add(item));
+            });
+            return Array.from(allOptions);
+          }
           return (this.recordBannerConfig ? this.recordBannerConfig.latest : []);
         },
         filteredRecordBannerAnalysisOptionsLatest() {
@@ -2622,6 +2781,9 @@
         }
         if (moduleKey) this.form.moduleKey = moduleKey;
         if (locationKey) this.form.locationKey = locationKey;
+        if (this.conditionGroups.length === 0) {
+          this.conditionGroups = [this.createConditionGroupItem()];
+        }
         this.initializePlacementContent();
       },
 
@@ -2721,6 +2883,118 @@
         selectContentGroup(gi) {
           this.activeContentGroupIndex = gi;
         },
+
+        // MY_TAB_MEMBER_CARD methods
+        addMyTabGroup() {
+          const newGroup = {
+            id: Math.max(0, ...this.myTabMemberCardForm.contentGroups.map(g => g.id)) + 1,
+            conditions: [
+              { type: 'currentHealthScore', operator: 'between', min: null, max: null, value: null },
+            ],
+            cardText: '',
+          };
+          this.myTabMemberCardForm.contentGroups.push(newGroup);
+          this.myTabMemberCardForm.activeContentGroupIndex = this.myTabMemberCardForm.contentGroups.length - 1;
+        },
+        copyMyTabGroup(gi) {
+          const src = this.myTabMemberCardForm.contentGroups[gi];
+          const newGroup = JSON.parse(JSON.stringify(src));
+          newGroup.id = Math.max(0, ...this.myTabMemberCardForm.contentGroups.map(g => g.id)) + 1;
+          this.myTabMemberCardForm.contentGroups.splice(gi + 1, 0, newGroup);
+          this.myTabMemberCardForm.activeContentGroupIndex = gi + 1;
+        },
+        deleteMyTabGroup(gi) {
+          if (this.myTabMemberCardForm.contentGroups.length <= 1 || gi === 0) return;
+          this.myTabMemberCardForm.contentGroups.splice(gi, 1);
+          if (this.myTabMemberCardForm.activeContentGroupIndex >= this.myTabMemberCardForm.contentGroups.length) {
+            this.myTabMemberCardForm.activeContentGroupIndex = this.myTabMemberCardForm.contentGroups.length - 1;
+          }
+        },
+        selectMyTabGroup(gi) {
+          this.myTabMemberCardForm.activeContentGroupIndex = gi;
+        },
+        onMyTabToggleConditions() {
+          if (this.myTabMemberCardForm.enableConditions) {
+            // 启用条件组合：给默认组添加一个空条件
+            if (this.myTabMemberCardForm.contentGroups[0].conditions.length === 0) {
+              this.myTabMemberCardForm.contentGroups[0].conditions.push({
+                type: 'currentHealthScore',
+                operator: 'between',
+                min: null,
+                max: null,
+                value: null
+              });
+            }
+          } else {
+            // 关闭条件组合：清空所有条件，只保留默认组
+            this.myTabMemberCardForm.contentGroups = [
+              {
+                id: 1,
+                conditions: [],
+                cardText: this.myTabMemberCardForm.contentGroups[0]?.cardText || '',
+              }
+            ];
+            this.myTabMemberCardForm.activeContentGroupIndex = 0;
+          }
+        },
+        addMyTabCondition() {
+          this.activeMyTabGroup.conditions.push({ type: 'currentHealthScore', operator: 'between', min: null, max: null, value: null });
+        },
+        removeMyTabCondition(ci) {
+          if (this.activeMyTabGroup.conditions.length <= 1) return;
+          this.activeMyTabGroup.conditions.splice(ci, 1);
+        },
+        onMyTabCondTypeChange(ci) {
+          const cond = this.activeMyTabGroup.conditions[ci];
+          cond.min = null;
+          cond.max = null;
+          cond.value = null;
+        },
+        onMyTabOperatorChange(ci) {
+          const cond = this.activeMyTabGroup.conditions[ci];
+          cond.min = null;
+          cond.max = null;
+          cond.value = null;
+        },
+        getMyTabCondMin(type) {
+          return type.includes('HealthScore') ? 0 : 1;
+        },
+        getMyTabCondMax(type) {
+          return type.includes('HealthScore') ? 100 : 7;
+        },
+        getMyTabCondLabel(type) {
+          const labels = {
+            currentHealthScore: '本次健康度',
+            lastHealthScore: '上次健康度',
+            currentAbnormalCount: '本次异常指标',
+            lastAbnormalCount: '上次异常指标',
+          };
+          return labels[type] || type;
+        },
+        getMyTabOperatorLabel(op) {
+          const labels = {
+            between: '介于',
+            gte: '≥',
+            gt: '>',
+            lte: '≤',
+            lt: '<',
+            eq: '=',
+          };
+          return labels[op] || op;
+        },
+        formatMyTabCondValue(cond) {
+          if (cond.operator === 'between') {
+            return `${cond.min ?? '-'} ~ ${cond.max ?? '-'}`;
+          }
+          return `${this.getMyTabOperatorLabel(cond.operator)} ${cond.value ?? '-'}`;
+        },
+        insertMyTabVar(variable) {
+          const group = this.myTabMemberCardForm.enableConditions
+            ? this.activeMyTabGroup
+            : this.myTabMemberCardForm.contentGroups[0];
+          group.cardText = (group.cardText || '') + variable;
+        },
+
         getGroupMaterialName(materialId) {
           if (!materialId) return '未设置';
           const m = this.recordBannerOptions.materials.find(item => item.id === materialId);
@@ -2906,14 +3180,23 @@
           else cond.valueArr.push(vo);
         },
 
-        // ---- Condition groups ----
-        addConditionGroup() {
+        createConditionItem() {
           const cond = newCondition();
           cond.id = ++this.condIdCounter;
-          this.conditionGroups.push({
+          cond.condLogic = 'and';
+          return cond;
+        },
+        createConditionGroupItem() {
+          return {
             id: ++this.groupIdCounter,
-            conditions: [cond],
-          });
+            groupLogic: 'and',
+            conditions: [this.createConditionItem()],
+          };
+        },
+
+        // ---- Condition groups ----
+        addConditionGroup() {
+          this.conditionGroups.push(this.createConditionGroupItem());
         },
         removeConditionGroup(gi) {
           if (this.conditionGroups.length > 1) {
@@ -2921,14 +3204,18 @@
           }
         },
         addConditionToGroup(group) {
-          const cond = newCondition();
-          cond.id = ++this.condIdCounter;
-          group.conditions.push(cond);
+          group.conditions.push(this.createConditionItem());
         },
         removeConditionFromGroup(group, ci) {
           if (group.conditions.length > 1) {
             group.conditions.splice(ci, 1);
           }
+        },
+        setGroupLogic(gi, logic) {
+          this.conditionGroups[gi].groupLogic = logic;
+        },
+        setCondLogic(gi, ci, logic) {
+          this.conditionGroups[gi].conditions[ci].condLogic = logic;
         },
         toggleCondition(cond) {
           // Flip operator if possible
@@ -2969,13 +3256,14 @@
             subscriptionPlan: this.form.subscriptionPlan,
             strategyType: this.form.strategyType,
             userConditions: this.conditionGroups.map(g => ({
-              logic: 'AND',
+              logic: (g.groupLogic || 'and') === 'and' ? 'AND' : 'OR',
               conditions: g.conditions
                 .filter(c => c.field)
                 .map(c => ({
                   field: c.field,
                   operator: c.operator,
                   value: buildConditionValue(c),
+                  condLogic: (c.condLogic || 'and') === 'and' ? 'AND' : 'OR',
                 })),
             })).filter(g => g.conditions.length > 0),
             components: this.selectedComponents.map(c => c.key),

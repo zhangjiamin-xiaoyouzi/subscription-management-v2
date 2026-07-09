@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>订阅管理系统 - 会员tab弹窗</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f5f5; color: #333; }
+    #app { min-height: 100vh; }
+    [v-cloak] { display: none !important; }
+
+    .app-header { height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03); position: sticky; top: 0; z-index: 100; }
+    .header-left { display: flex; align-items: center; gap: 4px; }
+    .menu-fold-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s; }
+    .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+    .layout-body { display: flex; height: calc(100vh - 48px); }
+    .app-sider { width: 200px; background: #fff; border-right: 1px solid #f0f0f0; transition: width .2s; overflow-y: auto; flex-shrink: 0; }
+    .app-sider.collapsed { width: 60px; }
+    .sider-logo { height: 48px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+    .logo-icon { font-size: 22px; color: #ff4d88; }
+    .logo-text { font-size: 14px; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+    .sider-menu { padding: 8px 0; }
+    .menu-group { position: relative; }
+    .sider-menu-item { display: flex; align-items: center; height: 44px; padding: 0 16px; font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none; transition: all .2s; cursor: pointer; white-space: nowrap; border-left: 3px solid transparent; position: relative; z-index: 1; }
+    .sider-menu-item:hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
+    .sider-menu-item.active { color: #ff4d88; background: linear-gradient(90deg,rgba(255,77,136,.08),rgba(255,77,136,.01)); border-left-color: #ff4d88; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .sider-submenu { overflow: hidden; transition: max-height .3s cubic-bezier(0.4,0,0.2,1); position: relative; z-index: 10; }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; border-left: 3px solid transparent; position: relative; z-index: 11; }
+    .sider-submenu .sider-menu-item.active { color: #ff4d88; background: #fff0f6; border-left-color: #ff4d88; font-weight: 500; }
+    .menu-arrow { margin-left: auto; font-size: 10px; transition: transform .2s; }
+    .menu-arrow.open { transform: rotate(90deg); }
+
+    .content-area { flex: 1; background: #f0f2f5; overflow-x: auto; }
+    .page-body { background: #fff; padding: 16px 24px 24px; min-height: 100%; }
+
+    .breadcrumb { font-size: 13px; color: #666; margin-bottom: 16px; }
+    .breadcrumb a { color: #ff4d88; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    .tabs { display: flex; border-bottom: 1px solid #f0f0f0; margin-bottom: 16px; }
+    .tab-item { padding: 8px 16px; font-size: 13px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; text-decoration: none; }
+    .tab-item:hover { color: #ff4d88; }
+    .tab-item.active { color: #ff4d88; border-bottom-color: #ff4d88; font-weight: 500; }
+
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-input { height: 32px; padding: 0 10px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; width: 200px; }
+    .search-input:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .btn-primary { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 16px; font-size: 13px; background: #ff4d88; color: #fff; border: 1px solid #ff4d88; border-radius: 4px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+    .btn-primary:hover { background: #ff3875; }
+    .btn-outline { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 16px; font-size: 13px; background: #fff; color: #ff4d88; border: 1px solid #ff4d88; border-radius: 4px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+    .btn-outline:hover { background: #fff0f6; }
+    .checkbox-label { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #333; cursor: pointer; }
+    .checkbox-label input { accent-color: #ff4d88; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th { background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 500; color: #333; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+    .data-table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+    .data-table tr:hover td { background: #fffafb; }
+    .data-table .expand-row td { background: #fafafa; padding: 8px 12px; }
+    .expand-content { font-size: 12px; color: #666; line-height: 1.6; }
+    .expand-content .cond-group { margin-bottom: 4px; }
+    .expand-content .cond-group::before { content: '且 '; color: #ff4d88; font-weight: 500; }
+    .expand-content .cond-group:first-child::before { content: ''; }
+
+    .status-tag { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 12px; }
+    .status-active { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .status-inactive { background: #fff2f0; color: #ff4d4f; border: 1px solid #ffccc7; }
+
+    .action-btns { display: flex; gap: 8px; }
+    .btn-link { background: none; border: none; color: #ff4d88; font-size: 13px; cursor: pointer; padding: 2px 4px; }
+    .btn-link:hover { color: #ff3875; text-decoration: underline; }
+
+    .pagination { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 16px; }
+    .page-btn { min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; cursor: pointer; font-size: 13px; color: #333; transition: all .15s; }
+    .page-btn:hover { border-color: #ff4d88; color: #ff4d88; }
+    .page-btn.active { background: #ff4d88; color: #fff; border-color: #ff4d88; }
+    .page-btn.disabled { opacity: .4; cursor: not-allowed; }
+    .page-info { font-size: 13px; color: #666; margin-right: 8px; }
+  </style>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <header class="app-header">
+      <div class="header-left">
+        <span class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed">☰</span>
+        <span class="brand">订阅管理系统</span>
+      </div>
+      <div class="header-right">
+        <span class="user-info">
+          <span class="user-avatar">张</span>
+          <span>张家敏</span>
+          <span>▾</span>
+        </span>
+      </div>
+    </header>
+
+    <div class="layout-body">
+      <aside class="app-sider" :class="{ collapsed: siderCollapsed }">
+        <div class="sider-logo">
+          <span class="logo-icon">♥</span>
+          <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
+        </div>
+        <div class="sider-menu">
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="menu-group">
+            <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('opTools') }" @click="opToolsOpen = !opToolsOpen">
+              <span class="menu-icon">🔧</span>
+              <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+              <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
+            </div>
+            <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+              <a class="sider-menu-item active" href="member-tab-popup-list.html">弹窗</a>
+              <a class="sider-menu-item" href="javascript:;">兑换码</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift-strategy/list')">赠礼发放策略</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')">限时促销策略</a>
+              <a class="sider-menu-item" href="javascript:;">赠礼物流管理</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-pricing-strategy/list')">活动价格策略</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-operations-strategy/list')">活动投放策略</a>
+            </div>
+          </div>
+          <div class="menu-group">
+            <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('deploy') }" @click="deployOpen = !deployOpen">
+              <span class="menu-icon">📢</span>
+              <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
+              <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
+            </div>
+            <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/rights-pay/list')">投放策略</a>
+              <a class="sider-menu-item" href="javascript:;">页面模块展示</a>
+            </div>
+          </div>
+          <div class="menu-group">
+            <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('price') }" @click="priceManageOpen = !priceManageOpen">
+              <span class="menu-icon">💰</span>
+              <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+              <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
+            </div>
+            <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+              <a class="sider-menu-item" href="javascript:;">价格套餐</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/price-strategy/list')">价格策略</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')">促销套餐</a>
+            </div>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
+          <div class="menu-group">
+            <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
+              <span class="menu-icon">🎯</span>
+              <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+              <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+            </div>
+            <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/prize/list')"><span class="menu-label">奖品管理</span></a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/coupon/list')"><span class="menu-label">抽奖券管理</span></a>
+            </div>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">⚙️</span><span class="menu-label" v-show="!siderCollapsed">设置管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏪</span><span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📚</span><span class="menu-label" v-show="!siderCollapsed">知识库</span></a>
+        </div>
+      </aside>
+
+      <main class="content-area">
+        <div class="page-body">
+          <div class="breadcrumb">
+            <a href="javascript:;">运营工具</a> / <a href="javascript:;">弹窗</a> / 会员tab弹窗
+          </div>
+
+          <div class="tabs">
+            <a class="tab-item" href="success-popup-list.html">成功开通弹窗</a>
+            <a class="tab-item" href="top-popup-list.html">顶部弹窗</a>
+            <a class="tab-item" href="popup-list.html">我tab弹窗</a>
+            <a class="tab-item active" href="member-tab-popup-list.html">会员tab弹窗</a>
+          </div>
+
+          <!-- 工具栏 -->
+          <div class="toolbar">
+            <button class="btn-primary" @click="goCreate">新 增</button>
+            <input class="search-input" type="text" v-model="searchName" placeholder="请输入弹窗名称" />
+            <button class="btn-outline" @click="doSearch">查 找</button>
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="onlyActive" />
+              仅看"投放中"
+            </label>
+          </div>
+
+          <!-- 数据表格 -->
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>弹窗ID</th>
+                <th>弹窗名称</th>
+                <th>优先级</th>
+                <th>投放条件</th>
+                <th>投放时间</th>
+                <th>关联订阅计划</th>
+                <th>最后修改时间</th>
+                <th>最后修改人</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-for="(item, index) in filteredData" :key="item.id">
+                <tr>
+                  <td>{{ item.id }}</td>
+                  <td>{{ item.name }}</td>
+                  <td>{{ item.priority }}</td>
+                  <td>
+                    <div>{{ item.conditions }}</div>
+                    <button class="btn-link" @click="toggleExpand(index)" v-if="item.conditionsDetail && item.conditionsDetail.length > 1">
+                      {{ expandedRows[index] ? '收起' : '展开' }}
+                    </button>
+                  </td>
+                  <td>{{ item.startDate }} ~ {{ item.endDate }}</td>
+                  <td>{{ item.subPlan }}</td>
+                  <td>{{ item.updateTime }}</td>
+                  <td>{{ item.updateBy }}</td>
+                  <td>
+                    <span class="status-tag" :class="item.status === '投放中' ? 'status-active' : 'status-inactive'">{{ item.status }}</span>
+                  </td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="btn-link" @click="viewDetail(item)">查看</button>
+                      <button class="btn-link" @click="moreActions(item)">更多</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="expand-row" v-if="expandedRows[index] && item.conditionsDetail">
+                  <td colspan="10">
+                    <div class="expand-content">
+                      <div class="cond-group" v-for="(cond, ci) in item.conditionsDetail" :key="ci">
+                        <span v-if="ci > 0" style="color:#ff4d88;font-weight:500;">且 </span>{{ cond }}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+
+          <!-- 分页 -->
+          <div class="pagination">
+            <span class="page-info">共 {{ total }} 条</span>
+            <button class="page-btn" :class="{ disabled: currentPage <= 1 }" @click="goPage(currentPage - 1)" :disabled="currentPage <= 1">‹</button>
+            <button class="page-btn" v-for="p in visiblePages" :key="p" :class="{ active: p === currentPage }" @click="goPage(p)">{{ p }}</button>
+            <button class="page-btn" :class="{ disabled: currentPage >= totalPages }" @click="goPage(currentPage + 1)" :disabled="currentPage >= totalPages">›</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script>
+    const { createApp, ref, computed } = Vue;
+
+    createApp({
+      setup() {
+        const siderCollapsed = ref(false);
+        const opToolsOpen = ref(true);
+        const deployOpen = ref(false);
+        const priceManageOpen = ref(false);
+        const lotteryManageOpen = ref(false);
+        const activeParents = ref(['opTools']);
+        const subMenuMaxHeight = '400px';
+        const searchName = ref('');
+        const onlyActive = ref(false);
+        const expandedRows = ref({});
+        const currentPage = ref(1);
+        const pageSize = 20;
+
+        const mockData = [
+          { id: 268, name: '挽留转盘_经期健康度0元', priority: 1, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2025-12-11 17:00', endDate: '2026-12-31 17:23', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-06-19 00:00:02', updateBy: '马利英', status: '投放中' },
+          { id: 308, name: '挽留转盘_其他权益页_试用0元', priority: 2, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2026-01-28 16:47', endDate: '2027-01-02 16:47', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-06-18 23:59:32', updateBy: '马利英', status: '投放中' },
+          { id: 303, name: '育儿-权益详情页拼团挽留', priority: 17, conditions: '会员状态包含从未开通过，已过期\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过，已过期', '身份模式包含', '应用版本 ~'], startDate: '2026-01-26 09:46', endDate: '2027-02-26 09:47', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-02-12 14:30:59', updateBy: '庄子慧', status: '投放中' },
+          { id: 141, name: '过期权益页推包月优惠', priority: 40, conditions: '会员状态包含已过期\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含已过期', '身份模式包含', '应用版本 ~'], startDate: '2025-07-03 16:05', endDate: '2026-07-31 16:06', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:05:09', updateBy: '马利英', status: '投放中' },
+          { id: 281, name: '挽留转盘_黄金受孕期_7.8兜底', priority: 41, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2025-12-18 14:26', endDate: '2026-12-19 14:27', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:05:04', updateBy: '马利英', status: '投放中' },
+          { id: 143, name: '权益页-临时已解约续费引导', priority: 42, conditions: '会员状态包含会员生效中\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含', '应用版本 ~'], startDate: '2025-07-03 16:18', endDate: '2026-07-31 16:18', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:04:58', updateBy: '马利英', status: '投放中' },
+          { id: 144, name: '过期权益页推包季优惠', priority: 43, conditions: '会员状态包含已过期\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含已过期', '身份模式包含', '应用版本 ~'], startDate: '2025-07-03 16:05', endDate: '2026-07-31 16:06', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:04:51', updateBy: '马利英', status: '投放中' },
+          { id: 264, name: '挽留转盘_经期健康度_8.8元', priority: 44, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2025-12-11 16:14', endDate: '2026-12-19 16:14', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:03:57', updateBy: '马利英', status: '投放中' },
+          { id: 265, name: '挽留转盘_经期健康度_7.8元', priority: 45, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2025-12-11 16:14', endDate: '2026-12-19 16:14', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:03:52', updateBy: '马利英', status: '投放中' },
+          { id: 266, name: '挽留转盘_经期健康度_6.8元', priority: 46, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2025-12-11 16:14', endDate: '2026-12-19 16:14', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:03:50', updateBy: '马利英', status: '投放中' },
+          { id: 272, name: '挽留转盘_黄金受孕期_7.8', priority: 47, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2025-12-18 14:26', endDate: '2026-12-19 14:27', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:03:20', updateBy: '马利英', status: '投放中' },
+          { id: 275, name: '挽留转盘_黄金受孕期_8.8', priority: 48, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2025-12-18 14:26', endDate: '2026-12-19 14:27', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:03:15', updateBy: '马利英', status: '投放中' },
+          { id: 283, name: '挽留转盘_怀孕、育儿_7.8元', priority: 49, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2025-12-29 15:59', endDate: '2026-12-31 16:00', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:02:55', updateBy: '马利英', status: '投放中' },
+          { id: 282, name: '挽留转盘_怀孕、育儿_6.8元', priority: 50, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2025-12-29 15:00', endDate: '2026-12-19 15:54', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:02:51', updateBy: '马利英', status: '投放中' },
+          { id: 302, name: '怀孕-权益详情页拼团挽留', priority: 16, conditions: '会员状态包含从未开通过，已过期\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过，已过期', '身份模式包含', '应用版本 ~'], startDate: '2026-01-26 09:46', endDate: '2027-02-26 09:47', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-04-01 15:10:43', updateBy: '马利英', status: '下线中' },
+          { id: 301, name: '经期-权益详情页拼团挽留', priority: 15, conditions: '会员状态包含从未开通过，已过期\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过，已过期', '身份模式包含', '应用版本 ~'], startDate: '2026-01-26 09:46', endDate: '2027-02-26 09:47', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-04-01 15:10:07', updateBy: '马利英', status: '下线中' },
+          { id: 289, name: '拼团挽留弹窗_预发', priority: 14, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2026-01-09 18:10', endDate: '2026-01-12 23:10', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-13 14:58:17', updateBy: '自动下线', status: '下线中' },
+          { id: 287, name: '预发测试_权益页挽留纯图片', priority: 14, conditions: '会员状态包含从未开通过，会员生效中，已过期\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过，会员生效中，已过期', '身份模式包含', '应用版本 ~'], startDate: '2026-01-06 18:59', endDate: '2026-01-06 23:00', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-07 09:24:47', updateBy: '自动下线', status: '下线中' },
+          { id: 286, name: '睡眠测试_低价促销', priority: 14, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2026-01-04 17:05', endDate: '2026-01-05 00:07', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-05 09:29:42', updateBy: '自动下线', status: '下线中' },
+          { id: 284, name: '挽留转盘_怀孕、育儿_8.8元', priority: 51, conditions: '会员状态包含从未开通过\n身份模式包含\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过', '身份模式包含', '应用版本 ~'], startDate: '2025-12-29 15:00', endDate: '2026-12-19 15:54', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-27 15:02:48', updateBy: '马利英', status: '投放中' },
+        ];
+
+        const total = ref(mockData.length);
+
+        const filteredData = computed(() => {
+          let data = [...mockData];
+          if (searchName.value) {
+            data = data.filter(item => item.name.includes(searchName.value));
+          }
+          if (onlyActive.value) {
+            data = data.filter(item => item.status === '投放中');
+          }
+          total.value = data.length;
+          const start = (currentPage.value - 1) * pageSize;
+          return data.slice(start, start + pageSize);
+        });
+
+        const totalPages = computed(() => Math.ceil(total.value / pageSize));
+        const visiblePages = computed(() => {
+          const pages = [];
+          const maxVisible = 5;
+          let start = Math.max(1, currentPage.value - Math.floor(maxVisible / 2));
+          let end = Math.min(totalPages.value, start + maxVisible - 1);
+          if (end - start < maxVisible - 1) start = Math.max(1, end - maxVisible + 1);
+          for (let i = start; i <= end; i++) pages.push(i);
+          return pages;
+        });
+
+        function navigateTo(url) {
+          window.location.href = url;
+        }
+        function toggleExpand(index) { expandedRows.value[index] = !expandedRows.value[index]; }
+        function doSearch() { currentPage.value = 1; }
+        function goPage(p) { if (p >= 1 && p <= totalPages.value) currentPage.value = p; }
+        function goCreate() { window.location.href = 'member-tab-popup-create.html'; }
+        function viewDetail(item) { alert('查看弹窗详情: ' + item.name); }
+        function moreActions(item) { alert('更多操作: ' + item.name); }
+
+        return {
+          siderCollapsed, opToolsOpen, deployOpen, priceManageOpen, lotteryManageOpen, subMenuMaxHeight, activeParents,
+          searchName, onlyActive, expandedRows,
+          currentPage, total, filteredData, totalPages, visiblePages,
+          navigateTo, toggleExpand, doSearch, goPage, goCreate, viewDetail, moreActions
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

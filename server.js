@@ -65,6 +65,8 @@ const server = http.createServer((req, res) => {
   // ====== 路由映射 ======
   const ROUTES = {
     '/': 'index.html',
+    '/popup/list': 'popup-list.html',
+    '/popup/create': 'popup-create.html',
     '/gift-strategy/list': 'gift-strategy-list.html',
     '/gift-strategy/create': 'gift-strategy-create.html',
     '/gift-strategy/detail': 'gift-strategy-detail.html',

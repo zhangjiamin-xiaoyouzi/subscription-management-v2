@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>订阅管理系统 - 我tab弹窗</title>
+  <link rel="stylesheet" href="https://unpkg.com/ant-design-vue@3.2.20/dist/antd.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f5f5; color: #333; }
+    #app { min-height: 100vh; }
+    [v-cloak] { display: none !important; }
+
+    .app-header { height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03); position: sticky; top: 0; z-index: 100; }
+    .header-left { display: flex; align-items: center; gap: 4px; }
+    .menu-fold-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s; }
+    .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+    .layout-body { display: flex; height: calc(100vh - 48px); }
+    .app-sider { width: 200px; background: #fff; border-right: 1px solid #f0f0f0; transition: width .2s; overflow-y: auto; flex-shrink: 0; }
+    .app-sider.collapsed { width: 60px; }
+    .sider-logo { height: 48px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+    .logo-icon { font-size: 22px; color: #ff4d88; }
+    .logo-text { font-size: 14px; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+    .sider-menu { padding: 8px 0; }    .menu-group { position: relative; }    .sider-menu-item { display: flex; align-items: center; height: 44px; padding: 0 16px; font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none; transition: all .2s; cursor: pointer; white-space: nowrap; border-left: 3px solid transparent; position: relative; }
+    .sider-menu-item:hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
+    .sider-menu-item.active { color: #ff4d88; background: linear-gradient(90deg,rgba(255,77,136,.08),rgba(255,77,136,.01)); border-left-color: #ff4d88; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .sider-submenu { overflow: hidden; transition: max-height .3s cubic-bezier(0.4,0,0.2,1); position: relative; z-index: 10; }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; border-left: 3px solid transparent; position: relative; z-index: 11; }
+    .sider-submenu .sider-menu-item.active { color: #ff4d88; background: #fff0f6; border-left-color: #ff4d88; font-weight: 500; }
+    .menu-arrow { margin-left: auto; font-size: 10px; transition: transform .2s; }
+    .menu-arrow.open { transform: rotate(90deg); }
+
+    .content-area { flex: 1; background: #f0f2f5; overflow-x: auto; }
+    .page-body { background: #fff; padding: 16px 24px 24px; min-height: 100%; }
+
+    /* Tabs */
+    .tabs { display: flex; border-bottom: 1px solid #f0f0f0; margin-bottom: 16px; }
+    .tab-item { padding: 8px 16px; font-size: 13px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; text-decoration: none; }
+    .tab-item:hover { color: #ff4d88; }
+    .tab-item.active { color: #ff4d88; border-bottom-color: #ff4d88; font-weight: 500; }
+
+    .page-desc { font-size: 13px; color: #666; margin-bottom: 16px; line-height: 1.6; }
+    .page-desc a { color: #ff4d88; }
+
+    .toolbar { margin-bottom: 16px; }
+    .toolbar-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; flex-wrap: wrap; }
+    .toolbar-top-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .toolbar-top-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    .filter-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .filter-label { font-size: 13px; color: #666; white-space: nowrap; }
+    .input-field { height: 32px; padding: 0 10px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; }
+    .input-field:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .date-input { height: 32px; padding: 0 8px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; }
+    .date-input:focus { border-color: #ff4d88; }
+    .date-sep { color: #999; font-size: 13px; }
+    .checkbox-inline { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #666; cursor: pointer; white-space: nowrap; }
+    .checkbox-inline input { accent-color: #ff4d88; }
+
+    .btn-primary { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 16px; font-size: 13px; background: #ff4d88; color: #fff; border: 1px solid #ff4d88; border-radius: 4px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+    .btn-primary:hover { background: #ff3875; }
+    .btn-link { background: none; border: none; color: #ff4d88; font-size: 13px; cursor: pointer; padding: 2px 4px; }
+    .btn-link:hover { color: #ff3875; }
+    .btn-danger { background: none; border: none; color: #ff4d4f; font-size: 13px; cursor: pointer; padding: 2px 4px; }
+    .btn-danger:hover { color: #d9363e; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table thead th { background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 500; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+    .data-table tbody td { padding: 10px 12px; border-bottom: 1px solid #f5f5f5; vertical-align: top; }
+    .data-table tbody tr:hover { background: #fafafa; }
+
+    .status-tag { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 12px; }
+    .status-tag.enabled { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .status-tag.disabled { background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e; }
+
+    .freq-text { font-size: 12px; color: #666; line-height: 1.5; }
+    .scope-text { font-size: 12px; color: #666; line-height: 1.5; }
+    .condition-text { font-size: 12px; color: #666; line-height: 1.6; max-width: 280px; }
+    .condition-group { margin-bottom: 4px; }
+    .condition-group-label { color: #ff4d88; font-weight: 500; }
+    .expand-btn { color: #ff4d88; cursor: pointer; font-size: 12px; }
+    .expand-btn:hover { text-decoration: underline; }
+
+    .action-btns { display: flex; gap: 8px; white-space: nowrap; }
+
+    .pagination-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 16px 0; font-size: 13px; color: #666; }
+    .pagination-bar button { height: 28px; padding: 0 12px; font-size: 12px; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; cursor: pointer; }
+    .pagination-bar button:hover { border-color: #ff4d88; color: #ff4d88; }
+    .pagination-bar button:disabled { opacity: .4; cursor: not-allowed; }
+    .pagination-bar button.current { border-color: #ff4d88; color: #ff4d88; }
+
+    .empty-state { text-align: center; padding: 60px 0; color: #bbb; }
+  </style>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <header class="app-header">
+      <div class="header-left">
+        <span class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed"></span>
+        <span class="brand">订阅管理系统</span>
+      </div>
+      <div class="header-right">
+        <span class="user-info">
+          <span class="user-avatar">张</span>
+          <span>张家敏</span>
+          <span>▾</span>
+        </span>
+      </div>
+    </header>
+
+    <div class="layout-body">
+      <aside class="app-sider" :class="{ collapsed: siderCollapsed }">
+        <div class="sider-logo">
+          <span class="logo-icon">♥</span>
+          <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
+        </div>
+        <div class="sider-menu">
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="menu-group">
+            <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('opTools') }" @click="opToolsOpen = !opToolsOpen">
+              <span class="menu-icon">🔧</span>
+              <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+              <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
+            </div>
+            <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+              <a class="sider-menu-item active" href="popup-list.html">弹窗</a>
+              <a class="sider-menu-item" href="javascript:;">兑换码</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift-strategy/list')">赠礼发放策略</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')">限时促销策略</a>
+              <a class="sider-menu-item" href="javascript:;">赠礼物流管理</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-pricing-strategy/list')">活动价格策略</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-operations-strategy/list')">活动投放策略</a>
+            </div>
+          </div>
+          <div class="menu-group">
+            <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('deploy') }" @click="deployOpen = !deployOpen">
+              <span class="menu-icon">📢</span>
+              <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
+              <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
+            </div>
+            <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/rights-pay/list')">投放策略</a>
+              <a class="sider-menu-item" href="javascript:;">页面模块展示</a>
+            </div>
+          </div>
+          <div class="menu-group">
+            <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('price') }" @click="priceManageOpen = !priceManageOpen">
+              <span class="menu-icon">💰</span>
+              <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+              <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
+            </div>
+            <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+              <a class="sider-menu-item" href="javascript:;">价格套餐</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/price-strategy/list')">价格策略</a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')">促销套餐</a>
+            </div>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span></a>
+          <div class="menu-group">
+            <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
+              <span class="menu-icon">🎯</span>
+              <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+              <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+            </div>
+            <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/prize/list')"><span class="menu-label">奖品管理</span></a>
+              <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/coupon/list')"><span class="menu-label">抽奖券管理</span></a>
+            </div>
+          </div>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">⚙️</span><span class="menu-label" v-show="!siderCollapsed">设置管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">🏪</span><span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span></a>
+          <a class="sider-menu-item" href="javascript:;"><span class="menu-icon">📚</span><span class="menu-label" v-show="!siderCollapsed">知识库</span></a>
+        </div>
+      </aside>
+
+      <main class="content-area">
+        <div class="page-body">
+          <div class="tabs">
+            <a class="tab-item" href="success-popup-list.html">成功开通弹窗</a>
+            <a class="tab-item" href="top-popup-list.html">顶部弹窗</a>
+            <a class="tab-item active" href="popup-list.html">我tab弹窗</a>
+            <a class="tab-item" href="member-tab-popup-list.html">会员tab弹窗</a>
+          </div>
+
+          <div class="page-desc">
+            生效范围：弹窗配置对8.91.0及以上版本生效，低版本可在【美柚全局运营系统】进行配置。配置的弹窗计划会同步到【美柚全局运营系统】统一管理。
+          </div>
+
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <div class="toolbar-top">
+              <div class="toolbar-top-left">
+                <button class="btn-primary" @click="goCreate">新 增</button>
+              </div>
+              <div class="toolbar-top-right">
+                <div class="filter-row">
+                  <span class="filter-label">计划名称:</span>
+                  <input class="input-field" type="text" v-model="filters.name" placeholder="支持关键词模糊检索" style="width:180px;" />
+                </div>
+                <div class="filter-row">
+                  <span class="filter-label">投放周期:</span>
+                  <input class="date-input" type="date" v-model="filters.startDate" />
+                  <span class="date-sep">→</span>
+                  <input class="date-input" type="date" v-model="filters.endDate" />
+                </div>
+                <button class="btn-primary" @click="search">查 找</button>
+                <label class="checkbox-inline">
+                  <input type="checkbox" v-model="filters.onlyEnabled" />
+                  仅看"生效中"
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:60px;">计划ID</th>
+                <th style="width:180px;">计划名称</th>
+                <th style="width:80px;">投放优先级</th>
+                <th style="width:80px;">计划状态</th>
+                <th style="width:180px;">展示频次</th>
+                <th style="width:160px;">投放范围</th>
+                <th style="width:200px;">目标人群</th>
+                <th style="width:160px;">投放周期</th>
+                <th style="width:120px;">投放内容</th>
+                <th style="width:140px;">关联订阅计划</th>
+                <th style="width:140px;">最后修改时间</th>
+                <th style="width:80px;">最后操作人</th>
+                <th style="width:160px;">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in filteredList" :key="item.id">
+                <td>{{ item.id }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.priority }}</td>
+                <td>
+                  <span class="status-tag" :class="item.status === 'enabled' ? 'enabled' : 'disabled'">
+                    {{ item.status === 'enabled' ? '生效中' : '已下线' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="freq-text" v-if="item.frequency.type === 'custom'">
+                    自定义<br/>
+                    （共{{ item.frequency.count }}次，每隔{{ item.frequency.interval }}小时展示，自然{{ item.frequency.natural === 'month' ? '月' : '周' }}）
+                  </div>
+                  <div class="freq-text" v-else>
+                    只展示 {{ item.frequency.count }} 次
+                  </div>
+                </td>
+                <td>
+                  <div class="scope-text">
+                    客户端平台：{{ item.scope.platforms.join('/') }}<br/>
+                    应用版本：{{ item.scope.minVersion }}
+                  </div>
+                </td>
+                <td>
+                  <div class="condition-text">
+                    <div class="condition-group" v-for="(cond, ci) in item.conditions.slice(0, expandedRows[item.id] ? item.conditions.length : 2)" :key="ci">
+                      <span class="condition-group-label" v-if="ci > 0">且</span>
+                      {{ cond.label }}
+                    </div>
+                    <span class="expand-btn" v-if="item.conditions.length > 2" @click="toggleExpand(item.id)">
+                      {{ expandedRows[item.id] ? '收起' : '展开' }}
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <div class="freq-text">
+                    {{ item.period.start }}<br/>~<br/>{{ item.period.end }}
+                  </div>
+                </td>
+                <td>{{ item.content }}</td>
+                <td>{{ item.relatedPlan }}</td>
+                <td>{{ item.modifiedTime }}</td>
+                <td>{{ item.operator }}</td>
+                <td>
+                  <div class="action-btns">
+                    <button class="btn-link" @click="viewDetail(item)">查看</button>
+                    <button class="btn-danger" v-if="item.status === 'enabled'" @click="offline(item)">下线</button>
+                    <button class="btn-link" v-else @click="enable(item)">上线</button>
+                    <button class="btn-link" @click="edit(item)">修改</button>
+                    <button class="btn-link" @click="copy(item)">复制</button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="filteredList.length === 0">
+                <td colspan="13" class="empty-state">暂无数据</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Pagination -->
+          <div class="pagination-bar">
+            <span>共 {{ filteredList.length }} 条</span>
+            <button :disabled="currentPage <= 1" @click="currentPage--">上一页</button>
+            <button class="current">1</button>
+            <button :disabled="currentPage >= totalPages" @click="currentPage++">下一页</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script>
+    const { createApp, ref, computed } = Vue;
+
+    createApp({
+      setup() {
+        const siderCollapsed = ref(false);
+        const opToolsOpen = ref(true);
+        const deployOpen = ref(false);
+        const priceManageOpen = ref(false);
+        const lotteryManageOpen = ref(false);
+        const activeParents = ref(['opTools']);
+        const subMenuMaxHeight = '400px';
+        const currentPage = ref(1);
+        const totalPages = ref(1);
+        const expandedRows = ref({});
+
+        const filters = ref({
+          name: '',
+          startDate: '',
+          endDate: '',
+          onlyEnabled: false
+        });
+
+        const mockData = [
+          {
+            id: 407, name: '买年卡送胎心仪-未订阅', priority: 9, status: 'enabled',
+            frequency: { type: 'custom', count: 1, interval: 168, natural: 'month' },
+            scope: { platforms: ['IOS', 'Android'], minVersion: '9.05.0' },
+            conditions: [
+              { label: '会员状态包含从未开通过' },
+              { label: '身份模式包含怀孕' },
+              { label: '怀孕周数区间0，36' }
+            ],
+            period: { start: '2025-07-25 18:00', end: '2026-09-08 23:59' },
+            content: '胎心仪赠礼', relatedPlan: '订阅计划-大于等于876版本',
+            modifiedTime: '2026-07-01 15:50:48', operator: '庄子慧'
+          },
+          {
+            id: 174, name: '福利-每周上新', priority: 25, status: 'enabled',
+            frequency: { type: 'custom', count: 1, interval: 168, natural: 'week' },
+            scope: { platforms: ['IOS', 'Android'], minVersion: '8.91.0' },
+            conditions: [
+              { label: '会员状态包含会员生效中' },
+              { label: '谛听人群包包含省钱福利-近30天启动会员' }
+            ],
+            period: { start: '2025-07-25 18:00', end: '2026-08-15 18:01' },
+            content: '福利-每周上新', relatedPlan: '订阅计划-大于等于876版本',
+            modifiedTime: '2026-06-12 10:07:51', operator: '庄子慧'
+          },
+          {
+            id: 392, name: '孕妈保险-已订阅会员', priority: 23, status: 'enabled',
+            frequency: { type: 'custom', count: 1, interval: 168, natural: 'month' },
+            scope: { platforms: ['IOS', 'Android'], minVersion: '9.00.0' },
+            conditions: [
+              { label: '会员状态包含会员生效中' },
+              { label: '身份模式包含怀孕' }
+            ],
+            period: { start: '2025-07-25 18:00', end: '2026-09-15 18:01' },
+            content: '孕妈保险', relatedPlan: '订阅计划-大于等于876版本',
+            modifiedTime: '2026-06-11 11:23:49', operator: '庄子慧'
+          },
+          {
+            id: 114, name: '怀孕-未订阅-孕早期-hcg', priority: 45, status: 'enabled',
+            frequency: { type: 'once', count: 1 },
+            scope: { platforms: ['IOS', 'Android'], minVersion: '8.91.0' },
+            conditions: [
+              { label: '会员状态包含从未开通过' },
+              { label: '身份模式包含怀孕' },
+              { label: '谛听人群包包含怀孕-未浏览产检智能解读-hcg' }
+            ],
+            period: { start: '2025-06-11 18:11', end: '2026-07-31 23:59' },
+            content: '产检单智能解读-孕早期-hcg', relatedPlan: '订阅计划-大于等于876版本',
+            modifiedTime: '2026-06-11 11:23:04', operator: '庄子慧'
+          },
+          {
+            id: 105, name: '非会员-育儿（0～5月龄）', priority: 40, status: 'enabled',
+            frequency: { type: 'custom', count: 1, interval: 48, natural: 'month' },
+            scope: { platforms: ['IOS', 'Android'], minVersion: '8.91.0' },
+            conditions: [
+              { label: '会员状态包含从未开通过' },
+              { label: '身份模式包含育儿' },
+              { label: '宝宝月数[最小宝宝]区间0，5' }
+            ],
+            period: { start: '2025-06-05 18:05', end: '2026-08-01 23:59' },
+            content: '非会员-育儿-0～6月龄', relatedPlan: '订阅计划-大于等于876版本',
+            modifiedTime: '2026-06-11 11:22:55', operator: '庄子慧'
+          },
+          {
+            id: 158, name: '经期/备孕新增21天未领取-心相印', priority: 69, status: 'enabled',
+            frequency: { type: 'custom', count: 1, interval: 168, natural: 'week' },
+            scope: { platforms: ['IOS', 'Android'], minVersion: '8.91.0' },
+            conditions: [
+              { label: '会员状态包含会员生效中' },
+              { label: '首开会员距今天天数区间15，21' },
+              { label: '待领取券包含心相印茶语抽纸券' }
+            ],
+            period: { start: '2025-07-11 18:16', end: '2026-07-11 18:16' },
+            content: '心相印', relatedPlan: '订阅计划-大于等于876版本',
+            modifiedTime: '2026-06-11 11:21:07', operator: '庄子慧'
+          },
+          {
+            id: 156, name: '经期/备孕新增7天未领取-美团', priority: 70, status: 'enabled',
+            frequency: { type: 'custom', count: 1, interval: 168, natural: 'week' },
+            scope: { platforms: ['IOS', 'Android'], minVersion: '8.91.0' },
+            conditions: [
+              { label: '会员状态包含会员生效中' },
+              { label: '首开会员距今天天数区间0，7' },
+              { label: '待领取券包含美团外卖80元券包' }
+            ],
+            period: { start: '2025-07-11 18:16', end: '2026-07-11 18:16' },
+            content: '新增会员-美团', relatedPlan: '订阅计划-大于等于876版本',
+            modifiedTime: '2026-06-11 11:21:04', operator: '庄子慧'
+          },
+          {
+            id: 157, name: '经期/备孕新增14天未领取-百度网盘', priority: 71, status: 'enabled',
+            frequency: { type: 'custom', count: 1, interval: 168, natural: 'week' },
+            scope: { platforms: ['IOS', 'Android'], minVersion: '8.91.0' },
+            conditions: [
+              { label: '会员状态包含会员生效中' },
+              { label: '首开会员距今天天数区间8，14' },
+              { label: '待领取券包含百度网盘500G网盘空间' }
+            ],
+            period: { start: '2025-07-11 18:16', end: '2026-07-11 18:16' },
+            content: '百度网盘', relatedPlan: '订阅计划-大于等于876版本',
+            modifiedTime: '2026-06-11 11:20:58', operator: '庄子慧'
+          }
+        ];
+
+        const listData = ref(mockData);
+
+        const filteredList = computed(() => {
+          let result = [...listData.value];
+          if (filters.value.name) {
+            result = result.filter(item => item.name.includes(filters.value.name));
+          }
+          if (filters.value.onlyEnabled) {
+            result = result.filter(item => item.status === 'enabled');
+          }
+          return result;
+        });
+
+        function navigateTo(url) {
+          window.location.href = url;
+        }
+
+        function toggleExpand(id) {
+          expandedRows.value[id] = !expandedRows.value[id];
+        }
+
+        function search() {
+          // Filter is reactive, no action needed
+        }
+
+        function goCreate() {
+          window.location.href = 'popup-create.html';
+        }
+
+        function viewDetail(item) {
+          alert('查看计划: ' + item.name);
+        }
+
+        function offline(item) {
+          if (confirm('确定要下线计划「' + item.name + '」吗？')) {
+            item.status = 'disabled';
+          }
+        }
+
+        function enable(item) {
+          item.status = 'enabled';
+        }
+
+        function edit(item) {
+          window.location.href = 'popup-create.html?id=' + item.id;
+        }
+
+        function copy(item) {
+          alert('复制计划: ' + item.name);
+        }
+
+        return {
+          siderCollapsed, opToolsOpen, deployOpen, priceManageOpen, lotteryManageOpen, subMenuMaxHeight, activeParents,
+          currentPage, totalPages, expandedRows,
+          filters, filteredList,
+          toggleExpand, search, goCreate, viewDetail, offline, enable, edit, copy, navigateTo
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
