@@ -795,6 +795,19 @@
       position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border-radius: 50%;
       background: #333; color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer;
     }
+    .price-card-copy-history-tip {
+      margin-left: 92px; margin-top: -4px; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 4px;
+      font-size: 13px; color: #ad6800;
+    }
+    .copy-history-icon { font-size: 16px; }
+    .copy-history-btn {
+      height: 28px; padding: 0 14px; font-size: 12px; font-weight: 500;
+      color: #fff; background: #ff4d88; border: none; border-radius: 4px; cursor: pointer;
+      transition: all .2s; white-space: nowrap; margin-left: auto;
+    }
+    .copy-history-btn:hover { background: #ff3875; }
     .price-card-bottom { margin-top: 18px; display: flex; align-items: center; gap: 12px; }
     .price-card-delete {
       height: 32px; padding: 0 12px; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,.65); border-radius: 2px; cursor: pointer;
@@ -1232,6 +1245,11 @@
                         <input class="input-field" type="text" v-model="fixedPriceCardComponent.packageName" />
                         <span class="price-card-clear" @click="fixedPriceCardComponent.packageName = ''">×</span>
                       </div>
+                    </div>
+                    <div v-if="showCopyHistoryTip && priceCardCopyHistoryEntry" class="price-card-copy-history-tip">
+                      <span class="copy-history-icon">📋</span>
+                      <span>检测到该套餐在 {{ formatHistoryTime(priceCardCopyHistoryEntry.savedAt) }} 有过填写记录</span>
+                      <button class="copy-history-btn" @click="fillPriceCardCopyHistory">一键填写历史文案</button>
                     </div>
 
                     <div class="price-card-field-row">
@@ -2458,6 +2476,13 @@
             }
           ],
           activeContentGroupIndex: 0,
+
+          // 套餐文案历史记忆
+          priceCardCopyHistory: (() => {
+            try { return JSON.parse(localStorage.getItem('price_card_copy_history') || '{}'); } catch { return {}; }
+          })(),
+          showCopyHistoryTip: false,
+
           componentLibrary: [
             {
               key: 'static_banner', icon: '🖼️', name: '静态banner', desc: '静态图片banner组件',
@@ -2624,6 +2649,13 @@
           if (!this.isFixedPriceCardPath) return null;
           return this.selectedComponents.find(comp => comp.key === 'price_card_display') || null;
         },
+        // 当前套餐名是否有历史文案记录
+        priceCardCopyHistoryEntry() {
+          const comp = this.fixedPriceCardComponent;
+          if (!comp || !comp.packageName) return null;
+          const history = this.priceCardCopyHistory;
+          return history[comp.packageName] || null;
+        },
         recordBannerConfig() {
           return this.recordBannerOptions.analysisByRecordItem[this.recordBannerForm.recordItem] || null;
         },
@@ -2765,6 +2797,13 @@
         },
       },
 
+      watch: {
+        // 监听价格卡片组件的 packageName 变化，检测历史文案
+        'fixedPriceCardComponent.packageName'(newName, oldName) {
+          this.showCopyHistoryTip = !!(newName && this.priceCardCopyHistory[newName]);
+        },
+      },
+
       mounted() {
         const params = new URLSearchParams(window.location.search);
         const pageKey = params.get('page_keys');
@@ -2785,9 +2824,43 @@
           this.conditionGroups = [this.createConditionGroupItem()];
         }
         this.initializePlacementContent();
+        // 检查初始套餐名是否有历史文案
+        this.$nextTick(() => {
+          const comp = this.fixedPriceCardComponent;
+          if (comp && comp.packageName) {
+            this.showCopyHistoryTip = !!(this.priceCardCopyHistory[comp.packageName]);
+          }
+        });
       },
 
       methods: {
+        // 一键填写历史文案
+        fillPriceCardCopyHistory() {
+          const comp = this.fixedPriceCardComponent;
+          const entry = this.priceCardCopyHistoryEntry;
+          if (!comp || !entry) return;
+          if (entry.cornerTag !== undefined) comp.cornerTag = entry.cornerTag;
+          if (entry.renewDesc !== undefined) comp.renewDesc = entry.renewDesc;
+          if (entry.payButtonText !== undefined) comp.payButtonText = entry.payButtonText;
+          if (entry.jumpMode !== undefined) comp.jumpMode = entry.jumpMode;
+          this.showCopyHistoryTip = false;
+          this.showToast('已填入历史文案');
+        },
+        // 保存当前套餐文案到 localStorage
+        savePriceCardCopyHistory(comp) {
+          if (!comp || !comp.packageName) return;
+          const history = this.priceCardCopyHistory;
+          history[comp.packageName] = {
+            cornerTag: comp.cornerTag || '',
+            renewDesc: comp.renewDesc || '',
+            payButtonText: comp.payButtonText || '',
+            jumpMode: comp.jumpMode || '',
+            savedAt: new Date().toISOString(),
+          };
+          this.priceCardCopyHistory = { ...history };
+          localStorage.setItem('price_card_copy_history', JSON.stringify(history));
+        },
+
         initializePlacementContent() {
           if (this.isRecordBannerPath) {
             this.selectedComponents = [];
@@ -3124,6 +3197,20 @@
           this.toastTimer = setTimeout(() => { this.toast = ''; }, 2000);
         },
 
+        formatHistoryTime(isoStr) {
+          if (!isoStr) return '之前';
+          try {
+            const d = new Date(isoStr);
+            const now = new Date();
+            const diff = now - d;
+            if (diff < 60 * 1000) return '刚刚';
+            if (diff < 3600 * 1000) return Math.floor(diff / 60000) + '分钟前';
+            if (diff < 86400 * 1000) return Math.floor(diff / 3600000) + '小时前';
+            if (diff < 7 * 86400 * 1000) return Math.floor(diff / 86400000) + '天前';
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+          } catch { return '之前'; }
+        },
+
         navigateTo(url) {
           if (location.hostname.includes('github.io')) {
             const [path, query] = url.split('?');
@@ -3288,6 +3375,11 @@
               })),
               expireDays: this.recordBannerForm.expireDays,
             };
+          }
+
+          // 保存价格卡片套餐文案历史
+          if (this.isFixedPriceCardPath && this.fixedPriceCardComponent) {
+            this.savePriceCardCopyHistory(this.fixedPriceCardComponent);
           }
 
           console.log('保存数据:', JSON.stringify(payload, null, 2));
