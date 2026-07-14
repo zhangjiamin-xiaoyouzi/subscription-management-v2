@@ -431,10 +431,18 @@
         function goPage(p) { currentPage.value = p; fetchList(); }
         function handlePageSizeChange() { currentPage.value = 1; fetchList(); }
 
-        function getCreateUrl() { return '/gift/create'; }
-        function getEditUrl(row) { return `/gift/edit?id=${row.id}&coupon_biz=`; }
-        function getDetailUrl(row) { return `/gift/detail?id=${row.id}&coupon_biz=`; }
-        function getCopyUrl(row) { return `/gift/create?id=${row.id}&coupon_biz=`; }
+        function convertUrl(url) {
+          if (location.hostname.includes('github.io')) {
+            const [path, query] = url.split('?');
+            const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
+            return parts.join('-') + '.html' + (query ? '?' + query : '');
+          }
+          return url;
+        }
+        function getCreateUrl() { return convertUrl('/gift/create'); }
+        function getEditUrl(row) { return convertUrl(`/gift/edit?id=${row.id}&coupon_biz=`); }
+        function getDetailUrl(row) { return convertUrl(`/gift/detail?id=${row.id}&coupon_biz=`); }
+        function getCopyUrl(row) { return convertUrl(`/gift/create?id=${row.id}&coupon_biz=`); }
 
         function getGiftTypeClass(type) {
           if (!type) return 'default';

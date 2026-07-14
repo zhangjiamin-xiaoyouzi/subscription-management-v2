@@ -141,7 +141,7 @@
       <main class="content-area">
         <div class="page-body">
           <div class="breadcrumb">
-            <a :href="'/gift/list'">赠礼库</a> / <span>查看</span>
+            <a :href="convertUrl('/gift/list')">赠礼库</a> / <span>查看</span>
           </div>
 
           <div v-if="loading" class="loading-text">加载中...</div>
@@ -261,8 +261,8 @@
             </div>
 
             <div class="detail-actions">
-              <a class="btn-primary" :href="`/gift/edit?id=${viewId}&coupon_biz=`">修 改</a>
-              <a class="btn-back" :href="'/gift/list'">返 回</a>
+              <a class="btn-primary" :href="convertUrl(`/gift/edit?id=${viewId}&coupon_biz=`)">修 改</a>
+              <a class="btn-back" :href="convertUrl('/gift/list')">返 回</a>
             </div>
           </template>
         </div>
@@ -375,6 +375,15 @@
 
         onMounted(loadData);
 
+        function convertUrl(url) {
+          if (location.hostname.includes('github.io')) {
+            const [path, query] = url.split('?');
+            const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
+            return parts.join('-') + '.html' + (query ? '?' + query : '');
+          }
+          return url;
+        }
+
         function navigateTo(url) {
           if (location.hostname.includes('github.io')) {
             const [path, query] = url.split('?');
@@ -389,7 +398,7 @@
           viewId, data, loading,
           sourceLabel, giftTypeLabel, deliverTypeLabel, costLevelLabel,
           expireTypeLabel, introTypeLabel, claimPageLabel,
-          navigateTo
+          navigateTo, convertUrl
         };
       }
     });

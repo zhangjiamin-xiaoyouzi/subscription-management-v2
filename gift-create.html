@@ -287,7 +287,7 @@
       <main class="content-area">
         <div class="page-body">
           <div class="breadcrumb">
-            <a :href="'/gift/list'">赠礼库</a> / <span>{{ isCopy ? '复制' : '新增' }}</span>
+            <a :href="convertUrl('/gift/list')">赠礼库</a> / <span>{{ isCopy ? '复制' : '新增' }}</span>
           </div>
 
           <!-- 基础信息 -->
@@ -509,7 +509,7 @@
           <!-- 操作按钮 -->
           <div class="form-actions">
             <button class="btn-primary" @click="handleSave">保 存</button>
-            <a class="btn-cancel" :href="'/gift/list'">取 消</a>
+            <a class="btn-cancel" :href="convertUrl('/gift/list')">取 消</a>
           </div>
         </div>
       </main>
@@ -644,7 +644,7 @@
             if (USE_MOCK) {
               await new Promise(r => setTimeout(r, 500));
               alert(`Mock: 赠礼"${formData.name}"保存成功！`);
-              window.location.href = '/gift/list';
+              window.location.href = convertUrl('/gift/list');
             } else {
               const payload = { ...formData };
               delete payload.icon_preview;
@@ -654,7 +654,7 @@
                 ? await apiPost(`/gift/${formData.id}/update`, payload)
                 : await apiPost('/gift/create', payload);
               if (res.code === 0 || res.success) {
-                window.location.href = '/gift/list';
+                window.location.href = convertUrl('/gift/list');
               } else {
                 alert(res.message || '保存失败');
               }
@@ -665,6 +665,15 @@
           } finally {
             saving.value = false;
           }
+        }
+
+        function convertUrl(url) {
+          if (location.hostname.includes('github.io')) {
+            const [path, query] = url.split('?');
+            const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
+            return parts.join('-') + '.html' + (query ? '?' + query : '');
+          }
+          return url;
         }
 
         function navigateTo(url) {
