@@ -80,6 +80,8 @@ const server = http.createServer((req, res) => {
     '/event-pricing-strategy/list': 'event-pricing-strategy-list.html',
     '/prize/list': 'prize-list.html',
     '/coupon/list': 'coupon-list.html',
+    '/gift/list': 'gift-list.html',
+    '/gift/create': 'gift-create.html',
   };
 
   // ====== 静态文件 ======
@@ -98,8 +100,17 @@ const server = http.createServer((req, res) => {
   fs.readFile(filePath, (err, data) => {
     if (err) {
       if (err.code === 'ENOENT') {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('Not Found');
+        // 404 回退到首页
+        filePath = path.join(__dirname, 'index.html');
+        fs.readFile(filePath, (err2, data2) => {
+          if (err2) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end('Not Found');
+            return;
+          }
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end(data2);
+        });
       } else {
         res.writeHead(500, { 'Content-Type': 'text/plain' });
         res.end('Internal Server Error');

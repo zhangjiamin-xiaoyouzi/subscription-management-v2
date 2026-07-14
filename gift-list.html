@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>赠礼库 - 订阅管理系统</title>
+  <link rel="stylesheet" href="https://unpkg.com/ant-design-vue@3.2.20/dist/antd.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: #f5f5f5; color: #333;
+    }
+    #app { min-height: 100vh; }
+    [v-cloak] { display: none !important; }
+
+    .app-header {
+      height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03); z-index: 100;
+      position: sticky; top: 0;
+    }
+    .app-header .header-left { display: flex; align-items: center; gap: 4px; }
+    .header-left .menu-fold-btn {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s;
+    }
+    .header-left .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .header-left .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; user-select: none; }
+    .app-header .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .header-right .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+    .layout-body { display: flex; height: calc(100vh - 48px); }
+    .app-sider {
+      width: 200px; background: #fff; border-right: 1px solid #f0f0f0;
+      transition: width .2s; overflow-y: auto; flex-shrink: 0;
+    }
+    .app-sider.collapsed { width: 60px; }
+    .sider-logo { height: 48px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+    .sider-logo .logo-icon { font-size: 22px; color: #ff4d88; }
+    .sider-logo .logo-text { font-size: 14px; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+    .sider-menu { padding: 8px 0; }
+    .sider-menu-item {
+      display: flex; align-items: center; height: 44px; padding: 0 16px;
+      font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none;
+      transition: all .2s ease; cursor: pointer; white-space: nowrap;
+      border-left: 3px solid transparent;
+    }
+    .sider-menu-item:hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
+    .sider-menu-item.active { color: #ff4d88; background: linear-gradient(90deg,rgba(255,77,136,.08),rgba(255,77,136,.01)); border-left-color: #ff4d88; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .sider-submenu { overflow: hidden; transition: max-height .3s cubic-bezier(0.4,0,0.2,1); }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; border-left: 3px solid transparent; }
+    .sider-submenu .sider-menu-item.active { color: #ff4d88; background: #fff0f6; border-left-color: #ff4d88; font-weight: 500; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
+
+    .content-area { flex: 1; background: #f0f2f5; overflow-x: auto; }
+    .page-body { background: #fff; padding: 16px 24px 24px; min-height: 100%; }
+
+    .toolbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 16px; flex-wrap: wrap; }
+    .toolbar-left { display: flex; align-items: center; gap: 12px; }
+    .toolbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 16px; font-size: 13px;
+      background: #ff4d88; color: #fff; border: 1px solid #ff4d88;
+      border-radius: 4px; cursor: pointer; transition: all .2s; white-space: nowrap;
+    }
+    .btn-primary:hover { background: #ff3875; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-cancel { background: #fff; color: #666; border: 1px solid #d9d9d9; height: 32px; padding: 0 16px; font-size: 13px; border-radius: 4px; cursor: pointer; }
+    .btn-ok { background: #ff4d88; color: #fff; border: none; height: 32px; padding: 0 20px; font-size: 13px; border-radius: 4px; cursor: pointer; margin-left: 8px; }
+    .btn-link { background: none; border: none; color: #ff4d88; font-size: 13px; cursor: pointer; padding: 0 4px; }
+    .btn-link:hover { color: #ff3875; }
+    .btn-link.disabled { color: #ccc; cursor: not-allowed; }
+    .btn-link.disabled:hover { color: #ccc; }
+    .btn-danger { background: none; border: none; color: #ff4d4f; font-size: 13px; cursor: pointer; padding: 0 4px; }
+    .btn-danger:hover { color: #d9363e; }
+    .input-field { height: 32px; padding: 0 10px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; }
+    .input-field:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .select-field { height: 32px; padding: 0 8px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; background: #fff; cursor: pointer; }
+    .checkbox-inline { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #666; cursor: pointer; white-space: nowrap; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+    .data-table thead th {
+      background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 500;
+      border-bottom: 1px solid #f0f0f0; white-space: nowrap; user-select: none;
+    }
+    .data-table tbody td { padding: 10px 12px; border-bottom: 1px solid #f5f5f5; overflow: hidden; text-overflow: ellipsis; }
+    .data-table tbody tr:hover { background: #fafafa; }
+    .empty-state { text-align: center; padding: 60px 0; color: #bbb; }
+
+    .pagination-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 16px 0; font-size: 13px; color: #666; }
+    .pagination-bar button {
+      height: 28px; padding: 0 12px; font-size: 12px; border: 1px solid #d9d9d9;
+      border-radius: 4px; background: #fff; cursor: pointer;
+    }
+    .pagination-bar button:hover { border-color: #ff4d88; color: #ff4d88; }
+    .pagination-bar button:disabled { opacity: .4; cursor: not-allowed; }
+    .pagination-bar button.active { background: #ff4d88; color: #fff; border-color: #ff4d88; }
+
+    .status-tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; }
+    .status-tag.enabled { background: #f6ffed; color: #52c41a; }
+    .status-tag.disabled { background: #f5f5f5; color: #999; }
+    .status-info { font-size: 12px; color: #999; margin-top: 2px; }
+
+    .type-tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; }
+    .type-tag.physical { background: #fff7e6; color: #fa8c16; }
+    .type-tag.lottery { background: #e6f7ff; color: #1890ff; }
+    .type-tag.vip { background: #f6ffed; color: #389e0d; }
+    .type-tag.invite { background: #fff0f6; color: #c41d7f; }
+    .type-tag.privilege { background: #f9f0ff; color: #722ed1; }
+    .type-tag.default { background: #f5f5f5; color: #999; }
+
+    .deliver-type-tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; }
+    .deliver-type-tag.online { background: #e6f7ff; color: #1677ff; }
+
+    .action-cell { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-box {
+      background: #fff; border-radius: 6px; box-shadow: 0 4px 24px rgba(0,0,0,.15);
+      width: 400px;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid #f0f0f0;
+    }
+    .modal-header .modal-title { font-size: 16px; font-weight: 600; color: #333; }
+    .modal-header .modal-close { cursor: pointer; font-size: 18px; color: #999; }
+    .modal-header .modal-close:hover { color: #ff4d88; }
+    .modal-body { padding: 24px; font-size: 14px; }
+    .modal-footer {
+      padding: 12px 24px; border-top: 1px solid #f0f0f0;
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <header class="app-header">
+      <div class="header-left">
+        <span class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed">✕</span>
+        <span class="brand">订阅管理系统</span>
+      </div>
+      <div class="header-right">
+        <span class="user-info">
+          <span class="user-avatar">张</span>
+          <span>张三</span>
+          <span>▾</span>
+        </span>
+      </div>
+    </header>
+
+    <div class="layout-body">
+      <aside class="app-sider" :class="{ collapsed: siderCollapsed }">
+        <div class="sider-logo">
+          <span class="logo-icon">♥</span>
+          <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
+        </div>
+        <div class="sider-menu">
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="sider-menu-item parent-open" @click="opToolsOpen = !opToolsOpen">
+            <span class="menu-icon">🔧</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+            <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="/"><span class="menu-label">弹窗</span></a>
+            <a class="sider-menu-item" href="/"><span class="menu-label">兑换码</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift-strategy/list')"><span class="menu-label">赠礼发放策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')"><span class="menu-label">限时促销策略</span></a>
+            <a class="sider-menu-item" href="/"><span class="menu-label">赠礼物流管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-pricing-strategy/list')"><span class="menu-label">活动价格策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-operations-strategy/list')"><span class="menu-label">活动投放策略</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="deployOpen = !deployOpen">
+            <span class="menu-icon">📢</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
+            <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/rights-pay/list')"><span class="menu-label">投放策略</span></a>
+            <a class="sider-menu-item" href="/"><span class="menu-label">页面模块展示</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="priceManageOpen = !priceManageOpen">
+            <span class="menu-icon">💰</span>
+            <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+            <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="/"><span class="menu-label">价格套餐</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/price-strategy/list')"><span class="menu-label">价格策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')"><span class="menu-label">促销套餐</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" :class="{ active: activeParent === 'product' }" @click="productManageOpen = !productManageOpen">
+            <span class="menu-icon">📦</span>
+            <span class="menu-label" v-show="!siderCollapsed">产品管理</span>
+            <span class="menu-arrow" :class="{ open: productManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: productManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="/"><span class="menu-label">权益库</span></a>
+            <a class="sider-menu-item active" href="javascript:void(0)" @click.stop="navigateTo('/gift/list')"><span class="menu-label">赠礼库</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" :class="{ active: activeParent === 'lottery' }" @click="lotteryManageOpen = !lotteryManageOpen">
+            <span class="menu-icon">🎯</span>
+            <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/prize/list')"><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/coupon/list')"><span class="menu-label">抽奖券管理</span></a>
+          </div>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">⚙️</span><span class="menu-label" v-show="!siderCollapsed">设置管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🏪</span><span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📚</span><span class="menu-label" v-show="!siderCollapsed">知识库</span></a>
+        </div>
+      </aside>
+
+      <main class="content-area">
+        <div class="page-body">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <a class="btn-primary" :href="getCreateUrl()">＋ 新增</a>
+            </div>
+            <div class="toolbar-right">
+              <input class="input-field" v-model="searchForm.id" placeholder="赠礼id" style="width:120px;" />
+              <input class="input-field" v-model="searchForm.name" placeholder="赠礼名" style="width:150px;" />
+              <button class="btn-primary" @click="handleSearch">查 找</button>
+              <label class="checkbox-inline">
+                <input type="checkbox" :checked="isEnabledOnly" @change="isEnabledOnly = $event.target.checked" />
+                仅看"启用"
+              </label>
+            </div>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:180px;">赠礼名</th>
+                <th style="width:150px;">赠礼别名</th>
+                <th style="width:70px;">id</th>
+                <th style="width:100px;">发货类型</th>
+                <th style="width:100px;">赠礼类型</th>
+                <th style="width:120px;">应用版本</th>
+                <th style="width:160px;">状态</th>
+                <th style="width:200px;">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in tableData" :key="row.id">
+                <td>{{ row.name }}</td>
+                <td>{{ row.alias || '-' }}</td>
+                <td>{{ row.id }}</td>
+                <td>
+                  <span v-if="row.deliver_type" class="deliver-type-tag online">{{ row.deliver_type }}</span>
+                  <span v-else style="color:#bbb;">-</span>
+                </td>
+                <td>
+                  <span class="type-tag" :class="getGiftTypeClass(row.gift_type)">{{ row.gift_type || '-' }}</span>
+                </td>
+                <td>{{ row.app_version || '~' }}</td>
+                <td>
+                  <span class="status-tag" :class="row.status === 1 ? 'enabled' : 'disabled'">{{ row.status === 1 ? '启用' : '失效' }}</span>
+                  <div class="status-info">{{ row.modifier }} 最后修改于{{ formatTime(row.updated_at) }}</div>
+                </td>
+                <td>
+                  <div class="action-cell">
+                    <a class="btn-link" :href="getEditUrl(row)">修改</a>
+                    <a class="btn-link" :href="getDetailUrl(row)">查看</a>
+                    <a class="btn-link" :href="getCopyUrl(row)">复制</a>
+                    <button class="btn-danger" @click="confirmDisable(row)" v-if="row.status === 1">失效</button>
+                    <a class="btn-link" href="/gift-strategy/list">去发放</a>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="tableData.length === 0 && !loading">
+                <td colspan="8" class="empty-state">暂无数据</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="pagination-bar" v-if="totalCount > 0">
+            <span>共 {{ totalCount }} 条</span>
+            <button :disabled="currentPage <= 1" @click="goPage(currentPage - 1)">‹ 上一页</button>
+            <span><strong style="color:#ff4d88;">{{ currentPage }}</strong> / {{ maxPage }}</span>
+            <button :disabled="currentPage >= maxPage" @click="goPage(currentPage + 1)">下一页 ›</button>
+            <span style="margin-left:8px;">
+              <select class="select-field" v-model.number="pageSize" @change="handlePageSizeChange" style="height:28px;">
+                <option :value="20">20 条/页</option>
+                <option :value="50">50 条/页</option>
+                <option :value="100">100 条/页</option>
+              </select>
+            </span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- 确认弹窗 -->
+    <div class="modal-overlay" v-if="confirmModal.visible" @click.self="confirmModal.visible = false">
+      <div class="modal-box">
+        <div class="modal-header">
+          <span class="modal-title">提示</span>
+          <span class="modal-close" @click="confirmModal.visible = false">✕</span>
+        </div>
+        <div class="modal-body">{{ confirmModal.message }}</div>
+        <div class="modal-footer">
+          <button class="btn-cancel" @click="confirmModal.visible = false">取消</button>
+          <button class="btn-ok" @click="handleConfirmOk">确认</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
+
+  <script>
+    const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+    const USE_MOCK = true;
+
+    const API_CONFIG = {
+      baseURL: '/api/vip-admin',
+    };
+
+    async function apiPost(path, body) {
+      const res = await fetch(API_CONFIG.baseURL + path, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: body ? JSON.stringify(body) : undefined
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    async function apiGet(path) {
+      const res = await fetch(API_CONFIG.baseURL + path, { credentials: 'include' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    // Mock 数据
+    const MOCK_GIFT_DATA = [
+      { id: 275, name: '无扩展图片', alias: '1', deliver_type: '线上领取', gift_type: '实物', app_version: '~', status: 1, modifier: '李四', updated_at: '2026-05-28 16:58' },
+      { id: 274, name: '618半年卡抽奖1次', alias: '618半年卡奖券', deliver_type: '', gift_type: '抽奖次数', app_version: '~', status: 1, modifier: '李四', updated_at: '2026-06-01 13:46' },
+      { id: 273, name: '618千金净雅卫生巾', alias: '卫生巾', deliver_type: '线上领取', gift_type: '实物', app_version: '~', status: 1, modifier: '李四', updated_at: '2026-07-14 09:11' },
+      { id: 272, name: '618月卡抽奖1次', alias: '618月卡奖券', deliver_type: '', gift_type: '抽奖次数', app_version: '~', status: 1, modifier: '王五', updated_at: '2026-06-03 20:06' },
+      { id: 271, name: '618季卡抽奖1次', alias: '618季卡奖券', deliver_type: '', gift_type: '抽奖次数', app_version: '~', status: 1, modifier: '李四', updated_at: '2026-06-18 13:52' },
+      { id: 268, name: '618赠送30天会员', alias: '618活动', deliver_type: '', gift_type: '会员会期', app_version: '~', status: 1, modifier: '李四', updated_at: '2026-06-11 15:19' },
+      { id: 266, name: '618年卡抽奖1次', alias: '618年卡奖券', deliver_type: '', gift_type: '抽奖次数', app_version: '~', status: 1, modifier: '李四', updated_at: '2026-06-04 10:00' },
+      { id: 262, name: '0514弹窗空气', alias: '0514弹窗空气', deliver_type: '线上领取', gift_type: '实物', app_version: '~', status: 1, modifier: '张三', updated_at: '2026-05-14 15:35' },
+      { id: 261, name: '亲友兑换3人', alias: '3人团', deliver_type: '', gift_type: '邀请码', app_version: '~', status: 1, modifier: '王五', updated_at: '2026-05-06 15:59' },
+      { id: 260, name: '亲友兑换2人', alias: '亲友卡的邀请码', deliver_type: '', gift_type: '邀请码', app_version: '~', status: 1, modifier: '王五', updated_at: '2026-05-13 13:43' },
+      { id: 256, name: '美柚6天会员-副本', alias: '美柚6天会员', deliver_type: '', gift_type: '会员会期', app_version: '~', status: 1, modifier: '赵六', updated_at: '2026-04-24 10:23' },
+      { id: 255, name: '906测试-无说明', alias: '906测试2-无说明', deliver_type: '', gift_type: '生活特权', app_version: '8.95.1 ~', status: 1, modifier: '李四', updated_at: '2026-04-21 17:27' },
+      { id: 254, name: '906测试-弹窗说明', alias: '906测试2-弹窗说明', deliver_type: '', gift_type: '生活特权', app_version: '8.95.1 ~', status: 1, modifier: '李四', updated_at: '2026-04-28 10:09' },
+      { id: 253, name: '亲友卡兑换年卡*1', alias: '亲友卡兑换年卡*1', deliver_type: '', gift_type: '邀请码', app_version: '~', status: 1, modifier: '孙七', updated_at: '2026-04-28 10:11' },
+      { id: 252, name: '亲友卡兑换年卡*2', alias: '亲友卡兑换年卡2', deliver_type: '', gift_type: '邀请码', app_version: '~', status: 1, modifier: '孙七', updated_at: '2026-04-28 10:12' },
+      { id: 250, name: '测试赠礼-已失效', alias: '测试', deliver_type: '线上领取', gift_type: '实物', app_version: '~', status: 2, modifier: '张三', updated_at: '2026-04-15 10:00' },
+    ];
+
+    const app = createApp({
+      setup() {
+        const loading = ref(false);
+        const siderCollapsed = ref(false);
+        const opToolsOpen = ref(false);
+        const deployOpen = ref(false);
+        const priceManageOpen = ref(false);
+        const productManageOpen = ref(true);
+        const lotteryManageOpen = ref(false);
+        const activeParent = ref('product');
+        const subMenuMaxHeight = ref('2000px');
+
+        const searchForm = reactive({ id: '', name: '' });
+        const isEnabledOnly = ref(true);
+
+        const currentPage = ref(1);
+        const pageSize = ref(20);
+        const totalCount = ref(0);
+        const tableData = ref([]);
+        const allData = ref([...MOCK_GIFT_DATA]);
+
+        const confirmModal = reactive({ visible: false, message: '', record: null });
+
+        const maxPage = computed(() => Math.max(1, Math.ceil(totalCount.value / pageSize.value)));
+
+        function fetchList() {
+          loading.value = true;
+          if (USE_MOCK) {
+            setTimeout(() => {
+              let filtered = [...allData.value];
+              if (searchForm.id) filtered = filtered.filter(item => String(item.id).includes(searchForm.id));
+              if (searchForm.name) filtered = filtered.filter(item => item.name.includes(searchForm.name));
+              if (isEnabledOnly.value) filtered = filtered.filter(item => item.status === 1);
+              totalCount.value = filtered.length;
+              const start = (currentPage.value - 1) * pageSize.value;
+              tableData.value = filtered.slice(start, start + pageSize.value);
+              loading.value = false;
+            }, 200);
+          } else {
+            // 真实 API 调用
+            const params = { page: currentPage.value, page_size: pageSize.value };
+            if (searchForm.id) params.id = searchForm.id;
+            if (searchForm.name) params.name = searchForm.name;
+            if (isEnabledOnly.value) params.status = 1;
+            apiGet('/gifts?' + new URLSearchParams(params).toString())
+              .then(data => {
+                tableData.value = data.list || data.items || [];
+                totalCount.value = data.total || data.total_count || 0;
+              })
+              .catch(e => { console.warn('获取赠礼列表失败', e); })
+              .finally(() => { loading.value = false; });
+          }
+        }
+
+        function handleSearch() { currentPage.value = 1; fetchList(); }
+        function goPage(p) { currentPage.value = p; fetchList(); }
+        function handlePageSizeChange() { currentPage.value = 1; fetchList(); }
+
+        function getCreateUrl() { return '/gift/create'; }
+        function getEditUrl(row) { return `/gift/edit?id=${row.id}&coupon_biz=`; }
+        function getDetailUrl(row) { return `/gift/detail?id=${row.id}&coupon_biz=`; }
+        function getCopyUrl(row) { return `/gift/create?id=${row.id}&coupon_biz=`; }
+
+        function getGiftTypeClass(type) {
+          if (!type) return 'default';
+          if (type.includes('实物')) return 'physical';
+          if (type.includes('抽奖')) return 'lottery';
+          if (type.includes('会员')) return 'vip';
+          if (type.includes('邀请')) return 'invite';
+          if (type.includes('特权')) return 'privilege';
+          return 'default';
+        }
+
+        function formatTime(timeStr) {
+          if (!timeStr) return '-';
+          return timeStr;
+        }
+
+        function confirmDisable(row) {
+          confirmModal.record = row;
+          confirmModal.message = `确认将赠礼"${row.name}"(id: ${row.id}) 设为失效吗？`;
+          confirmModal.visible = true;
+        }
+
+        function handleConfirmOk() {
+          if (confirmModal.record) {
+            if (USE_MOCK) {
+              const idx = allData.value.findIndex(item => item.id === confirmModal.record.id);
+              if (idx >= 0) allData.value[idx].status = 2;
+              fetchList();
+            } else {
+              apiPost(`/gift/${confirmModal.record.id}/disable`).then(() => fetchList()).catch(e => console.warn(e));
+            }
+          }
+          confirmModal.visible = false;
+        }
+
+        function navigateTo(url) {
+          if (location.hostname.includes('github.io')) {
+            const [path, query] = url.split('?');
+            const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
+            window.location.href = parts.join('-') + '.html' + (query ? '?' + query : '');
+          } else {
+            window.location.href = url;
+          }
+        }
+
+        onMounted(() => { fetchList(); });
+
+        return {
+          loading, siderCollapsed,
+          opToolsOpen, deployOpen, priceManageOpen, productManageOpen, lotteryManageOpen,
+          activeParent, subMenuMaxHeight,
+          searchForm, isEnabledOnly,
+          currentPage, pageSize, totalCount, tableData, maxPage,
+          confirmModal,
+          handleSearch, goPage, handlePageSizeChange,
+          getCreateUrl, getEditUrl, getDetailUrl, getCopyUrl,
+          getGiftTypeClass, formatTime,
+          confirmDisable, handleConfirmOk,
+          navigateTo
+        };
+      }
+    });
+
+    app.mount('#app');
+  </script>
+</body>
+</html>

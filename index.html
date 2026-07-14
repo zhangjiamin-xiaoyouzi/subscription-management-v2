@@ -292,19 +292,19 @@
           <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
         </div>
         <div class="sider-menu">
-          <a class="sider-menu-item" href="javascript:;">
+          <a class="sider-menu-item" href="/">
             <span class="menu-icon">📋</span>
             <span class="menu-label" v-show="!siderCollapsed">订单管理</span>
           </a>
-          <a class="sider-menu-item" href="javascript:;">
+          <a class="sider-menu-item" href="/">
             <span class="menu-icon">👥</span>
             <span class="menu-label" v-show="!siderCollapsed">用户管理</span>
           </a>
-          <a class="sider-menu-item" href="javascript:;">
+          <a class="sider-menu-item" href="/">
             <span class="menu-icon">🖼️</span>
             <span class="menu-label" v-show="!siderCollapsed">素材管理</span>
           </a>
-          <a class="sider-menu-item" href="javascript:;">
+          <a class="sider-menu-item" href="/">
             <span class="menu-icon">🔗</span>
             <span class="menu-label" v-show="!siderCollapsed">拼团管理</span>
           </a>
@@ -315,22 +315,22 @@
             <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
-            <a class="sider-menu-item" href="javascript:;">
+            <a class="sider-menu-item" href="/">
               <span class="menu-label">弹窗</span>
             </a>
-            <a class="sider-menu-item" href="javascript:;">
+            <a class="sider-menu-item" href="/">
               <span class="menu-label">兑换码</span>
             </a>
-            <a class="sider-menu-item active" href="javascript:;">
+            <a class="sider-menu-item active" href="/">
               <span class="menu-label">赠礼发放策略</span>
             </a>
-            <a class="sider-menu-item" href="javascript:;">
+            <a class="sider-menu-item" href="/">
               <span class="menu-label">限时促销策略</span>
             </a>
-            <a class="sider-menu-item" href="javascript:;">
+            <a class="sider-menu-item" href="/">
               <span class="menu-label">赠礼物流管理</span>
             </a>
-            <a class="sider-menu-item" href="javascript:;">
+            <a class="sider-menu-item" href="/">
               <span class="menu-label">活动价格策略</span>
             </a>
             <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-operations-strategy/list')">
@@ -344,7 +344,7 @@
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
             <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/rights-pay/list')"><span class="menu-label">投放策略</span></a>
-            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">页面模块展示</span></a>
+            <a class="sider-menu-item" href="/"><span class="menu-label">页面模块展示</span></a>
           </div>
           <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('price') }" @click="priceManageOpen = !priceManageOpen">
             <span class="menu-icon">💰</span>
@@ -352,14 +352,19 @@
             <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
           </div>
           <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
-            <a class="sider-menu-item" href="javascript:;"><span class="menu-label">价格套餐</span></a>
+            <a class="sider-menu-item" href="/"><span class="menu-label">价格套餐</span></a>
             <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/price-strategy/list')"><span class="menu-label">价格策略</span></a>
             <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')"><span class="menu-label">促销套餐</span></a>
           </div>
-          <a class="sider-menu-item" href="javascript:;">
+          <div class="sider-menu-item parent-open" :class="{ active: activeParents.includes('product') }" @click="productManageOpen = !productManageOpen">
             <span class="menu-icon">📦</span>
             <span class="menu-label" v-show="!siderCollapsed">产品管理</span>
-          </a>
+            <span class="menu-arrow" :class="{ open: productManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: productManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="/"><span class="menu-label">权益库</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift/list')"><span class="menu-label">赠礼库</span></a>
+          </div>
           <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
             <span class="menu-icon">🎯</span>
             <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
@@ -369,27 +374,27 @@
             <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/prize/list')"><span class="menu-label">奖品管理</span></a>
             <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/coupon/list')"><span class="menu-label">抽奖券管理</span></a>
           </div>
-          <a class="sider-menu-item" href="javascript:;">
+          <a class="sider-menu-item" href="/">
             <span class="menu-icon">🏆</span>
             <span class="menu-label" v-show="!siderCollapsed">中奖管理</span>
           </a>
-          <a class="sider-menu-item" href="javascript:;">
+          <a class="sider-menu-item" href="/">
             <span class="menu-icon">📜</span>
             <span class="menu-label" v-show="!siderCollapsed">订阅管理</span>
           </a>
-          <a class="sider-menu-item" href="javascript:;">
+          <a class="sider-menu-item" href="/">
             <span class="menu-icon">📁</span>
             <span class="menu-label" v-show="!siderCollapsed">素材库</span>
           </a>
-          <a class="sider-menu-item" href="javascript:;">
+          <a class="sider-menu-item" href="/">
             <span class="menu-icon">⚙️</span>
             <span class="menu-label" v-show="!siderCollapsed">设置管理</span>
           </a>
-          <a class="sider-menu-item" href="javascript:;">
+          <a class="sider-menu-item" href="/">
             <span class="menu-icon">🏪</span>
             <span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span>
           </a>
-          <a class="sider-menu-item" href="javascript:;">
+          <a class="sider-menu-item" href="/">
             <span class="menu-icon">📚</span>
             <span class="menu-label" v-show="!siderCollapsed">知识库</span>
           </a>
@@ -543,7 +548,7 @@
       <div class="modal-box" style="min-width:480px;">
         <div class="modal-hd">打开美柚App扫一扫预览，重启App即刻生效</div>
         <div class="modal-bd" style="text-align:center;">
-          <div class="preview-hint">使用预览功能前请联系江淮添加白名单</div>
+          <div class="preview-hint">使用预览功能前请联系刘十二添加白名单</div>
           <div style="display:flex; justify-content:center;">
             <div class="preview-box">
               <div class="qrcode-ph">二维码<br>(需集成 QR 库)</div>
@@ -741,6 +746,7 @@
         const deployOpen = ref(false);
         const priceManageOpen = ref(false);
         const lotteryManageOpen = ref(false);
+        const productManageOpen = ref(false);
         const activeParents = ref(['opTools']);
         const subMenuMaxHeight = ref('2000px');
 
@@ -1007,7 +1013,7 @@
           loading, tableData, totalCount, currentPage, pageSize, maxPage,
           sortDir, searchForm, isActiveOnly, editingRowId, editingValue, enumData,
           openDropdownId, confirmModal, previewModal, statusText,
-          siderCollapsed, opToolsOpen, deployOpen, subMenuMaxHeight, activeParents,
+          siderCollapsed, opToolsOpen, deployOpen, priceManageOpen, lotteryManageOpen, productManageOpen, subMenuMaxHeight, activeParents,
           selectedIds, isPageAllSelected, batchModal,
           handleSearch, handleActiveOnlyChange, toggleSort, goPage, handlePageSizeChange,
           toggleSelectAll, toggleSelectRow,

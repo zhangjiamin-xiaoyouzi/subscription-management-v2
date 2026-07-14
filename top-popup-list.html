@@ -100,7 +100,7 @@
       <div class="header-right">
         <span class="user-info">
           <span class="user-avatar">张</span>
-          <span>张家敏</span>
+          <span>张三</span>
           <span>▾</span>
         </span>
       </div>
@@ -293,16 +293,16 @@
         const pageSize = 20;
 
         const mockData = [
-          { id: 15, name: '育儿权益早知道', priority: 100, conditions: '会员状态包含会员生效中\n身份模式包含怀孕\n应用版本 8.70.0~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含怀孕', '应用版本 8.70.0~'], startDate: '2026-01-07 00:00', endDate: '2027-01-07 13:47', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-22 14:54:29', updateBy: '庄子慧', status: '投放中' },
-          { id: 16, name: '价格1_会员tab弹窗_美团重新上122', priority: 99, conditions: '会员状态包含会员生效中\n身份模式包含经期，备孕，怀孕，育儿\n待领取券包含美团外卖80元券包\n应用版本 8.70.0~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含经期，备孕，怀孕，育儿', '待领取券包含美团外卖80元券包', '应用版本 8.70.0~'], startDate: '2026-01-07 00:00', endDate: '2027-01-07 13:53', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-22 14:07:25', updateBy: '庄子慧', status: '投放中' },
+          { id: 15, name: '育儿权益早知道', priority: 100, conditions: '会员状态包含会员生效中\n身份模式包含怀孕\n应用版本 8.70.0~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含怀孕', '应用版本 8.70.0~'], startDate: '2026-01-07 00:00', endDate: '2027-01-07 13:47', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-22 14:54:29', updateBy: '陈一一', status: '投放中' },
+          { id: 16, name: '价格1_会员tab弹窗_美团重新上122', priority: 99, conditions: '会员状态包含会员生效中\n身份模式包含经期，备孕，怀孕，育儿\n待领取券包含美团外卖80元券包\n应用版本 8.70.0~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含经期，备孕，怀孕，育儿', '待领取券包含美团外卖80元券包', '应用版本 8.70.0~'], startDate: '2026-01-07 00:00', endDate: '2027-01-07 13:53', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-22 14:07:25', updateBy: '陈一一', status: '投放中' },
           { id: 356, name: '会员2周年大促-存量会员抽奖', priority: 101, conditions: '会员状态包含会员生效中\n身份模式包含经期，怀孕，备孕，育儿\n应用版本 9.03.0~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含经期，怀孕，备孕，育儿', '应用版本 9.03.0~'], startDate: '2026-03-11 00:00', endDate: '2026-03-17 00:00', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-03-17 00:05:33', updateBy: '自动下线', status: '下线中' },
           { id: 18, name: '价格1_会员tab弹窗_备孕生育力自测', priority: 97, conditions: '会员状态包含会员生效中\n身份模式包含备孕\n应用版本 8.70.0~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含备孕', '应用版本 8.70.0~'], startDate: '2025-01-07 00:00', endDate: '2026-01-07 14:00', subPlan: '订阅计划-大于等于876版本', updateTime: '2026-01-07 15:37:22', updateBy: '自动下线', status: '下线中' },
           { id: 10, name: '验证会员tab弹窗用', priority: 1, conditions: '会员状态包含从未开通过，会员生效中，已过期\n身份模式包含经期，备孕，怀孕，育儿\n应用版本 8.84.0~', conditionsDetail: ['会员状态包含从未开通过，会员生效中，已过期', '身份模式包含经期，备孕，怀孕，育儿', '应用版本 8.84.0~'], startDate: '2024-12-27 16:14', endDate: '2024-12-31 23:14', subPlan: '订阅计划-大于等于876版本', updateTime: '2025-04-18 15:23:15', updateBy: '自动下线', status: '下线中' },
           { id: 17, name: '价格1_会员tab弹窗_【新用户】省钱+', priority: 98, conditions: '会员状态包含会员生效中\n身份模式包含全部\n待领取券包含滴滴出行80元券包\n应用版本 ~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含全部', '待领取券包含滴滴出行80元券包', '应用版本 ~'], startDate: '2025-01-07 00:00', endDate: '2026-01-07 13:57', subPlan: '订阅计划-大于等于876版本', updateTime: '2025-04-18 15:23:15', updateBy: '周若凡', status: '下线中' },
-          { id: 19, name: '价格1_会员tab弹窗_淘宝年货节', priority: 96, conditions: '会员状态包含会员生效中\n身份模式包含全部\n应用版本 ~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含全部', '应用版本 ~'], startDate: '2025-01-07 00:00', endDate: '2026-01-07 14:02', subPlan: '订阅计划-大于等于876版本', updateTime: '2025-04-18 15:23:15', updateBy: '庄子慧', status: '下线中' },
-          { id: 20, name: '价格1_会员tab弹窗_新京东1224', priority: 95, conditions: '会员状态包含会员生效中\n身份模式包含经期，备孕，怀孕，育儿\n应用版本 ~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含经期，备孕，怀孕，育儿', '应用版本 ~'], startDate: '2025-01-07 00:00', endDate: '2026-01-07 14:08', subPlan: '订阅计划-大于等于876版本', updateTime: '2025-04-18 15:23:15', updateBy: '庄子慧', status: '下线中' },
+          { id: 19, name: '价格1_会员tab弹窗_淘宝年货节', priority: 96, conditions: '会员状态包含会员生效中\n身份模式包含全部\n应用版本 ~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含全部', '应用版本 ~'], startDate: '2025-01-07 00:00', endDate: '2026-01-07 14:02', subPlan: '订阅计划-大于等于876版本', updateTime: '2025-04-18 15:23:15', updateBy: '陈一一', status: '下线中' },
+          { id: 20, name: '价格1_会员tab弹窗_新京东1224', priority: 95, conditions: '会员状态包含会员生效中\n身份模式包含经期，备孕，怀孕，育儿\n应用版本 ~', conditionsDetail: ['会员状态包含会员生效中', '身份模式包含经期，备孕，怀孕，育儿', '应用版本 ~'], startDate: '2025-01-07 00:00', endDate: '2026-01-07 14:08', subPlan: '订阅计划-大于等于876版本', updateTime: '2025-04-18 15:23:15', updateBy: '陈一一', status: '下线中' },
           { id: 21, name: '京东医疗弹窗', priority: 101, conditions: '会员状态包含从未开通过，会员生效中，已过期\n身份模式包含全部\n应用版本 ~', conditionsDetail: ['会员状态包含从未开通过，会员生效中，已过期', '身份模式包含全部', '应用版本 ~'], startDate: '2025-02-14 14:29', endDate: '2025-02-15 14:29', subPlan: '订阅计划-大于等于876版本', updateTime: '2025-04-18 15:23:15', updateBy: '自动下线', status: '下线中' },
-          { id: 22, name: '新权益宣推-经期健康度/黄金受孕期', priority: 101, conditions: '会员状态包含从未开通过，已过期\n身份模式包含经期，备孕\n应用版本 8.86.0~', conditionsDetail: ['会员状态包含从未开通过，已过期', '身份模式包含经期，备孕', '应用版本 8.86.0~'], startDate: '2025-03-03 00:00', endDate: '2025-03-31 15:48', subPlan: '订阅计划-大于等于876版本', updateTime: '2025-04-18 15:23:15', updateBy: '庄子慧', status: '下线中' },
+          { id: 22, name: '新权益宣推-经期健康度/黄金受孕期', priority: 101, conditions: '会员状态包含从未开通过，已过期\n身份模式包含经期，备孕\n应用版本 8.86.0~', conditionsDetail: ['会员状态包含从未开通过，已过期', '身份模式包含经期，备孕', '应用版本 8.86.0~'], startDate: '2025-03-03 00:00', endDate: '2025-03-31 15:48', subPlan: '订阅计划-大于等于876版本', updateTime: '2025-04-18 15:23:15', updateBy: '陈一一', status: '下线中' },
         ];
 
         const total = ref(mockData.length);
