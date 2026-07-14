@@ -585,6 +585,15 @@
           finally { saving.value = false; }
         }
 
+        function convertUrl(url) {
+          if (location.hostname.includes('github.io')) {
+            const [path, query] = url.split('?');
+            const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
+            return parts.join('-') + '.html' + (query ? '?' + query : '');
+          }
+          return url;
+        }
+
         function navigateTo(url) {
           if (location.hostname.includes('github.io')) {
             const [path, query] = url.split('?');
@@ -600,7 +609,7 @@
           incrementValue, decrementValue, validateValue, addExtImage,
           handleIconUpload, handleExtImageUpload,
           handleMember876Upload, handleMember877Upload, handleSuccessPopupUpload,
-          handleSave, navigateTo
+          handleSave, navigateTo, convertUrl
         };
       }
     });
