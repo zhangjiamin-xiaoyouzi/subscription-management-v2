@@ -111,7 +111,59 @@
     .detail-row:last-child { margin-bottom: 0; }
     .detail-label { width: 130px; flex-shrink: 0; padding-right: 12px; font-size: 13px; color: #888; line-height: 32px; text-align: right; }
     .detail-content { flex: 1; min-height: 32px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+
+    /* 富文本编辑器 */
+    .richtext-editor { border: 1px solid #d9d9d9; border-radius: 4px; overflow: hidden; }
+    .richtext-editor:focus-within { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .richtext-toolbar { display: flex; align-items: center; gap: 2px; padding: 6px 8px; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+    .richtext-toolbar button,
+    .richtext-toolbar .richtext-img-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 26px; border: 1px solid transparent; border-radius: 3px; background: transparent; cursor: pointer; font-size: 12px; color: #555; transition: all .15s; padding: 0; }
+    .richtext-toolbar button:hover,
+    .richtext-toolbar .richtext-img-btn:hover { background: #e6e6e6; border-color: #d9d9d9; }
+    .richtext-area { min-height: 120px; max-height: 400px; padding: 10px 12px; font-size: 13px; line-height: 1.7; color: #333; outline: none; overflow-y: auto; word-break: break-word; }
+    .richtext-area:empty::before { content: '请输入使用须知内容…'; color: #bbb; }
+    .richtext-area img { max-width: 100%; height: auto; border-radius: 4px; margin: 4px 0; }
   </style>
+
+  <style id="__req_tip_style2__">
+.req-anno-btn{display:inline-block;background:#e67e00;color:#fff;border:none;border-radius:3px;
+  padding:1px 7px;font-size:11px;line-height:18px;cursor:pointer;margin-right:8px;
+  vertical-align:middle;font-weight:600;opacity:.9}
+.req-anno-btn:hover{background:#cf6c00;opacity:1}
+.req-anno-box{display:none}
+#__req_modal__ *{box-sizing:border-box}
+</style>
+<script>
+function toggleReqAnno(btn) {
+  var box = btn.parentElement.querySelector('.req-anno-box');
+  if (!box) return;
+  if (document.getElementById('__req_modal__')) return;
+  var ov = document.createElement('div');
+  ov.id = '__req_modal__';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);'
+    + 'z-index:999998;display:flex;align-items:center;justify-content:center';
+  var card = document.createElement('div');
+  card.style.cssText = 'background:#fff;border-radius:8px;padding:24px 28px 20px;max-width:420px;'
+    + 'width:92%;box-shadow:0 8px 32px rgba(0,0,0,.22);position:relative;border-top:4px solid #e67e00';
+  var cls = document.createElement('button');
+  cls.innerHTML = '&times;';
+  cls.style.cssText = 'position:absolute;top:10px;right:14px;background:none;border:none;'
+    + 'font-size:22px;line-height:1;cursor:pointer;color:#aaa;padding:0';
+  cls.onclick = function () { ov.remove(); };
+  var ttl = document.createElement('div');
+  ttl.style.cssText = 'font-size:13px;font-weight:700;color:#e67e00;margin-bottom:12px;letter-spacing:.5px';
+  ttl.textContent = '📋 需求说明';
+  var body = document.createElement('div');
+  body.style.cssText = 'font-size:12px;color:#5a4000;line-height:1.9;white-space:pre-line;'
+    + 'background:#fffbe6;padding:12px 14px;border-radius:6px;border-left:3px solid #e67e00;'
+    + 'max-height:60vh;overflow-y:auto';
+  body.textContent = box.textContent.trim();
+  card.appendChild(cls); card.appendChild(ttl); card.appendChild(body);
+  ov.appendChild(card);
+  ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+}
+</script>
 </head>
 <body>
   <div id="app" v-cloak>
@@ -343,6 +395,28 @@
                   </select>
                 </div>
               </div>
+              <div class="form-row">
+                <div class="form-label" style="line-height:normal;padding-top:4px;">
+                  <button class="req-anno-btn" onclick="toggleReqAnno(this)" style="display:block;margin-bottom:3px;">需求说明</button>
+                  使用须知<span class="help-icon" title="发货类型=物流发货的实物奖品配置，配置后领取页展示使用须知模块">?</span> :
+                  <div class="req-anno-box">【使用须知】非必填，支持富文本输入（图片+文本）。仅当发货类型选为"物流发货"且赠礼类型为"实物"时，此配置生效。配置后用户在领取页可查看使用须知模块。</div>
+                </div>
+                <div class="form-control">
+                  <div class="richtext-editor">
+                    <div class="richtext-toolbar">
+                      <button type="button" @click="execBold" title="加粗"><b>B</b></button>
+                      <button type="button" @click="execItalic" title="斜体"><i>I</i></button>
+                      <button type="button" @click="execUnderline" title="下划线"><u>U</u></button>
+                      <label class="richtext-img-btn" title="插入图片">
+                        📷
+                        <input type="file" accept="image/*" @change="handleUsageNotesImage" style="display:none" />
+                      </label>
+                      <button type="button" @click="execClearFormat" title="清除格式">✕</button>
+                    </div>
+                    <div class="richtext-area" contenteditable="true" @input="onUsageNotesInput" ref="usageNotesEditor" v-html="formData.usage_notes"></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- 素材管理 -->
@@ -499,6 +573,7 @@
           expire_type: 'follow',
           intro_type: 'none',
           claim_page: '',
+          usage_notes: '',
           icon: null,
           icon_preview: '',
           ext_images: [null],
@@ -558,6 +633,27 @@
         function handleMember877Upload(e) { formData.member_877 = e.target.files[0]; }
         function handleSuccessPopupUpload(e) { formData.success_popup = e.target.files[0]; }
 
+        // 富文本编辑器
+        const usageNotesEditor = ref(null);
+        function execBold() { document.execCommand('bold', false); usageNotesEditor.value?.focus(); }
+        function execItalic() { document.execCommand('italic', false); usageNotesEditor.value?.focus(); }
+        function execUnderline() { document.execCommand('underline', false); usageNotesEditor.value?.focus(); }
+        function execClearFormat() { document.execCommand('removeFormat', false); usageNotesEditor.value?.focus(); }
+        function handleUsageNotesImage(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const el = usageNotesEditor.value;
+            if (el) { el.focus(); document.execCommand('insertImage', false, ev.target.result); }
+          };
+          reader.readAsDataURL(file);
+          e.target.value = '';
+        }
+        function onUsageNotesInput(e) {
+          formData.usage_notes = e.target.innerHTML;
+        }
+
         function validate() {
           let valid = true;
           errors.name = errors.alias = errors.value = '';
@@ -609,7 +705,9 @@
           incrementValue, decrementValue, validateValue, addExtImage,
           handleIconUpload, handleExtImageUpload,
           handleMember876Upload, handleMember877Upload, handleSuccessPopupUpload,
-          handleSave, navigateTo, convertUrl
+          handleSave, navigateTo, convertUrl,
+          execBold, execItalic, execUnderline, execClearFormat,
+          handleUsageNotesImage, onUsageNotesInput, usageNotesEditor,
         };
       }
     });

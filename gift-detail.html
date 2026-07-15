@@ -56,12 +56,19 @@
     .tag.blue { background: #e6f7ff; color: #1890ff; }
     .tag.orange { background: #fff7e6; color: #fa8c16; }
     .detail-empty { color: #ccc; }
+    .help-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 14px; height: 14px; border-radius: 50%; background: #e8e8e8;
+      color: #999; font-size: 10px; cursor: help; margin-left: 2px; vertical-align: middle;
+    }
     .detail-actions { display: flex; justify-content: center; gap: 12px; padding: 20px 0; }
     .btn-primary { display: inline-flex; align-items: center; gap: 4px; height: 36px; padding: 0 24px; font-size: 14px; background: #ff4d88; color: #fff; border: 1px solid #ff4d88; border-radius: 4px; cursor: pointer; transition: all .2s; white-space: nowrap; text-decoration: none; }
     .btn-primary:hover { background: #ff3875; }
     .btn-back { display: inline-flex; align-items: center; height: 36px; padding: 0 24px; font-size: 14px; background: #fff; color: #666; border: 1px solid #d9d9d9; border-radius: 4px; cursor: pointer; transition: all .2s; text-decoration: none; }
     .btn-back:hover { border-color: #ff4d88; color: #ff4d88; }
     .loading-text { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+    .usage-notes-preview { font-size: 13px; line-height: 1.7; color: #333; padding: 8px 12px; background: #fafafa; border-radius: 4px; min-height: 32px; word-break: break-word; }
+    .usage-notes-preview img { max-width: 100%; height: auto; border-radius: 4px; margin: 4px 0; }
   </style>
 </head>
 <body>
@@ -226,6 +233,15 @@
                   <span v-else class="detail-empty">—</span>
                 </div>
               </div>
+              <div class="detail-row">
+                <div class="detail-label">
+                  使用须知<span class="help-icon" title="发货类型=物流发货的实物奖品配置，配置后领取页展示使用须知模块">?</span>：
+                </div>
+                <div class="detail-content">
+                  <div v-if="data.usage_notes" class="usage-notes-preview" v-html="data.usage_notes"></div>
+                  <span v-else class="detail-empty">—</span>
+                </div>
+              </div>
             </div>
 
             <!-- 素材管理 -->
@@ -330,7 +346,7 @@
         const data = reactive({
           id: '', name: '', alias: '', deliver_type: '', gift_type: '', source: '',
           cost_level: '', value: 0, stock: 0, expire_type: '', intro_type: '',
-          claim_page: '', privilege_tag: '', version_min: '', version_max: '',
+          claim_page: '', usage_notes: '', privilege_tag: '', version_min: '', version_max: '',
           icon_preview: '', ext_images: [], member_876: '', member_877: '', success_popup: '',
         });
 
@@ -360,6 +376,7 @@
                 data.expire_type = item.expire_type || 'follow';
                 data.intro_type = item.intro_type || 'none';
                 data.claim_page = item.claim_page || '';
+                data.usage_notes = item.usage_notes || '';
                 data.privilege_tag = item.privilege_tag || '';
                 data.version_min = item.version_min || '';
                 data.version_max = item.version_max || '';
