@@ -94,10 +94,48 @@
     .loading-text { text-align: center; padding: 40px; color: #999; font-size: 14px; }
     .usage-notes-preview { font-size: 13px; line-height: 1.7; color: #333; padding: 8px 12px; background: #fafafa; border-radius: 4px; min-height: 32px; word-break: break-word; }
     .usage-notes-preview img { max-width: 100%; height: auto; border-radius: 4px; margin: 4px 0; }
+
+    .req-anno-btn{display:inline-block;background:#e67e00;color:#fff;border:none;border-radius:3px;
+      padding:1px 7px;font-size:11px;line-height:18px;cursor:pointer;margin-right:8px;
+      vertical-align:middle;font-weight:600;opacity:.9}
+    .req-anno-btn:hover{background:#cf6c00;opacity:1}
+    .req-anno-box{display:none}
+    #__req_modal__ *{box-sizing:border-box}
   </style>
 </head>
 <body>
   <div id="app" v-cloak>
+<script>
+function toggleReqAnno(btn) {
+  var box = btn.parentElement.querySelector('.req-anno-box');
+  if (!box) return;
+  if (document.getElementById('__req_modal__')) return;
+  var ov = document.createElement('div');
+  ov.id = '__req_modal__';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);'
+    + 'z-index:999998;display:flex;align-items:center;justify-content:center';
+  var card = document.createElement('div');
+  card.style.cssText = 'background:#fff;border-radius:8px;padding:24px 28px 20px;max-width:420px;'
+    + 'width:92%;box-shadow:0 8px 32px rgba(0,0,0,.22);position:relative;border-top:4px solid #e67e00';
+  var cls = document.createElement('button');
+  cls.innerHTML = '&times;';
+  cls.style.cssText = 'position:absolute;top:10px;right:14px;background:none;border:none;'
+    + 'font-size:22px;line-height:1;cursor:pointer;color:#aaa;padding:0';
+  cls.onclick = function () { ov.remove(); };
+  var ttl = document.createElement('div');
+  ttl.style.cssText = 'font-size:13px;font-weight:700;color:#e67e00;margin-bottom:12px;letter-spacing:.5px';
+  ttl.textContent = '📋 需求说明';
+  var body = document.createElement('div');
+  body.style.cssText = 'font-size:12px;color:#5a4000;line-height:1.9;white-space:pre-line;'
+    + 'background:#fffbe6;padding:12px 14px;border-radius:6px;border-left:3px solid #e67e00;'
+    + 'max-height:60vh;overflow-y:auto';
+  body.textContent = box.textContent.trim();
+  card.appendChild(cls); card.appendChild(ttl); card.appendChild(body);
+  ov.appendChild(card);
+  ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+}
+</script>
     <header class="app-header">
       <div class="header-left">
         <span class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed">✕</span>
@@ -260,7 +298,9 @@
               </div>
               <div class="detail-row">
                 <div class="detail-label">
+                  <button class="req-anno-btn" onclick="toggleReqAnno(this)" style="display:block;margin-bottom:3px;">需求说明</button>
                   使用须知<span class="help-icon" data-tip="发货类型=物流发货的实物奖品配置，配置后领取页展示使用须知模块">?</span>：
+                  <div class="req-anno-box">【使用须知】非必填，支持富文本输入（图片+文本）。仅当发货类型选为"物流发货"且赠礼类型为"实物"时，此配置生效。配置后用户在领取页可查看使用须知模块。</div>
                 </div>
                 <div class="detail-content">
                   <div v-if="data.usage_notes" class="usage-notes-preview" v-html="data.usage_notes"></div>
