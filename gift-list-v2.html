@@ -440,7 +440,7 @@
         function convertUrl(url) {
             const [path, query] = url.split('?');
             const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
-            return parts.join('-') + '-v2.html' + (query ? '?' + query : '');
+            return '/' + parts.join('-') + '-v2.html' + (query ? '?' + query : '');
         }
         function getCreateUrl() { return convertUrl('/gift/create'); }
         function getEditUrl(row) { return convertUrl(`/gift/edit?id=${row.id}&coupon_biz=`); }

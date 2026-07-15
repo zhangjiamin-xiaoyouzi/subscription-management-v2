@@ -857,7 +857,7 @@ function toggleReqAnno(btn) {
         function convertUrl(url) {
             const [path, query] = url.split('?');
             const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
-            return parts.join('-') + '-v2.html' + (query ? '?' + query : '');
+            return '/' + parts.join('-') + '-v2.html' + (query ? '?' + query : '');
         }
 
         function navigateTo(url) {
