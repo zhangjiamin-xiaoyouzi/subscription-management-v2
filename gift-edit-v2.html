@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>修改赠礼 - 赠礼库</title>
+  <link rel="stylesheet" href="https://unpkg.com/ant-design-vue@3.2.20/dist/antd.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif; background: #f5f5f5; color: #333; font-size: 14px; }
+    #app { min-height: 100vh; display: flex; flex-direction: column; }
+    [v-cloak] { display: none !important; }
+    .app-header { height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03); position: sticky; top: 0; z-index: 100; }
+    .app-header .header-left { display: flex; align-items: center; gap: 4px; }
+    .header-left .menu-fold-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s; }
+    .header-left .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .header-left .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; user-select: none; }
+    .app-header .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .header-right .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
+    .main-area { display: flex; flex: 1; }
+    .sider { width: 200px; background: #fff; color: rgba(0,0,0,.8); flex-shrink: 0; overflow-y: auto; transition: width .2s; display: flex; flex-direction: column; border-right: 1px solid #f0f0f0; }
+    .sider.collapsed { width: 48px; }
+    .sider-logo { height: 48px; padding: 0 16px; display: flex; align-items: center; border-bottom: 1px solid #f0f0f0; font-size: 15px; font-weight: 600; color: rgba(0,0,0,.8); gap: 10px; overflow: hidden; }
+    .sider-logo .logo-icon { width: 24px; height: 24px; background: #ff4d88; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; flex-shrink: 0; }
+    .sider-logo .logo-text { white-space: nowrap; }
+    .sider-menu { flex: 1; padding: 4px 0; }
+    .sider-menu-item { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 40px; font-size: 13px; color: rgba(0,0,0,.6); cursor: pointer; text-decoration: none; transition: all .2s ease; white-space: nowrap; overflow: hidden; border-left: 3px solid transparent; }
+    .sider-menu-item .menu-icon { font-size: 14px; width: 16px; text-align: center; flex-shrink: 0; }
+    .sider-menu-item .menu-label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+    .sider-menu-item .menu-arrow { font-size: 10px; color: rgba(0,0,0,.25); flex-shrink: 0; transition: transform .2s; }
+    .sider-menu-item .menu-arrow.open { transform: rotate(90deg); }
+    .sider-menu-item:hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
+    .sider-menu-item.active { color: #ff4d88; background: linear-gradient(90deg,rgba(255,77,136,.08),rgba(255,77,136,.01)); border-left-color: #ff4d88; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .sider-submenu { overflow: hidden; transition: max-height .3s cubic-bezier(0.4,0,0.2,1); }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; border-left: 3px solid transparent; }
+    .sider-submenu .sider-menu-item.active { color: #ff4d88; background: #fff0f6; border-left-color: #ff4d88; font-weight: 500; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
+    .content-area { flex: 1; background: #f0f2f5; overflow-y: auto; }
+    .page-body { padding: 16px 24px 24px; }
+    .breadcrumb { font-size: 13px; color: #999; margin-bottom: 16px; }
+    .breadcrumb a { color: #ff4d88; text-decoration: none; }
+    .breadcrumb a:hover { color: #ff3875; }
+    .breadcrumb span { color: #666; }
+    .form-card { background: #fff; border-radius: 4px; padding: 24px; margin-bottom: 16px; }
+    .form-card h5.section-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
+    .form-row { display: flex; align-items: flex-start; margin-bottom: 20px; }
+    .form-row:last-child { margin-bottom: 0; }
+    .form-label { width: 130px; flex-shrink: 0; padding-right: 12px; font-size: 13px; color: #555; line-height: 32px; text-align: right; }
+    .form-label .required { color: #ff4d4f; margin-right: 2px; }
+    .form-label .help-icon {
+      position: relative;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 14px; height: 14px; border-radius: 50%; background: #e8e8e8;
+      color: #999; font-size: 10px; cursor: help; margin-left: 2px; vertical-align: middle;
+    }
+    .form-label .help-icon::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,.78); color: #fff;
+      font-size: 12px; line-height: 1.5;
+      padding: 6px 10px; border-radius: 4px;
+      white-space: nowrap; pointer-events: none;
+      opacity: 0; visibility: hidden;
+      transition: opacity .15s, visibility .15s;
+      z-index: 9999;
+    }
+    .form-label .help-icon::before {
+      content: '';
+      position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: rgba(0,0,0,.78);
+      opacity: 0; visibility: hidden;
+      transition: opacity .15s, visibility .15s;
+      z-index: 9999;
+    }
+    .form-label .help-icon:hover::after,
+    .form-label .help-icon:hover::before {
+      opacity: 1; visibility: visible;
+    }
+    .form-control { flex: 1; max-width: 500px; }
+    .form-hint { font-size: 12px; color: #999; margin-top: 4px; }
+    .form-error { font-size: 12px; color: #ff4d4f; margin-top: 4px; }
+    .input-field { height: 32px; padding: 0 10px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; width: 100%; }
+    .input-field:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .input-field:disabled { background: #f5f5f5; color: #999; cursor: not-allowed; }
+    .input-field.error { border-color: #ff4d4f; }
+    .input-field.short { width: 200px; }
+    .radio-group { display: flex; gap: 20px; flex-wrap: wrap; }
+    .radio-item { display: flex; align-items: flex-start; gap: 6px; cursor: pointer; font-size: 13px; color: #333; }
+    .radio-item input[type="radio"] { margin-top: 1px; accent-color: #ff4d88; }
+    .radio-item .radio-desc { font-size: 12px; color: #999; display: block; }
+    .version-range { display: flex; align-items: center; gap: 8px; }
+    .version-range .input-field { width: 110px; }
+    .version-range .sep { color: #999; font-size: 13px; }
+    .number-input-wrap { display: flex; align-items: center; gap: 0; width: 140px; }
+    .number-input-wrap button { width: 28px; height: 32px; border: 1px solid #d9d9d9; background: #fafafa; cursor: pointer; font-size: 12px; color: #666; display: flex; align-items: center; justify-content: center; }
+    .number-input-wrap button:hover { border-color: #ff4d88; color: #ff4d88; }
+    .number-input-wrap button:first-child { border-radius: 4px 0 0 4px; }
+    .number-input-wrap button:last-child { border-radius: 0 4px 4px 0; }
+    .number-input-wrap input { width: 84px; height: 32px; border: 1px solid #d9d9d9; border-left: none; border-right: none; text-align: center; font-size: 13px; outline: none; }
+    .number-input-wrap input:focus { border-color: #ff4d88; }
+    .number-unit { font-size: 13px; color: #666; margin-left: 6px; }
+    .select-field { height: 32px; padding: 0 8px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; background: #fff; cursor: pointer; width: 100%; }
+    .select-field:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .upload-box { width: 80px; height: 80px; border: 1px dashed #d9d9d9; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; background: #fafafa; color: #999; }
+    .upload-box:hover { border-color: #ff4d88; color: #ff4d88; }
+    .upload-box .plus-icon { font-size: 22px; line-height: 1; }
+    .upload-box .upload-text { font-size: 11px; margin-top: 2px; }
+    .upload-box input[type="file"] { display: none; }
+    .upload-hint { font-size: 12px; color: #999; margin-left: 12px; }
+    .upload-row { display: flex; align-items: center; gap: 12px; }
+    .add-col-btn { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 12px; font-size: 12px; color: #ff4d88; border: 1px dashed #ff4d88; border-radius: 4px; background: #fff; cursor: pointer; transition: all .15s; }
+    .add-col-btn:hover { background: #fff0f6; }
+    .ext-image-list { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* 规格表格 */
+    .spec-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .spec-table th { background: #fafafa; padding: 8px 10px; text-align: left; font-weight: 500; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+    .spec-table td { padding: 6px 10px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+    .spec-table .spec-input { height: 32px; padding: 0 8px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; width: 100%; }
+    .spec-table .spec-input:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .spec-table .spec-input.stock-input { width: 100px; }
+    .spec-table .spec-del-btn { background: none; border: none; color: #ff4d4f; font-size: 13px; cursor: pointer; padding: 4px 8px; }
+    .spec-table .spec-del-btn:hover { color: #d9363e; }
+    .spec-total-stock { font-size: 12px; color: #999; margin-top: 6px; }
+    .spec-group-name-input { width: 120px; }
+    .form-hint { font-size: 12px; color: #999; margin-top: 4px; }
+    .checkbox-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+    .checkbox-inline input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; }
+
+    .info-tip { display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 4px; font-size: 12px; color: #ad8b00; margin-bottom: 16px; }
+    .info-tip .tip-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .form-actions { display: flex; justify-content: center; gap: 12px; padding: 20px 0; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 4px; height: 36px; padding: 0 24px; font-size: 14px; background: #ff4d88; color: #fff; border: 1px solid #ff4d88; border-radius: 4px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+    .btn-primary:hover { background: #ff3875; }
+    .btn-cancel { display: inline-flex; align-items: center; height: 36px; padding: 0 24px; font-size: 14px; background: #fff; color: #666; border: 1px solid #d9d9d9; border-radius: 4px; cursor: pointer; transition: all .2s; text-decoration: none; }
+    .btn-cancel:hover { border-color: #ff4d88; color: #ff4d88; }
+    .loading-text { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+
+    /* 详情模式样式 */
+    .detail-value { font-size: 13px; color: #333; line-height: 32px; }
+    .detail-desc { font-size: 12px; color: #999; margin-top: 2px; }
+    .detail-tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; }
+    .detail-tag.green { background: #f6ffed; color: #52c41a; }
+    .detail-tag.red { background: #fff2f0; color: #ff4d4f; }
+    .detail-tag.blue { background: #e6f7ff; color: #1890ff; }
+    .detail-tag.orange { background: #fff7e6; color: #fa8c16; }
+    .detail-image { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #f0f0f0; background: #fafafa; }
+    .detail-image-placeholder { width: 80px; height: 80px; border-radius: 4px; border: 1px dashed #d9d9d9; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 12px; background: #fafafa; }
+    .detail-card { background: #fff; border-radius: 4px; padding: 24px; margin-bottom: 16px; }
+    .detail-card h5.section-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
+    .detail-row { display: flex; align-items: flex-start; margin-bottom: 16px; }
+    .detail-row:last-child { margin-bottom: 0; }
+    .detail-label { width: 130px; flex-shrink: 0; padding-right: 12px; font-size: 13px; color: #888; line-height: 32px; text-align: right; }
+    .detail-content { flex: 1; min-height: 32px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+
+    /* 富文本编辑器 */
+    .richtext-editor { border: 1px solid #d9d9d9; border-radius: 4px; overflow: hidden; }
+    .richtext-editor:focus-within { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .richtext-toolbar { display: flex; align-items: center; gap: 2px; padding: 6px 8px; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+    .richtext-toolbar button,
+    .richtext-toolbar .richtext-img-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 26px; border: 1px solid transparent; border-radius: 3px; background: transparent; cursor: pointer; font-size: 12px; color: #555; transition: all .15s; padding: 0; }
+    .richtext-toolbar button:hover,
+    .richtext-toolbar .richtext-img-btn:hover { background: #e6e6e6; border-color: #d9d9d9; }
+    .richtext-area { min-height: 120px; max-height: 400px; padding: 10px 12px; font-size: 13px; line-height: 1.7; color: #333; outline: none; overflow-y: auto; word-break: break-word; }
+    .richtext-area:empty::before { content: '请输入使用须知内容…'; color: #bbb; }
+    .richtext-area img { max-width: 100%; height: auto; border-radius: 4px; margin: 4px 0; }
+  </style>
+
+  <style id="__req_tip_style2__">
+.req-anno-btn{display:inline-block;background:#e67e00;color:#fff;border:none;border-radius:3px;
+  padding:1px 7px;font-size:11px;line-height:18px;cursor:pointer;margin-right:8px;
+  vertical-align:middle;font-weight:600;opacity:.9}
+.req-anno-btn:hover{background:#cf6c00;opacity:1}
+.req-anno-box{display:none}
+#__req_modal__ *{box-sizing:border-box}
+</style>
+<script>
+function toggleReqAnno(btn) {
+  var box = btn.parentElement.querySelector('.req-anno-box');
+  if (!box) return;
+  if (document.getElementById('__req_modal__')) return;
+  var ov = document.createElement('div');
+  ov.id = '__req_modal__';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);'
+    + 'z-index:999998;display:flex;align-items:center;justify-content:center';
+  var card = document.createElement('div');
+  card.style.cssText = 'background:#fff;border-radius:8px;padding:24px 28px 20px;max-width:420px;'
+    + 'width:92%;box-shadow:0 8px 32px rgba(0,0,0,.22);position:relative;border-top:4px solid #e67e00';
+  var cls = document.createElement('button');
+  cls.innerHTML = '&times;';
+  cls.style.cssText = 'position:absolute;top:10px;right:14px;background:none;border:none;'
+    + 'font-size:22px;line-height:1;cursor:pointer;color:#aaa;padding:0';
+  cls.onclick = function () { ov.remove(); };
+  var ttl = document.createElement('div');
+  ttl.style.cssText = 'font-size:13px;font-weight:700;color:#e67e00;margin-bottom:12px;letter-spacing:.5px';
+  ttl.textContent = '📋 需求说明';
+  var body = document.createElement('div');
+  body.style.cssText = 'font-size:12px;color:#5a4000;line-height:1.9;white-space:pre-line;'
+    + 'background:#fffbe6;padding:12px 14px;border-radius:6px;border-left:3px solid #e67e00;'
+    + 'max-height:60vh;overflow-y:auto';
+  body.textContent = box.textContent.trim();
+  card.appendChild(cls); card.appendChild(ttl); card.appendChild(body);
+  ov.appendChild(card);
+  ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+}
+</script>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <header class="app-header">
+      <div class="header-left">
+        <span class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed">✕</span>
+        <span class="brand">订阅管理系统</span>
+      </div>
+      <div class="header-right">
+        <span class="user-info">
+          <span class="user-avatar">张</span>
+          <span>张三</span>
+          <span>▾</span>
+        </span>
+      </div>
+    </header>
+    <div class="main-area">
+      <aside class="sider" :class="{ collapsed: siderCollapsed }">
+        <div class="sider-logo"><span class="logo-icon">♥</span><span class="logo-text" v-show="!siderCollapsed">导航菜单</span></div>
+        <div class="sider-menu">
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="sider-menu-item parent-open" @click="opToolsOpen = !opToolsOpen">
+            <span class="menu-icon">🔧</span><span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+            <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="/"><span class="menu-label">弹窗</span></a>
+            <a class="sider-menu-item" href="/"><span class="menu-label">兑换码</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift-strategy/list')"><span class="menu-label">赠礼发放策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')"><span class="menu-label">限时促销策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift-logistics/list')"><span class="menu-label">赠礼物流管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-pricing-strategy/list')"><span class="menu-label">活动价格策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-operations-strategy/list')"><span class="menu-label">活动投放策略</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="deployOpen = !deployOpen">
+            <span class="menu-icon">📢</span><span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
+            <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/rights-pay/list')"><span class="menu-label">投放策略</span></a>
+            <a class="sider-menu-item" href="/"><span class="menu-label">页面模块展示</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="priceManageOpen = !priceManageOpen">
+            <span class="menu-icon">💰</span><span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+            <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="/"><span class="menu-label">价格套餐</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/price-strategy/list')"><span class="menu-label">价格策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')"><span class="menu-label">促销套餐</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" :class="{ active: activeParent === 'product' }" @click="productManageOpen = !productManageOpen">
+            <span class="menu-icon">📦</span><span class="menu-label" v-show="!siderCollapsed">产品管理</span>
+            <span class="menu-arrow" :class="{ open: productManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: productManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="/"><span class="menu-label">权益库</span></a>
+            <a class="sider-menu-item active" href="javascript:void(0)" @click.stop="navigateTo('/gift/list')"><span class="menu-label">赠礼库</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
+            <span class="menu-icon">🎯</span><span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/prize/list')"><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/coupon/list')"><span class="menu-label">抽奖券管理</span></a>
+          </div>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">⚙️</span><span class="menu-label" v-show="!siderCollapsed">设置管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🏪</span><span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📚</span><span class="menu-label" v-show="!siderCollapsed">知识库</span></a>
+        </div>
+      </aside>
+
+      <main class="content-area">
+        <div class="page-body">
+          <div class="breadcrumb">
+            <a :href="convertUrl('/gift/list')">赠礼库</a> / <span>修改</span>
+          </div>
+
+          <div v-if="loading" class="loading-text">加载中...</div>
+
+          <template v-if="!loading">
+            <!-- 基础信息 -->
+            <div class="form-card">
+              <h5 class="section-title">基础信息</h5>
+              <div class="form-row">
+                <div class="form-label">赠礼ID :</div>
+                <div class="form-control">
+                  <input class="input-field short" type="text" disabled :value="formData.id" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label"><span class="required">*</span>赠礼来源 :</div>
+                <div class="form-control">
+                  <div class="radio-group">
+                    <label class="radio-item"><input type="radio" v-model="formData.source" value="self" />美柚自营</label>
+                    <label class="radio-item"><input type="radio" v-model="formData.source" value="third" />第三方</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label"><span class="required">*</span>赠礼类型 :</div>
+                <div class="form-control">
+                  <div class="radio-group" style="flex-direction: column; gap: 8px;">
+                    <label class="radio-item"><input type="radio" v-model="formData.gift_type" value="physical" />实物 <span class="radio-desc">需要通过线下邮寄,面交等方式给到用户</span></label>
+                    <label class="radio-item"><input type="radio" v-model="formData.gift_type" value="coupon" />卡券 <span class="radio-desc">包含优惠券、折扣券等</span></label>
+                    <label class="radio-item"><input type="radio" v-model="formData.gift_type" value="vip" />会员会期 <span class="radio-desc">平台提供的会员使用资格</span></label>
+                    <label class="radio-item"><input type="radio" v-model="formData.gift_type" value="lottery" />抽奖次数 <span class="radio-desc">开卡后获得抽奖次数</span></label>
+                    <label class="radio-item"><input type="radio" v-model="formData.gift_type" value="invite" />邀请码 <span class="radio-desc">开卡后获得，可分享给亲友</span></label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label"><span class="required">*</span>发货类型 :</div>
+                <div class="form-control">
+                  <div class="radio-group">
+                    <label class="radio-item"><input type="radio" v-model="formData.deliver_type" value="online" />线上领取</label>
+                    <label class="radio-item"><input type="radio" v-model="formData.deliver_type" value="logistics" />物流发货</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label"><span class="required">*</span>赠礼名称 :</div>
+                <div class="form-control">
+                  <input class="input-field" :class="{ error: errors.name }" type="text" v-model="formData.name" placeholder="≤10字，参考：美柚会员7天卡" maxlength="10" />
+                  <div class="form-hint">将在赠礼模块展示给用户</div>
+                  <div class="form-error" v-if="errors.name">{{ errors.name }}</div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label"><span class="required">*</span>赠礼别名 :</div>
+                <div class="form-control">
+                  <input class="input-field" :class="{ error: errors.alias }" type="text" v-model="formData.alias" placeholder="美柚胎心仪_周年庆活动专用" />
+                  <div class="form-hint">仅用户后台展示</div>
+                  <div class="form-error" v-if="errors.alias">{{ errors.alias }}</div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label">应用版本<span class="help-icon" title="版本号的三段式格式">?</span> :</div>
+                <div class="form-control">
+                  <div class="version-range">
+                    <input class="input-field" type="text" v-model="formData.version_min" placeholder="xx.xx.xx" />
+                    <span class="sep">至</span>
+                    <input class="input-field" type="text" v-model="formData.version_max" placeholder="xx.xx.xx" />
+                  </div>
+                  <div class="form-hint">填写三段式的格式，如8.70.0</div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label"><span class="required">*</span>赠礼成本 :</div>
+                <div class="form-control">
+                  <div class="radio-group">
+                    <label class="radio-item"><input type="radio" v-model="formData.cost_level" value="low" />低价值</label>
+                    <label class="radio-item"><input type="radio" v-model="formData.cost_level" value="high" />高价值</label>
+                  </div>
+                  <div class="form-hint">高价值赠礼在订单退款时会进行"发货或领取"的二次核实</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 赠礼详情 -->
+            <div class="form-card">
+              <h5 class="section-title">赠礼详情</h5>
+              <div class="form-row">
+                <div class="form-label">特权标识 :</div>
+                <div class="form-control">
+                  <input class="input-field" type="text" v-model="formData.privilege_tag" placeholder="请输入" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label"><span class="required">*</span>赠礼价值 :</div>
+                <div class="form-control">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <div class="number-input-wrap">
+                      <button @click="decrementValue">−</button>
+                      <input type="text" v-model.number="formData.value" @input="validateValue" />
+                      <button @click="incrementValue">+</button>
+                    </div>
+                    <span class="number-unit">元/份</span>
+                  </div>
+                  <div class="form-hint">请按最小单位的价值进行填写。价值将在赠礼模块展示，用于计算"节省N元"</div>
+                  <div class="form-error" v-if="errors.value">{{ errors.value }}</div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label">库存 :</div>
+                <div class="form-control">
+                  <div class="number-input-wrap">
+                    <button @click="formData.stock > 0 && formData.stock--">−</button>
+                    <input type="text" v-model.number="formData.stock" :disabled="formData.has_specs" />
+                    <button @click="formData.stock++" :disabled="formData.has_specs">+</button>
+                  </div>
+                  <div class="form-hint">启用规格配置后，统一库存不生效，改为按规格管理库存</div>
+                </div>
+              </div>
+
+              <!-- 规格库存配置 -->
+              <div class="form-row">
+                <button class="req-anno-btn" onclick="toggleReqAnno(this)" style="flex-shrink:0;margin-right:4px;margin-top:3px;">需求说明</button>
+                <div class="form-control">
+                  <span style="display:inline-block;width:130px;padding-right:12px;text-align:right;line-height:32px;font-size:13px;color:#555;">规格配置<span class="help-icon" data-tip="开启后可按规格（如尺码/型号/规格名）管理库存">?</span> :</span>
+                  <label class="checkbox-inline">
+                    <input type="checkbox" v-model="formData.has_specs" /> 启用规格配置
+                  </label>
+                  <div class="req-anno-box">【规格库存配置】勾选"启用规格配置"后，可自定义规格组名称（默认"尺码"），并按规格粒度管理库存。适用于实物、物流发货类赠礼。启用后统一库存字段将失效。配置后在用户领取时可选择具体规格。</div>
+                  <template v-if="formData.has_specs">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                      <span style="font-size:13px;color:#666;white-space:nowrap;">规格名称：</span>
+                      <input class="input-field spec-group-name-input" type="text" v-model="formData.spec_group_name" placeholder="尺码" />
+                      <span style="font-size:12px;color:#999;">如：尺码、型号、规格</span>
+                    </div>
+                    <table class="spec-table">
+                      <thead>
+                        <tr>
+                          <th style="width:160px;">规格名</th>
+                          <th style="width:130px;">库存</th>
+                          <th>操作</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(spec, idx) in formData.specs" :key="idx">
+                          <td><input class="spec-input" type="text" v-model="spec.name" placeholder="如 S / 36 / 100g" /></td>
+                          <td><input class="spec-input stock-input" type="number" min="0" v-model.number="spec.stock" placeholder="0" /></td>
+                          <td><button class="spec-del-btn" @click="removeSpec(idx)" v-if="formData.specs.length > 1">删除</button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <button class="add-col-btn" @click="addSpec" style="margin-top:8px;">+ 添加一行</button>
+                    <div class="spec-total-stock">合计库存：{{ specTotalStock }}</div>
+                  </template>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-label"><span class="required">*</span>有效期 :</div>
+                <div class="form-control">
+                  <div class="radio-group">
+                    <label class="radio-item"><input type="radio" v-model="formData.expire_type" value="follow" />跟随订阅周期</label>
+                    <label class="radio-item"><input type="radio" v-model="formData.expire_type" value="relative" />相对时间</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label"><span class="required">*</span>介绍说明 :</div>
+                <div class="form-control">
+                  <div class="radio-group">
+                    <label class="radio-item"><input type="radio" v-model="formData.intro_type" value="none" />无</label>
+                    <label class="radio-item"><input type="radio" v-model="formData.intro_type" value="popup" />弹窗介绍</label>
+                    <label class="radio-item"><input type="radio" v-model="formData.intro_type" value="page" />跳转页面</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label"><span class="required">*</span>领取/核销地址 :</div>
+                <div class="form-control">
+                  <select class="select-field" v-model="formData.claim_page">
+                    <option value="">请选择跳转页面</option>
+                    <option value="vip_center">会员中心</option>
+                    <option value="order_list">订单列表</option>
+                    <option value="personal_center">个人中心</option>
+                    <option value="app_home">App首页</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label" style="line-height:normal;padding-top:4px;">
+                  使用须知<span class="help-icon" data-tip="发货类型=物流发货的实物奖品配置，配置后领取页展示使用须知模块">?</span> :
+                </div>
+                <div class="form-control">
+                  <div class="richtext-editor">
+                    <div class="richtext-toolbar">
+                      <button type="button" @click="execBold" title="加粗"><b>B</b></button>
+                      <button type="button" @click="execItalic" title="斜体"><i>I</i></button>
+                      <button type="button" @click="execUnderline" title="下划线"><u>U</u></button>
+                      <input type="color" @change="execForeColor" title="字体颜色" style="width:22px;height:22px;border:1px solid #d9d9d9;border-radius:3px;cursor:pointer;padding:1px;background:transparent;" value="#333333" />
+                      <label class="richtext-img-btn" title="插入图片">
+                        📷
+                        <input type="file" accept="image/*" @change="handleUsageNotesImage" style="display:none" />
+                      </label>
+                      <button type="button" @click="execClearFormat" title="清除格式">✕</button>
+                    </div>
+                    <div class="richtext-area" contenteditable="true" @input="onUsageNotesInput" ref="usageNotesEditor" v-html="formData.usage_notes"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 素材管理 -->
+            <div class="form-card">
+              <h5 class="section-title">素材管理</h5>
+              <div class="form-row">
+                <div class="form-label"><span class="required">*</span>图标 :</div>
+                <div class="form-control">
+                  <div class="upload-row">
+                    <label class="upload-box">
+                      <span class="plus-icon">+</span>
+                      <span class="upload-text">上传图片</span>
+                      <input type="file" accept="image/png,image/jpg,image/jpeg" @change="handleIconUpload" />
+                    </label>
+                    <span class="upload-hint">尺寸比例：1 ：1，支持png、jpg</span>
+                  </div>
+                  <div v-if="formData.icon_preview" style="margin-top: 8px;">
+                    <img :src="formData.icon_preview" style="width:80px;height:80px;object-fit:cover;border-radius:4px;" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label">扩展图片 :</div>
+                <div class="form-control">
+                  <div class="ext-image-list">
+                    <label class="upload-box" v-for="(img, idx) in formData.ext_images" :key="idx">
+                      <span class="plus-icon">+</span>
+                      <span class="upload-text">上传图片</span>
+                      <input type="file" accept="image/png,image/jpg,image/jpeg" @change="(e) => handleExtImageUpload(e, idx)" />
+                    </label>
+                  </div>
+                  <button class="add-col-btn" @click="addExtImage" style="margin-top: 8px;">+ 添加一列</button>
+                </div>
+              </div>
+              <div class="info-tip">
+                <span class="tip-icon">⚠</span>
+                <span>购买后成功开通弹窗、会员中心会展示赠礼模块。高版本将取图标、赠礼名称组装;低版本（8.96.0以下）需要配置图片，未配置图片将不展示。</span>
+              </div>
+              <div class="form-row">
+                <div class="form-label">会员中心配图 :</div>
+                <div class="form-control">
+                  <div style="display: flex; gap: 24px;">
+                    <div>
+                      <div style="font-size:13px;color:#666;margin-bottom:8px;">876版本 :</div>
+                      <label class="upload-box">
+                        <span class="plus-icon">+</span>
+                        <span class="upload-text">上传图片</span>
+                        <input type="file" accept="image/*" @change="handleMember876Upload" />
+                      </label>
+                    </div>
+                    <div>
+                      <div style="font-size:13px;color:#666;margin-bottom:8px;">877及以上版本 :</div>
+                      <label class="upload-box">
+                        <span class="plus-icon">+</span>
+                        <span class="upload-text">上传图片</span>
+                        <input type="file" accept="image/*" @change="handleMember877Upload" />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-label">支付成功后弹窗配图 :</div>
+                <div class="form-control">
+                  <label class="upload-box">
+                    <span class="plus-icon">+</span>
+                    <span class="upload-text">上传图片</span>
+                    <input type="file" accept="image/*" @change="handleSuccessPopupUpload" />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-primary" @click="handleSave" :disabled="saving">{{ saving ? '保存中...' : '保 存' }}</button>
+              <a class="btn-cancel" :href="convertUrl('/gift/list')">取 消</a>
+            </div>
+          </template>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
+  <script>
+    const { createApp, ref, reactive, onMounted } = Vue;
+    const USE_MOCK = true;
+    const API_CONFIG = { baseURL: '/api/vip-admin' };
+
+    // 类型映射映射表
+    const GIFT_TYPE_MAP = { '实物': 'physical', '卡券': 'coupon', '会员会期': 'vip', '抽奖次数': 'lottery', '邀请码': 'invite', '生活特权': 'coupon' };
+    const DELIVER_TYPE_MAP = { '线上领取': 'online', '物流发货': 'logistics' };
+    const COST_LEVEL_MAP = { '低价值': 'low', '高价值': 'high' };
+
+    // Mock 数据仓库 - 根据 id 查找
+    const MOCK_DATA = [
+      { id: 275, name: '无扩展图片', alias: '1', deliver_type: '线上领取', gift_type: '实物', source: 'self', cost_level: '低价值', value: 10, stock: 100, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 274, name: '618半年卡抽奖1次', alias: '618半年卡奖券', deliver_type: '', gift_type: '抽奖次数', source: 'self', cost_level: '低价值', value: 5, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 273, name: '618千金净雅卫生巾', alias: '卫生巾', deliver_type: '线上领取', gift_type: '实物', source: 'self', cost_level: '高价值', value: 29, stock: 200, expire_type: 'follow', intro_type: 'popup', claim_page: 'vip_center', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 272, name: '618月卡抽奖1次', alias: '618月卡奖券', deliver_type: '', gift_type: '抽奖次数', source: 'self', cost_level: '低价值', value: 3, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 271, name: '618季卡抽奖1次', alias: '618季卡奖券', deliver_type: '', gift_type: '抽奖次数', source: 'self', cost_level: '低价值', value: 8, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 268, name: '618赠送30天会员', alias: '618活动', deliver_type: '', gift_type: '会员会期', source: 'self', cost_level: '低价值', value: 15, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 266, name: '618年卡抽奖1次', alias: '618年卡奖券', deliver_type: '', gift_type: '抽奖次数', source: 'self', cost_level: '低价值', value: 20, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 262, name: '0514弹窗空气', alias: '0514弹窗空气', deliver_type: '线上领取', gift_type: '实物', source: 'self', cost_level: '低价值', value: 1, stock: 50, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 261, name: '亲友兑换3人', alias: '3人团', deliver_type: '', gift_type: '邀请码', source: 'self', cost_level: '低价值', value: 0, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 260, name: '亲友兑换2人', alias: '亲友卡的邀请码', deliver_type: '', gift_type: '邀请码', source: 'self', cost_level: '低价值', value: 0, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 256, name: '美柚6天会员-副本', alias: '美柚6天会员', deliver_type: '', gift_type: '会员会期', source: 'self', cost_level: '低价值', value: 6, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 255, name: '906测试-无说明', alias: '906测试2-无说明', deliver_type: '', gift_type: '生活特权', source: 'self', cost_level: '低价值', value: 0, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '8.95.1', version_max: '', status: 1 },
+      { id: 254, name: '906测试-弹窗说明', alias: '906测试2-弹窗说明', deliver_type: '', gift_type: '生活特权', source: 'self', cost_level: '低价值', value: 0, stock: 0, expire_type: 'follow', intro_type: 'popup', claim_page: '', privilege_tag: '', version_min: '8.95.1', version_max: '', status: 1 },
+      { id: 253, name: '亲友卡兑换年卡*1', alias: '亲友卡兑换年卡*1', deliver_type: '', gift_type: '邀请码', source: 'self', cost_level: '低价值', value: 0, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 252, name: '亲友卡兑换年卡*2', alias: '亲友卡兑换年卡2', deliver_type: '', gift_type: '邀请码', source: 'self', cost_level: '低价值', value: 0, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
+      { id: 250, name: '测试赠礼-已失效', alias: '测试', deliver_type: '线上领取', gift_type: '实物', source: 'self', cost_level: '低价值', value: 1, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 2 },
+      // 带规格配置的测试数据
+      { id: 276, name: '定制礼盒套装', alias: '定制礼盒-测试规格', deliver_type: '物流发货', gift_type: '实物', source: 'self', cost_level: '高价值', value: 99, stock: 200, expire_type: 'follow', intro_type: 'none', claim_page: 'vip_center', privilege_tag: '', version_min: '', version_max: '', status: 1, has_specs: true, spec_group_name: '尺码', specs: [{ name: 'S', stock: 50 }, { name: 'M', stock: 80 }, { name: 'L', stock: 70 }] },
+    ];
+
+    async function apiPost(path, body) {
+      const res = await fetch(API_CONFIG.baseURL + path, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', body: body ? JSON.stringify(body) : undefined
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    const app = createApp({
+      setup() {
+        const siderCollapsed = ref(false);
+        const opToolsOpen = ref(false);
+        const deployOpen = ref(false);
+        const priceManageOpen = ref(false);
+        const productManageOpen = ref(true);
+        const lotteryManageOpen = ref(false);
+        const activeParent = ref('product');
+        const subMenuMaxHeight = ref('2000px');
+        const saving = ref(false);
+        const loading = ref(true);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('id') || '';
+
+        const formData = reactive({
+          id: editId,
+          source: 'self',
+          gift_type: 'physical',
+          deliver_type: 'online',
+          name: '',
+          alias: '',
+          version_min: '',
+          version_max: '',
+          cost_level: 'low',
+          privilege_tag: '',
+          value: 0,
+          stock: 0,
+          expire_type: 'follow',
+          intro_type: 'none',
+          claim_page: '',
+          usage_notes: '',
+          icon: null,
+          icon_preview: '',
+          ext_images: [null],
+          member_876: null,
+          member_877: null,
+          success_popup: null,
+          // 规格配置
+          has_specs: false,
+          spec_group_name: '尺码',
+          specs: [{ name: '', stock: 0 }],
+        });
+
+        const errors = reactive({ name: '', alias: '', value: '' });
+
+        function loadData() {
+          loading.value = true;
+          if (USE_MOCK) {
+            setTimeout(() => {
+              const item = MOCK_DATA.find(m => String(m.id) === String(editId));
+              if (item) {
+                formData.id = item.id;
+                formData.name = item.name;
+                formData.alias = item.alias;
+                formData.source = item.source || 'self';
+                formData.gift_type = GIFT_TYPE_MAP[item.gift_type] || 'physical';
+                formData.deliver_type = DELIVER_TYPE_MAP[item.deliver_type] || 'online';
+                formData.cost_level = COST_LEVEL_MAP[item.cost_level] || 'low';
+                formData.value = item.value || 0;
+                formData.stock = item.stock || 0;
+                formData.expire_type = item.expire_type || 'follow';
+                formData.intro_type = item.intro_type || 'none';
+                formData.claim_page = item.claim_page || '';
+                formData.privilege_tag = item.privilege_tag || '';
+                formData.version_min = item.version_min || '';
+                formData.version_max = item.version_max || '';
+                // 规格配置
+                if (item.has_specs) {
+                  formData.has_specs = true;
+                  formData.spec_group_name = item.spec_group_name || '尺码';
+                  formData.specs = item.specs && item.specs.length > 0
+                    ? item.specs.map(s => ({ ...s }))
+                    : [{ name: '', stock: 0 }];
+                }
+              }
+              loading.value = false;
+            }, 200);
+          } else {
+            apiPost('/gift/detail', { id: editId }).then(res => {
+              if (res.data) {
+                Object.assign(formData, res.data);
+              }
+            }).finally(() => { loading.value = false; });
+          }
+        }
+
+        onMounted(loadData);
+
+        function incrementValue() { formData.value++; }
+        function decrementValue() { if (formData.value > 0) formData.value--; }
+        function validateValue() { formData.value = Math.max(0, Number(formData.value) || 0); }
+        function addExtImage() { formData.ext_images.push(null); }
+
+        // 规格配置
+        function addSpec() { formData.specs.push({ name: '', stock: 0 }); }
+        function removeSpec(idx) { if (formData.specs.length > 1) formData.specs.splice(idx, 1); }
+        const specTotalStock = Vue.computed(() => {
+          if (!formData.has_specs || !formData.specs) return 0;
+          return formData.specs.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+        });
+
+        function handleIconUpload(e) {
+          const file = e.target.files[0];
+          if (file) { formData.icon = file; const reader = new FileReader(); reader.onload = (ev) => { formData.icon_preview = ev.target.result; }; reader.readAsDataURL(file); }
+        }
+        function handleExtImageUpload(e, idx) { const file = e.target.files[0]; if (file) { formData.ext_images[idx] = file; } }
+        function handleMember876Upload(e) { formData.member_876 = e.target.files[0]; }
+        function handleMember877Upload(e) { formData.member_877 = e.target.files[0]; }
+        function handleSuccessPopupUpload(e) { formData.success_popup = e.target.files[0]; }
+
+        // 富文本编辑器
+        const usageNotesEditor = ref(null);
+        function execBold() { document.execCommand('bold', false); usageNotesEditor.value?.focus(); }
+        function execItalic() { document.execCommand('italic', false); usageNotesEditor.value?.focus(); }
+        function execUnderline() { document.execCommand('underline', false); usageNotesEditor.value?.focus(); }
+        function execForeColor(e) { document.execCommand('foreColor', false, e.target.value); usageNotesEditor.value?.focus(); }
+        function execClearFormat() { document.execCommand('removeFormat', false); usageNotesEditor.value?.focus(); }
+        function handleUsageNotesImage(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const el = usageNotesEditor.value;
+            if (el) { el.focus(); document.execCommand('insertImage', false, ev.target.result); }
+          };
+          reader.readAsDataURL(file);
+          e.target.value = '';
+        }
+        function onUsageNotesInput(e) {
+          formData.usage_notes = e.target.innerHTML;
+        }
+
+        function validate() {
+          let valid = true;
+          errors.name = errors.alias = errors.value = '';
+          if (!formData.name.trim()) { errors.name = '请输入赠礼名称'; valid = false; }
+          if (!formData.alias.trim()) { errors.alias = '请输入赠礼别名'; valid = false; }
+          if (!formData.value || formData.value <= 0) { errors.value = '请输入赠礼价值'; valid = false; }
+          return valid;
+        }
+
+        async function handleSave() {
+          if (!validate()) return;
+          if (saving.value) return;
+          saving.value = true;
+          try {
+            if (USE_MOCK) {
+              await new Promise(r => setTimeout(r, 500));
+              alert(`Mock: 赠礼"${formData.name}"修改成功！`);
+              window.location.href = convertUrl('/gift/list');
+            } else {
+              const res = await apiPost(`/gift/${formData.id}/update`, formData);
+              if (res.code === 0 || res.success) { window.location.href = convertUrl('/gift/list'); }
+              else { alert(res.message || '修改失败'); }
+            }
+          } catch (e) { alert('修改失败: ' + e.message); }
+          finally { saving.value = false; }
+        }
+
+        function convertUrl(url) {
+            const [path, query] = url.split('?');
+            const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
+            return parts.join('-') + '-v2.html' + (query ? '?' + query : '');
+        }
+
+        function navigateTo(url) {
+          window.location.href = convertUrl(url);
+        }
+
+        return {
+          siderCollapsed, opToolsOpen, deployOpen, priceManageOpen,
+          productManageOpen, lotteryManageOpen, activeParent, subMenuMaxHeight,
+          formData, errors, saving, loading,
+          incrementValue, decrementValue, validateValue, addExtImage, addSpec, removeSpec, specTotalStock,
+          handleIconUpload, handleExtImageUpload,
+          handleMember876Upload, handleMember877Upload, handleSuccessPopupUpload,
+          handleSave, navigateTo, convertUrl,
+          execBold, execItalic, execUnderline, execClearFormat, execForeColor,
+          handleUsageNotesImage, onUsageNotesInput, usageNotesEditor,
+        };
+      }
+    });
+    app.mount('#app');
+  </script>
+</body>
+</html>

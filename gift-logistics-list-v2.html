@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>赠礼物流管理 - 订阅管理系统</title>
+  <link rel="stylesheet" href="https://unpkg.com/ant-design-vue@3.2.20/dist/antd.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      background: #f5f5f5; color: #333;
+    }
+    #app { min-height: 100vh; }
+    [v-cloak] { display: none !important; }
+
+    .app-header {
+      height: 48px; background: #fff; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03); z-index: 100;
+      position: sticky; top: 0;
+    }
+    .app-header .header-left { display: flex; align-items: center; gap: 4px; }
+    .header-left .menu-fold-btn {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; font-size: 16px; color: #666; transition: all .15s;
+    }
+    .header-left .menu-fold-btn:hover { background: #f5f5f5; color: #ff4d88; }
+    .header-left .brand { font-weight: 600; font-size: 15px; color: #333; margin-left: 8px; user-select: none; }
+    .app-header .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right .user-info { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 13px; color: #666; }
+    .header-right .user-info:hover { background: #f5f5f5; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ff4d88; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+    .layout-body { display: flex; height: calc(100vh - 48px); }
+    .app-sider {
+      width: 200px; background: #fff; border-right: 1px solid #f0f0f0;
+      transition: width .2s; overflow-y: auto; flex-shrink: 0;
+    }
+    .app-sider.collapsed { width: 60px; }
+    .sider-logo { height: 48px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
+    .sider-logo .logo-icon { font-size: 22px; color: #ff4d88; }
+    .sider-logo .logo-text { font-size: 14px; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+    .sider-menu { padding: 8px 0; }
+    .sider-menu-item {
+      display: flex; align-items: center; height: 44px; padding: 0 16px;
+      font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none;
+      transition: all .2s ease; cursor: pointer; white-space: nowrap;
+      border-left: 3px solid transparent;
+    }
+    .sider-menu-item:hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
+    .sider-menu-item.active { color: #ff4d88; background: linear-gradient(90deg,rgba(255,77,136,.08),rgba(255,77,136,.01)); border-left-color: #ff4d88; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .menu-icon { font-size: 14px; width: 16px; text-align: center; flex-shrink: 0; }
+    .menu-label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+    .menu-arrow {
+      font-size: 10px; color: rgba(0,0,0,.25); flex-shrink: 0; transition: transform .2s;
+    }
+    .menu-arrow.open { transform: rotate(90deg); }
+    .sider-submenu { overflow: hidden; transition: max-height .3s cubic-bezier(0.4,0,0.2,1); }
+    .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; border-left: 3px solid transparent; }
+    .sider-submenu .sider-menu-item.active { color: #ff4d88; background: #fff0f6; border-left-color: #ff4d88; font-weight: 500; }
+    .sider-submenu .sider-menu-item:not(.active):hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
+
+    .content-area { flex: 1; background: #f0f2f5; overflow: auto; }
+    .page-body { background: #fff; padding: 16px 24px 24px; min-height: 100%; }
+
+    .filter-bar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin-bottom: 16px; padding: 12px 0;
+    }
+    .filter-label { font-size: 13px; color: #555; white-space: nowrap; }
+    .input-field { height: 32px; padding: 0 10px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; }
+    .input-field:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .select-field { height: 32px; padding: 0 8px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; background: #fff; cursor: pointer; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 16px; font-size: 13px;
+      background: #ff4d88; color: #fff; border: 1px solid #ff4d88;
+      border-radius: 4px; cursor: pointer; transition: all .2s; white-space: nowrap;
+    }
+    .btn-primary:hover { background: #ff3875; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-default {
+      display: inline-flex; align-items: center;
+      height: 32px; padding: 0 16px; font-size: 13px;
+      background: #fff; color: #666; border: 1px solid #d9d9d9;
+      border-radius: 4px; cursor: pointer; white-space: nowrap;
+    }
+    .btn-default:hover { border-color: #ff4d88; color: #ff4d88; }
+    .btn-link { background: none; border: none; color: #ff4d88; font-size: 13px; cursor: pointer; padding: 0 4px; }
+    .btn-link:hover { color: #ff3875; }
+
+    .toolbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .hint-text { font-size: 12px; color: #999; margin-left: 8px; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+    .data-table thead th {
+      background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 500;
+      border-bottom: 1px solid #f0f0f0; white-space: nowrap; user-select: none;
+    }
+    .data-table tbody td { padding: 10px 12px; border-bottom: 1px solid #f5f5f5; overflow: hidden; text-overflow: ellipsis; }
+    .data-table tbody tr:hover { background: #fafafa; }
+    .empty-state { text-align: center; padding: 60px 0; color: #bbb; }
+
+    .pagination-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 16px 0; font-size: 13px; color: #666; }
+    .pagination-bar button {
+      height: 28px; min-width: 32px; padding: 0 8px; font-size: 12px; border: 1px solid #d9d9d9;
+      border-radius: 4px; background: #fff; cursor: pointer;
+    }
+    .pagination-bar button:hover { border-color: #ff4d88; color: #ff4d88; }
+    .pagination-bar button:disabled { opacity: .4; cursor: not-allowed; }
+    .pagination-bar button.active { background: #ff4d88; color: #fff; border-color: #ff4d88; }
+
+    .status-tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; }
+    .status-tag.pending { background: #fff7e6; color: #fa8c16; }
+    .status-tag.received { background: #f6ffed; color: #52c41a; }
+    .status-tag.shipped { background: #e6f7ff; color: #1890ff; }
+
+    .addr-info { font-size: 12px; color: #666; line-height: 1.6; }
+    .addr-info span { display: block; }
+    .sms-tag { font-size: 12px; }
+    .sms-tag.fail { color: #ff4d4f; }
+    .spec-tag {
+      display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px;
+      background: #fff0f6; color: #ff4d88; font-weight: 500;
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-box { background: #fff; border-radius: 6px; box-shadow: 0 4px 24px rgba(0,0,0,.15); width: 520px; }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid #f0f0f0;
+    }
+    .modal-header .modal-title { font-size: 16px; font-weight: 600; color: #333; }
+    .modal-header .modal-close { cursor: pointer; font-size: 18px; color: #999; }
+    .modal-header .modal-close:hover { color: #ff4d88; }
+    .modal-body { padding: 24px; font-size: 14px; }
+    .modal-footer {
+      padding: 12px 24px; border-top: 1px solid #f0f0f0;
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+
+    .form-row { display: flex; align-items: center; margin-bottom: 16px; }
+    .form-label { width: 100px; flex-shrink: 0; font-size: 13px; color: #555; }
+
+    .file-upload-area {
+      border: 1px dashed #d9d9d9; border-radius: 4px; padding: 24px;
+      text-align: center; color: #999; cursor: pointer; margin: 12px 0;
+    }
+    .file-upload-area:hover { border-color: #ff4d88; color: #ff4d88; }
+  </style>
+
+  <style id="__req_tip_style2__">
+  .req-anno-btn{display:inline-block;background:#e67e00;color:#fff;border:none;border-radius:3px;
+    padding:1px 7px;font-size:11px;line-height:18px;cursor:pointer;margin-right:8px;
+    vertical-align:middle;font-weight:600;opacity:.9}
+  .req-anno-btn:hover{background:#cf6c00;opacity:1}
+  .req-anno-box{display:none}
+  #__req_modal__ *{box-sizing:border-box}
+  </style>
+  <script>
+  function toggleReqAnno(btn) {
+    var box = btn.parentElement.querySelector('.req-anno-box');
+    if (!box) return;
+    if (document.getElementById('__req_modal__')) return;
+    var ov = document.createElement('div');
+    ov.id = '__req_modal__';
+    ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);'
+      + 'z-index:999998;display:flex;align-items:center;justify-content:center';
+    var card = document.createElement('div');
+    card.style.cssText = 'background:#fff;border-radius:8px;padding:24px 28px 20px;max-width:420px;'
+      + 'width:92%;box-shadow:0 8px 32px rgba(0,0,0,.22);position:relative;border-top:4px solid #e67e00';
+    var cls = document.createElement('button');
+    cls.innerHTML = '&times;';
+    cls.style.cssText = 'position:absolute;top:10px;right:14px;background:none;border:none;'
+      + 'font-size:22px;line-height:1;cursor:pointer;color:#aaa;padding:0';
+    cls.onclick = function () { ov.remove(); };
+    var ttl = document.createElement('div');
+    ttl.style.cssText = 'font-size:13px;font-weight:700;color:#e67e00;margin-bottom:12px;letter-spacing:.5px';
+    ttl.textContent = '📋 需求说明';
+    var body = document.createElement('div');
+    body.style.cssText = 'font-size:12px;color:#5a4000;line-height:1.9;white-space:pre-line;'
+      + 'background:#fffbe6;padding:12px 14px;border-radius:6px;border-left:3px solid #e67e00;'
+      + 'max-height:60vh;overflow-y:auto';
+    body.textContent = box.textContent.trim();
+    card.appendChild(cls); card.appendChild(ttl); card.appendChild(body);
+    ov.appendChild(card);
+    ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+    document.body.appendChild(ov);
+  }
+  </script>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <header class="app-header">
+      <div class="header-left">
+        <span class="menu-fold-btn" @click="siderCollapsed = !siderCollapsed">✕</span>
+        <span class="brand">订阅管理系统</span>
+      </div>
+      <div class="header-right">
+        <span class="user-info">
+          <span class="user-avatar">张</span>
+          <span>张三</span>
+          <span>▾</span>
+        </span>
+      </div>
+    </header>
+
+    <div class="layout-body">
+      <aside class="app-sider" :class="{ collapsed: siderCollapsed }">
+        <div class="sider-logo">
+          <span class="logo-icon">♥</span>
+          <span class="logo-text" v-show="!siderCollapsed">导航菜单</span>
+        </div>
+        <div class="sider-menu">
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📋</span><span class="menu-label" v-show="!siderCollapsed">订单管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">👥</span><span class="menu-label" v-show="!siderCollapsed">用户管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🖼️</span><span class="menu-label" v-show="!siderCollapsed">素材管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🔗</span><span class="menu-label" v-show="!siderCollapsed">拼团管理</span></a>
+          <div class="sider-menu-item parent-open" @click="opToolsOpen = !opToolsOpen">
+            <span class="menu-icon">🔧</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营工具</span>
+            <span class="menu-arrow" :class="{ open: opToolsOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: opToolsOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="/"><span class="menu-label">弹窗</span></a>
+            <a class="sider-menu-item" href="/"><span class="menu-label">兑换码</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift-strategy/list')"><span class="menu-label">赠礼发放策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')"><span class="menu-label">限时促销策略</span></a>
+            <a class="sider-menu-item active" href="javascript:void(0)" @click.stop="navigateTo('/gift-logistics/list')"><span class="menu-label">赠礼物流管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-pricing-strategy/list')"><span class="menu-label">活动价格策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/event-operations-strategy/list')"><span class="menu-label">活动投放策略</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="deployOpen = !deployOpen">
+            <span class="menu-icon">📢</span>
+            <span class="menu-label" v-show="!siderCollapsed">运营位投放策略</span>
+            <span class="menu-arrow" :class="{ open: deployOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: deployOpen && !siderCollapsed ? '110px' : '0' }">
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/rights-pay/list')"><span class="menu-label">投放策略</span></a>
+            <a class="sider-menu-item" href="/"><span class="menu-label">页面模块展示</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="priceManageOpen = !priceManageOpen">
+            <span class="menu-icon">💰</span>
+            <span class="menu-label" v-show="!siderCollapsed">价格管理</span>
+            <span class="menu-arrow" :class="{ open: priceManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: priceManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="/"><span class="menu-label">价格套餐</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/price-strategy/list')"><span class="menu-label">价格策略</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/promotion-strategy/list')"><span class="menu-label">促销套餐</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="productManageOpen = !productManageOpen">
+            <span class="menu-icon">📦</span>
+            <span class="menu-label" v-show="!siderCollapsed">产品管理</span>
+            <span class="menu-arrow" :class="{ open: productManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: productManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="/"><span class="menu-label">权益库</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/gift/list')"><span class="menu-label">赠礼库</span></a>
+          </div>
+          <div class="sider-menu-item parent-open" @click="lotteryManageOpen = !lotteryManageOpen">
+            <span class="menu-icon">🎯</span>
+            <span class="menu-label" v-show="!siderCollapsed">抽奖管理</span>
+            <span class="menu-arrow" :class="{ open: lotteryManageOpen }" v-show="!siderCollapsed">▶</span>
+          </div>
+          <div class="sider-submenu" @click.stop :style="{ maxHeight: lotteryManageOpen && !siderCollapsed ? subMenuMaxHeight : '0' }">
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/prize/list')"><span class="menu-label">奖品管理</span></a>
+            <a class="sider-menu-item" href="javascript:void(0)" @click.stop="navigateTo('/coupon/list')"><span class="menu-label">抽奖券管理</span></a>
+          </div>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🏆</span><span class="menu-label" v-show="!siderCollapsed">中奖管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📜</span><span class="menu-label" v-show="!siderCollapsed">订阅管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📁</span><span class="menu-label" v-show="!siderCollapsed">素材库</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">⚙️</span><span class="menu-label" v-show="!siderCollapsed">设置管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">🏪</span><span class="menu-label" v-show="!siderCollapsed">第三方商户管理</span></a>
+          <a class="sider-menu-item" href="/"><span class="menu-icon">📚</span><span class="menu-label" v-show="!siderCollapsed">知识库</span></a>
+        </div>
+      </aside>
+
+      <main class="content-area">
+        <div class="page-body">
+          <!-- 筛选栏 -->
+          <div class="filter-bar">
+            <span class="filter-label">发放时间 :</span>
+            <input class="input-field" type="date" v-model="searchForm.start_time" style="width:150px;" />
+            <span style="color:#999;">至</span>
+            <input class="input-field" type="date" v-model="searchForm.end_time" style="width:150px;" />
+
+            <select class="select-field" v-model="searchForm.status" style="width:100px;">
+              <option value="">状态</option>
+              <option value="pending">待领取</option>
+              <option value="received">已领取</option>
+              <option value="shipped">已发货</option>
+            </select>
+
+            <select class="select-field" v-model="searchForm.gift_alias" style="width:160px;">
+              <option value="">赠礼别名</option>
+              <option value="【217】A2大礼包-楚乔">【217】A2大礼包-楚乔</option>
+              <option value="【218】618活动">【218】618活动</option>
+              <option value="【235】3333">【235】3333</option>
+              <option value="【236】备注y">【236】备注y</option>
+              <option value="【237】胎心仪大礼包-ygy">【237】胎心仪大礼包-ygy</option>
+              <option value="【238】灌灌灌灌">【238】灌灌灌灌</option>
+              <option value="【243】年卡*胎心仪">【243】年卡*胎心仪</option>
+            </select>
+
+            <input class="input-field" v-model="searchForm.gift_id" placeholder="赠礼ID" style="width:200px;" />
+
+            <input class="input-field" v-model="searchForm.uid" placeholder="用户UID" style="width:130px;" />
+
+            <button class="req-anno-btn" onclick="toggleReqAnno(this)">需求说明</button>
+            <input class="input-field" v-model="searchForm.spec" placeholder="尺码" style="width:80px;" />
+            <div class="req-anno-box">【筛选：尺码】
+用于按尺码/规格筛选物流记录。
+枚举值：S、M、L、XL、36码、37码、38码 等，由赠礼商品配置决定。
+支持模糊匹配（例如输入"S"可匹配"S"和"XL"中含S的记录）。
+选填，不填则不筛选尺码。</div>
+
+            <button class="btn-primary" @click="handleSearch">立即查询</button>
+
+            <div class="toolbar-right">
+              <button class="btn-default" @click="exportTemplate">导出发货模板</button>
+              <button class="btn-primary" @click="importModalVisible = true">导入发货信息</button>
+              <span class="hint-text">*请按照模板填写快递公司/快递单号进行导入</span>
+            </div>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:220px;">交易单号</th>
+                <th style="width:90px;">UID</th>
+                <th style="width:80px;">支付金额</th>
+                <th style="width:140px;">赠礼别名</th>
+                <th style="width:70px;position:relative">
+                  <button class="req-anno-btn" onclick="toggleReqAnno(this)"
+                    style="display:block;margin-bottom:3px;font-size:10px;padding:1px 5px">需求说明</button>
+                  尺码
+                  <div class="req-anno-box">【列表列：尺码】
+显示用户领取赠礼时选择的尺码/规格。
+数据来源：赠礼商品配置的尺码选项，用户在领取页自行选择。
+可能为空（商品未配置尺码选项时显示"-"）。
+有值时以粉色标签样式展示（S/M/L/XL/36码/37码/38码等）。</div>
+                </th>
+                <th style="width:150px;">发放时间</th>
+                <th style="width:180px;">收件信息</th>
+                <th style="width:100px;">快递公司</th>
+                <th style="width:110px;">快递单号</th>
+                <th style="width:90px;">是否已发短信</th>
+                <th style="width:80px;">状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-if="pagedData.length > 0">
+                <tr v-for="row in pagedData" :key="row.trade_no">
+                  <td>{{ row.trade_no }}</td>
+                  <td>{{ row.uid }}</td>
+                  <td>￥{{ row.pay_amount }}</td>
+                  <td>{{ row.gift_alias }}</td>
+                  <td>
+                    <span v-if="row.spec" class="spec-tag">{{ row.spec }}</span>
+                    <span v-else style="color:#bbb;">-</span>
+                  </td>
+                  <td>{{ row.send_time }}</td>
+                  <td>
+                    <div class="addr-info">
+                      <span>收件人：{{ row.recipient || '-' }}</span>
+                      <span>收货电话：{{ row.phone || '-' }}</span>
+                      <span>收件地址：{{ row.address || '-' }}</span>
+                    </div>
+                  </td>
+                  <td>{{ row.express_company || '-' }}</td>
+                  <td>{{ row.express_no || '-' }}</td>
+                  <td>
+                    <span v-if="row.sms_status === 'fail'" class="sms-tag fail">发送失败</span>
+                    <span v-else>-</span>
+                  </td>
+                  <td>
+                    <span class="status-tag" :class="row.status">{{ statusMap[row.status] || row.status }}</span>
+                  </td>
+                </tr>
+              </template>
+              <tr v-else>
+                <td colspan="11" class="empty-state">暂无数据</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="pagination-bar" v-if="totalPages > 1">
+            <button :disabled="currentPage <= 1" @click="currentPage = 1">首页</button>
+            <button :disabled="currentPage <= 1" @click="currentPage--">上一页</button>
+            <button v-for="p in visiblePages" :key="p" @click="currentPage = p" :class="{ active: p === currentPage }">{{ p }}</button>
+            <button :disabled="currentPage >= totalPages" @click="currentPage++">下一页</button>
+            <button :disabled="currentPage >= totalPages" @click="currentPage = totalPages">末页</button>
+            <span>共 {{ totalCount }} 条</span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- 导入发货信息弹窗 -->
+    <div class="modal-overlay" v-if="importModalVisible" @click.self="importModalVisible = false">
+      <div class="modal-box" style="width:720px;max-height:80vh;overflow-y:auto;">
+        <div class="modal-header">
+          <span class="modal-title">导入发货信息</span>
+          <span class="modal-close" @click="importModalVisible = false">✕</span>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <span class="form-label">上传文件：</span>
+            <div>
+              <input type="file" ref="fileInput" accept=".csv,.xlsx,.xls" @change="handleFileSelect" style="font-size:13px;" />
+              <div style="font-size:12px;color:#999;margin-top:4px;">支持 .csv 格式（Excel可另存为CSV），请按导出的模板格式填写</div>
+            </div>
+          </div>
+          <div v-if="importFileName" style="font-size:13px;color:#333;margin-top:8px;">
+            已选择文件：{{ importFileName }}
+          </div>
+
+          <!-- 错误提示 -->
+          <div v-if="importErrors.length > 0" style="margin-top:12px;">
+            <div v-for="(err, idx) in importErrors" :key="idx" style="color:#ff4d4f;font-size:12px;margin-bottom:4px;">⚠ {{ err }}</div>
+          </div>
+
+          <!-- 预览表格 -->
+          <div v-if="importPreview.length > 0" style="margin-top:16px;">
+            <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:8px;">预览 (共 {{ importPreview.length }} 条)</div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+              <thead>
+                <tr style="background:#fafafa;border-bottom:1px solid #f0f0f0;">
+                  <th style="padding:6px 8px;text-align:left;">#</th>
+                  <th style="padding:6px 8px;text-align:left;">交易单号</th>
+                  <th style="padding:6px 8px;text-align:left;">赠礼别名</th>
+                  <th style="padding:6px 8px;text-align:left;">尺码</th>
+                  <th style="padding:6px 8px;text-align:left;">快递公司</th>
+                  <th style="padding:6px 8px;text-align:left;">快递单号</th>
+                  <th style="padding:6px 8px;text-align:left;">状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, idx) in importPreview" :key="idx" :style="{ background: item.exists ? '#fff' : '#fff7e6', borderBottom: '1px solid #f5f5f5' }">
+                  <td style="padding:6px 8px;">{{ item.row }}</td>
+                  <td style="padding:6px 8px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="item.trade_no">{{ item.trade_no }}</td>
+                  <td style="padding:6px 8px;">{{ item.gift_alias }}</td>
+                  <td style="padding:6px 8px;color:#ff4d88;">{{ item.spec || '-' }}</td>
+                  <td style="padding:6px 8px;color:#1890ff;">{{ item.express_company }}</td>
+                  <td style="padding:6px 8px;color:#1890ff;">{{ item.express_no }}</td>
+                  <td style="padding:6px 8px;">
+                    <span v-if="!item.exists" style="color:#faad14;">⚠ 未匹配</span>
+                    <span v-else style="color:#52c41a;">✓ 将更新</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-default" @click="importModalVisible = false">取消</button>
+          <button class="btn-primary" @click="doImport" :disabled="importPreview.length === 0">确认导入</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3.3.13/dist/vue.global.js"></script>
+  <script>
+    const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+    const USE_MOCK = true;
+    const PAGE_SIZE = 10;
+
+    const MOCK_DATA = [
+      { trade_no: 'fd9ba053-7aaf-11f1-8889-6a7fdab7515d', uid: '220515194', pay_amount: '9', gift_alias: '618活动', spec: 'M', send_time: '2026-07-08 17:32:45', recipient: '', phone: '', address: '', express_company: '', express_no: '', sms_status: '', status: 'pending' },
+      { trade_no: '713dd6f9-75ed-11f1-9b5f-ced7ab6bb55b', uid: '220619823', pay_amount: '0.03', gift_alias: '618活动', spec: 'L', send_time: '2026-07-02 16:10:25', recipient: '', phone: '', address: '', express_company: '', express_no: '', sms_status: '', status: 'pending' },
+      { trade_no: '2d649927-5e57-11f1-8be6-ea03f05a8c41', uid: '220720100', pay_amount: '0.01', gift_alias: '618活动', spec: 'S', send_time: '2026-06-02 15:46:38', recipient: '您好', phone: '18800000005', address: '重庆市重庆市垫江县包家镇法国红酒姐姐', express_company: '', express_no: '', sms_status: '', status: 'received' },
+      { trade_no: 'a7b163d9-5e53-11f1-8be6-ea03f05a8c41', uid: '220749783', pay_amount: '0.01', gift_alias: '618活动', spec: 'XL', send_time: '2026-06-02 15:21:30', recipient: 'dizhi1', phone: '18800000001', address: '福建省龙岩市上杭县白砂镇ffghh来咯来咯', express_company: '', express_no: '', sms_status: '', status: 'pending' },
+      { trade_no: '4781919a-5db6-11f1-8be6-ea03f05a8c41', uid: '219236062', pay_amount: '0.02', gift_alias: '618活动', spec: 'M', send_time: '2026-06-01 20:35:06', recipient: '', phone: '', address: '', express_company: '', express_no: '', sms_status: '', status: 'pending' },
+      { trade_no: '330f38bd-59b3-11f1-a7ea-626e9f4ea6b5', uid: '220619823', pay_amount: '0.01', gift_alias: '618活动', spec: '', send_time: '2026-05-27 18:02:56', recipient: '', phone: '', address: '', express_company: '', express_no: '', sms_status: '', status: 'pending' },
+      { trade_no: '92848485-4aab-11f1-9bef-12f4883c6153', uid: '220636519', pay_amount: '0.02', gift_alias: 'A2大礼包-楚乔', spec: '36码', send_time: '2026-05-08 15:00:24', recipient: '胡胡', phone: '17777777777', address: '福建省福州市仓山区仓前街道测试测试', express_company: '', express_no: '', sms_status: '', status: 'received' },
+      { trade_no: 'ff436b2f-2e6c-11f1-830e-02745fe799d5', uid: '220734683', pay_amount: '0.01', gift_alias: '618活动', spec: 'L', send_time: '2026-04-02 16:21:47', recipient: 'ces', phone: '14100000001', address: '北京市北京市朝阳区奥运村街道1111', express_company: '京东', express_no: 'JD123456', sms_status: '', status: 'shipped' },
+      { trade_no: 'a2a141c7-17a9-11f1-a550-62a9480d3168', uid: '220728476', pay_amount: '0.01', gift_alias: 'A2大礼包-楚乔', spec: '37码', send_time: '2026-03-04 17:09:50', recipient: 'zhang77', phone: '18150383860', address: '福建省厦门市思明区滨海街道民主路77号', express_company: '顺丰', express_no: 'sf2343', sms_status: 'fail', status: 'shipped' },
+      { trade_no: '9110f94d-121b-11f1-9197-ae7e81ae3282', uid: '220685179', pay_amount: '0.01', gift_alias: 'A2大礼包-楚乔', spec: '38码', send_time: '2026-02-25 15:28:36', recipient: '', phone: '', address: '', express_company: '', express_no: '', sms_status: '', status: 'pending' },
+      { trade_no: 'a9910b86-5a67-11f1-b9e9-ee3e3576ea77', uid: '220035224', pay_amount: '0.01', gift_alias: '618活动', spec: '', send_time: '2025-12-05 16:34:09', recipient: '', phone: '', address: '', express_company: '', express_no: '', sms_status: '', status: 'pending' },
+      { trade_no: 'b12c8d71-6f88-44d2-a1b3-12f4883c8888', uid: '220888999', pay_amount: '0.01', gift_alias: '美柚会员实物礼', spec: 'S', send_time: '2025-11-18 10:22:10', recipient: '小美', phone: '13800001111', address: '浙江省杭州市西湖区文三路478号', express_company: '中通', express_no: 'ZT9876543210', sms_status: '', status: 'shipped' },
+    ];
+
+    const statusMap = { pending: '待领取', received: '已领取', shipped: '已发货' };
+
+    createApp({
+      setup() {
+        const siderCollapsed = ref(false);
+        const subMenuMaxHeight = '400px';
+
+        const opToolsOpen = ref(true);
+        const deployOpen = ref(false);
+        const priceManageOpen = ref(false);
+        const productManageOpen = ref(false);
+        const lotteryManageOpen = ref(false);
+
+        const importModalVisible = ref(false);
+        const importFileName = ref('');
+        const fileInput = ref(null);
+        const importPreview = ref([]);
+        const importErrors = ref([]);
+
+        const searchForm = reactive({
+          start_time: '',
+          end_time: '',
+          status: '',
+          gift_alias: '',
+          gift_id: '',
+          uid: '',
+          spec: ''
+        });
+
+        const allData = ref([]);
+        const currentPage = ref(1);
+
+        const filteredData = computed(() => {
+          let list = allData.value;
+          if (searchForm.status) {
+            list = list.filter(r => r.status === searchForm.status);
+          }
+          if (searchForm.gift_alias) {
+            list = list.filter(r => r.gift_alias === searchForm.gift_alias);
+          }
+          if (searchForm.gift_id) {
+            list = list.filter(r => r.trade_no.toLowerCase().includes(searchForm.gift_id.toLowerCase()));
+          }
+          if (searchForm.uid) {
+            list = list.filter(r => r.uid.includes(searchForm.uid));
+          }
+          if (searchForm.spec) {
+            const specKw = searchForm.spec.toLowerCase();
+            list = list.filter(r => (r.spec || '').toLowerCase().includes(specKw));
+          }
+          if (searchForm.start_time) {
+            list = list.filter(r => r.send_time >= searchForm.start_time);
+          }
+          if (searchForm.end_time) {
+            list = list.filter(r => r.send_time <= searchForm.end_time + ' 23:59:59');
+          }
+          return list;
+        });
+
+        const totalCount = computed(() => filteredData.value.length);
+        const totalPages = computed(() => Math.ceil(totalCount.value / PAGE_SIZE) || 1);
+
+        const pagedData = computed(() => {
+          const start = (currentPage.value - 1) * PAGE_SIZE;
+          return filteredData.value.slice(start, start + PAGE_SIZE);
+        });
+
+        const visiblePages = computed(() => {
+          const pages = [];
+          const total = totalPages.value;
+          const cur = currentPage.value;
+          let start = Math.max(1, cur - 2);
+          let end = Math.min(total, start + 4);
+          if (end - start < 4) start = Math.max(1, end - 4);
+          for (let i = start; i <= end; i++) pages.push(i);
+          return pages;
+        });
+
+        function handleSearch() {
+          currentPage.value = 1;
+        }
+
+        function exportTemplate() {
+          const BOM = '\uFEFF';
+          const headers = ['交易单号', 'UID', '支付金额', '赠礼别名', '尺码', '发放时间', '收件人', '收货电话', '收件地址', '快递公司', '快递单号', '是否已发短信', '状态'];
+          const data = filteredData.value.map(r => [
+            r.trade_no,
+            r.uid,
+            r.pay_amount,
+            r.gift_alias,
+            r.spec || '',
+            r.send_time,
+            r.recipient || '',
+            r.phone || '',
+            r.address || '',
+            r.express_company || '',
+            r.express_no || '',
+            r.sms_status || '',
+            r.status
+          ]);
+          const csvContent = BOM + [headers.join(','), ...data.map(row => row.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(','))].join('\n');
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = '发货数据_' + new Date().toISOString().slice(0, 10) + '.csv';
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+
+        function handleFileSelect(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          importFileName.value = file.name;
+          importPreview.value = [];
+          importErrors.value = [];
+
+          const reader = new FileReader();
+          reader.onload = function(ev) {
+            const text = ev.target.result;
+            const rows = text.split(/\r?\n/).filter(line => line.trim());
+            if (rows.length < 2) {
+              importErrors.value.push('文件内容为空或仅含表头');
+              return;
+            }
+            // Parse CSV (support comma or tab)
+            const delimiter = rows[0].includes('\t') ? '\t' : ',';
+            const headers = rows[0].split(delimiter).map(h => h.trim().replace(/^"|"$/g, ''));
+            const tradeNoIdx = headers.findIndex(h => h === '交易单号');
+            const companyIdx = headers.findIndex(h => h === '快递公司');
+            const expressNoIdx = headers.findIndex(h => h === '快递单号');
+            const specIdx = headers.findIndex(h => h === '尺码');
+
+            if (tradeNoIdx < 0 || companyIdx < 0 || expressNoIdx < 0) {
+              importErrors.value.push('缺少必要列：交易单号、快递公司、快递单号');
+              return;
+            }
+
+            const preview = [];
+            const errors = [];
+            for (let i = 1; i < rows.length; i++) {
+              const cols = rows[i].split(delimiter).map(c => c.trim().replace(/^"|"$/g, ''));
+              const tradeNo = cols[tradeNoIdx] || '';
+              const company = cols[companyIdx] || '';
+              const expressNo = cols[expressNoIdx] || '';
+              const spec = specIdx >= 0 ? (cols[specIdx] || '') : '';
+
+              if (!tradeNo) { errors.push(`第${i + 1}行：交易单号为空`); continue; }
+              if (!company && !expressNo && !spec) { errors.push(`第${i + 1}行：快递公司、快递单号、尺码均为空`); continue; }
+
+              const found = allData.value.find(r => r.trade_no === tradeNo);
+              preview.push({
+                trade_no: tradeNo,
+                express_company: company,
+                express_no: expressNo,
+                spec: spec,
+                exists: !!found,
+                current_company: found ? (found.express_company || '-') : '-',
+                current_express: found ? (found.express_no || '-') : '-',
+                current_spec: found ? (found.spec || '-') : '-',
+                gift_alias: found ? found.gift_alias : '未找到',
+                row: i + 1
+              });
+            }
+            importPreview.value = preview;
+            if (errors.length) importErrors.value = errors;
+          };
+          reader.readAsText(file, 'UTF-8');
+        }
+
+        function doImport() {
+          if (importPreview.value.length === 0) {
+            alert('没有可导入的数据');
+            return;
+          }
+          let updatedCount = 0;
+          importPreview.value.forEach(item => {
+            const found = allData.value.find(r => r.trade_no === item.trade_no);
+            if (found) {
+              found.express_company = item.express_company;
+              found.express_no = item.express_no;
+              if (item.spec) found.spec = item.spec;
+              found.sms_status = ''; // Reset SMS status after re-import
+              if (found.status === 'pending' || found.status === 'received') {
+                found.status = 'shipped';
+              }
+              updatedCount++;
+            }
+          });
+          alert(`导入完成！共更新 ${updatedCount} 条记录`);
+          importModalVisible.value = false;
+          importFileName.value = '';
+          importPreview.value = [];
+          importErrors.value = [];
+          if (fileInput.value) fileInput.value.value = '';
+          currentPage.value = 1;
+        }
+
+        function convertUrl(url) {
+          const [path, query] = url.split('?');
+          const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
+          return parts.join('-') + '-v2.html' + (query ? '?' + query : '');
+        }
+
+        function navigateTo(url) {
+          window.location.href = convertUrl(url);
+        }
+
+        function loadData() {
+          if (USE_MOCK) {
+            allData.value = MOCK_DATA;
+          } else {
+            fetch('/api/vip-admin/gift-send/list', { credentials: 'include' })
+              .then(r => r.json()).then(res => { allData.value = res.data || []; })
+              .catch(() => { allData.value = MOCK_DATA; });
+          }
+        }
+
+        onMounted(() => {
+          loadData();
+        });
+
+        return {
+          siderCollapsed, subMenuMaxHeight,
+          opToolsOpen, deployOpen, priceManageOpen, productManageOpen, lotteryManageOpen,
+          importModalVisible, importFileName, fileInput, importPreview, importErrors,
+          searchForm, currentPage, totalCount, totalPages,
+          filteredData, pagedData, visiblePages, statusMap,
+          handleSearch, exportTemplate, handleFileSelect, doImport,
+          convertUrl, navigateTo
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
