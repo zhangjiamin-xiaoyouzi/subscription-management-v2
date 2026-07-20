@@ -1862,19 +1862,21 @@ function toggleReqAnno(btn){var box=btn.parentElement.querySelector('.req-anno-b
                                 <div class="select-option" v-for="rel in ['包含', '等于']" :key="rel" :class="{ selected: cond.relation === rel }" @click.stop="cond.relation = rel; cond.relationOpen = false">{{ rel }}</div>
                               </div>
                             </div>
-                            <!-- 选择人群标签：黄金受孕期用枚举值下拉，其他用输入 -->
+                            <!-- 选择人群标签：黄金受孕期用多选枚举值下拉，其他用输入 -->
                             <div v-if="crowdTagValues[cond.selectedTag]" class="record-banner-select" style="min-width: 150px;" v-click-outside="() => cond.valueOpen = false">
                               <div class="select-trigger" :class="{ open: cond.valueOpen }" @click="cond.valueOpen = !cond.valueOpen">
-                                <span :class="{ placeholder: !cond.customTag }">{{ cond.customTag || '选择标签值' }}</span>
+                                <span :class="{ placeholder: !cond.customTags || !cond.customTags.length }">{{ (cond.customTags && cond.customTags.length) ? cond.customTags.join('、') : '选择标签值' }}</span>
                               </div>
                               <span class="select-arrow">▾</span>
                               <div class="select-dropdown" v-show="cond.valueOpen">
-                                <div class="select-option" v-for="val in crowdTagValues[cond.selectedTag]" :key="val" :class="{ selected: cond.customTag === val }" @click.stop="cond.customTag = val; cond.valueOpen = false">{{ val }}</div>
+                                <div class="select-option" v-for="val in crowdTagValues[cond.selectedTag]" :key="val" :class="{ selected: cond.customTags && cond.customTags.includes(val) }" @click.stop="toggleCustomTag(cond, val)">
+                                  <span class="check-mark">{{ cond.customTags && cond.customTags.includes(val) ? '☑' : '☐' }}</span> {{ val }}
+                                </div>
                               </div>
                             </div>
                             <input v-else class="input-field" type="text" v-model="cond.customTag" placeholder="选择人群标签" style="min-width: 150px;" />
                             <!-- 加减号 -->
-                            <span @click="record.crowdConditions.push({ selectedTag: '', tagOpen: false, relation: '', relationOpen: false, customTag: '' })" style="cursor: pointer; color: #52c41a; font-size: 16px;">⊕</span>
+                            <span @click="record.crowdConditions.push({ selectedTag: '', tagOpen: false, relation: '', relationOpen: false, customTags: [], customTag: '' })" style="cursor: pointer; color: #52c41a; font-size: 16px;">⊕</span>
                             <span v-if="record.crowdConditions.length > 1" @click="record.crowdConditions.splice(ci, 1)" style="cursor: pointer; color: #ff4d4f; font-size: 16px;"></span>
                           </div>
                         </div>
@@ -2626,7 +2628,7 @@ function toggleReqAnno(btn){var box=btn.parentElement.querySelector('.req-anno-b
               {
                 id: 1,
                 crowdConditions: [
-                  { selectedTag: '', tagOpen: false, relation: '', relationOpen: false, customTag: '' }
+                  { selectedTag: '', tagOpen: false, relation: '', relationOpen: false, customTags: [], customTag: '' }
                 ],
                 titleText: '',
                 subtitleGray: '',
@@ -3118,6 +3120,18 @@ function toggleReqAnno(btn){var box=btn.parentElement.querySelector('.req-anno-b
       },
 
       methods: {
+        // 多选标签值切换
+        toggleCustomTag(cond, val) {
+          if (!cond.customTags) {
+            cond.customTags = [];
+          }
+          const idx = cond.customTags.indexOf(val);
+          if (idx >= 0) {
+            cond.customTags.splice(idx, 1);
+          } else {
+            cond.customTags.push(val);
+          }
+        },
         // 一键填写历史文案
         fillPriceCardCopyHistory() {
           const comp = this.fixedPriceCardComponent;
@@ -3483,7 +3497,7 @@ function toggleReqAnno(btn){var box=btn.parentElement.querySelector('.req-anno-b
           this.rightsDetailGuideForm.records.push({
             id: maxId + 1,
             crowdConditions: [
-              { selectedTag: '', tagOpen: false, relation: '', relationOpen: false, customTag: '' }
+              { selectedTag: '', tagOpen: false, relation: '', relationOpen: false, customTags: [], customTag: '' }
             ],
             titleText: '',
             subtitleGray: '',
