@@ -208,6 +208,13 @@
     .radio-item input[type="radio"] { accent-color: #1890ff; width: 14px; height: 14px; cursor: pointer; }
     .radio-item.disabled input[type="radio"] { cursor: not-allowed; }
 
+    /* Checkbox Group */
+    .checkbox-group { display: flex; align-items: center; gap: 24px; }
+    .checkbox-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: rgba(0,0,0,.85); }
+    .checkbox-item.disabled { opacity: .5; cursor: not-allowed; }
+    .checkbox-item input[type="checkbox"] { accent-color: #1890ff; width: 14px; height: 14px; cursor: pointer; }
+    .checkbox-item.disabled input[type="checkbox"] { cursor: not-allowed; }
+
     /* Date Range Picker */
     .date-range-wrap {
       display: flex; align-items: center; gap: 8px;
@@ -1168,6 +1175,27 @@
               </div>
             </div>
 
+            <!-- 会员状态 -->
+            <div class="form-row">
+              <span class="form-label required">会员状态 :</span>
+              <div class="form-control">
+                <div class="checkbox-group">
+                  <label class="checkbox-item">
+                    <input type="checkbox" v-model="form.vipStatus" value="never_opened" />
+                    <span>从未开通过</span>
+                  </label>
+                  <label class="checkbox-item disabled">
+                    <input type="checkbox" disabled />
+                    <span>会员生效中</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" v-model="form.vipStatus" value="expired" />
+                    <span>已过期</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <!-- 用户条件 -->
             <div class="form-row">
               <span class="form-label">用户条件 :</span>
@@ -1757,7 +1785,198 @@
               </template>
             </div>
 
-            <template v-if="!isRecordBannerPath && !isFixedPriceCardPath && !isMyTabMemberCardPath">
+            <!-- RIGHTS_DETAIL/GUIDE/GUIDE: 订阅引导组件 -->
+            <div class="record-banner-panel" v-else-if="isRightsDetailGuidePath">
+              <div class="record-banner-form">
+                <!-- 提示文字 -->
+                <div style="margin-bottom: 16px; padding: 8px 12px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 4px; font-size: 13px; color: rgba(0,0,0,.85);">
+                  <span style="color: #ff4d4f;">*</span> 该模块仅针对非会员用户生效
+                </div>
+                <!-- 配置方式 -->
+                <div class="record-banner-grid">
+                  <div class="record-banner-field full">
+                    <div class="record-banner-label">配置方式:</div>
+                    <div class="record-banner-control">
+                      <div class="radio-group">
+                        <label class="radio-item">
+                          <input type="radio" value="structured" v-model="rightsDetailGuideForm.configMode" />
+                          <span>结构化文本配置</span>
+                        </label>
+                        <label class="radio-item">
+                          <input type="radio" value="image_only" v-model="rightsDetailGuideForm.configMode" />
+                          <span>纯图片配置</span>
+                        </label>
+                        <label class="radio-item">
+                          <input type="radio" value="image_text" v-model="rightsDetailGuideForm.configMode" />
+                          <span>图+文配置</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 展示内容 -->
+                <h5 style="margin: 16px 0 12px; font-size: 14px; font-weight: 600; color: rgba(0,0,0,.85);">展示内容</h5>
+
+                <div v-for="(record, ri) in rightsDetailGuideForm.records" :key="record.id" class="guide-record-block" style="position: relative; border: 1px solid #e8e8e8; border-radius: 6px; padding: 16px; margin-bottom: 12px; background: #fafafa;">
+                  <div class="record-banner-grid">
+                    <!-- 人群标签 -->
+                    <div class="record-banner-field full">
+                      <div class="record-banner-label">
+                        人群标签
+                        <span class="help-icon" data-tip="可添加多个人群标签，用于细分不同人群展示不同内容">?</span>:
+                      </div>
+                      <div class="record-banner-control">
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                          <!-- 条件行 -->
+                          <div v-for="(cond, ci) in record.crowdConditions" :key="ci" style="display: flex; align-items: center; gap: 8px;">
+                            <!-- 已有人群标签下拉 -->
+                            <div class="record-banner-select" style="min-width: 180px;" v-click-outside="() => cond.tagOpen = false">
+                              <div class="select-trigger" :class="{ open: cond.tagOpen }" @click="cond.tagOpen = !cond.tagOpen">
+                                <span :class="{ placeholder: !cond.selectedTag }">{{ cond.selectedTag || '选择已有人群标签' }}</span>
+                              </div>
+                              <span class="select-arrow">▾</span>
+                              <div class="select-dropdown" v-show="cond.tagOpen">
+                                <div class="select-option" v-for="tag in availableCrowdTags" :key="tag" :class="{ selected: cond.selectedTag === tag }" @click.stop="cond.selectedTag = tag; cond.tagOpen = false">{{ tag }}</div>
+                              </div>
+                            </div>
+                            <!-- 或 -->
+                            <span style="color: #ff4d4f; font-size: 12px; padding: 0 4px;">或</span>
+                            <!-- 关系下拉 -->
+                            <div class="record-banner-select" style="min-width: 80px;" v-click-outside="() => cond.relationOpen = false">
+                              <div class="select-trigger" :class="{ open: cond.relationOpen }" @click="cond.relationOpen = !cond.relationOpen">
+                                <span>{{ cond.relation || '关系' }}</span>
+                              </div>
+                              <span class="select-arrow">▾</span>
+                              <div class="select-dropdown" v-show="cond.relationOpen">
+                                <div class="select-option" v-for="rel in ['包含', '等于']" :key="rel" :class="{ selected: cond.relation === rel }" @click.stop="cond.relation = rel; cond.relationOpen = false">{{ rel }}</div>
+                              </div>
+                            </div>
+                            <!-- 选择人群标签输入 -->
+                            <input class="input-field" type="text" v-model="cond.customTag" placeholder="选择人群标签" style="min-width: 150px;" />
+                            <!-- 加减号 -->
+                            <span @click="record.crowdConditions.push({ selectedTag: '', tagOpen: false, relation: '', relationOpen: false, customTag: '' })" style="cursor: pointer; color: #52c41a; font-size: 16px;">⊕</span>
+                            <span v-if="record.crowdConditions.length > 1" @click="record.crowdConditions.splice(ci, 1)" style="cursor: pointer; color: #ff4d4f; font-size: 16px;"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 标题文案 + 副标题文案(灰色) -->
+                    <div class="record-banner-field">
+                      <div class="record-banner-label">标题文案:</div>
+                      <div class="record-banner-control">
+                        <input class="input-field" type="text" v-model="record.titleText" placeholder="请输入，≤15个字" maxlength="15" />
+                      </div>
+                    </div>
+
+                    <div class="record-banner-field">
+                      <div class="record-banner-label">副标题文案(灰色):</div>
+                      <div class="record-banner-control">
+                        <input class="input-field" type="text" v-model="record.subtitleGray" placeholder="请输入，≤15个字" maxlength="15" />
+                      </div>
+                    </div>
+
+                    <!-- 副标题文案(粉色) + 按钮文案 -->
+                    <div class="record-banner-field">
+                      <div class="record-banner-label">副标题文案(粉色):</div>
+                      <div class="record-banner-control">
+                        <input class="input-field" type="text" v-model="record.subtitlePink" placeholder="请输入，≤15个字" maxlength="15" />
+                      </div>
+                    </div>
+
+                    <div class="record-banner-field">
+                      <div class="record-banner-label required">按钮文案:</div>
+                      <div class="record-banner-control">
+                        <div class="record-banner-select" v-click-outside="() => record.buttonTextOpen = false">
+                          <div class="select-trigger" :class="{ open: record.buttonTextOpen }" @click="record.buttonTextOpen = !record.buttonTextOpen">
+                            <span :class="{ placeholder: !record.buttonText }">{{ record.buttonText || '请输入，≤15个字，可通过输入$获取变量列表' }}</span>
+                          </div>
+                          <span class="select-arrow">▾</span>
+                          <div class="select-dropdown" v-show="record.buttonTextOpen">
+                            <div class="select-option" v-for="v in rightsDetailGuideVarList" :key="v" :class="{ selected: record.buttonText === v }" @click.stop="record.buttonText = v; record.buttonTextOpen = false">{{ v }}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 复制按钮 -->
+                    <div class="record-banner-field full" style="justify-content: flex-start;">
+                      <button class="btn-cancel" type="button" @click="copyGuideRecord(ri)" style="font-size: 12px; border: 1px dashed #d9d9d9;">复 制</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 新增记录按钮 -->
+                <button class="btn-dashed-block" type="button" @click="addGuideRecord" style="margin-bottom: 12px;">
+                  <span style="font-size:14px;">＋</span> 新增记录
+                </button>
+
+                <!-- 跳转链接 -->
+                <h5 style="margin: 16px 0 12px; font-size: 14px; font-weight: 600; color: rgba(0,0,0,.85);">跳转链接</h5>
+
+                <div style="margin-bottom: 8px;">
+                  <button class="btn-cancel" type="button" @click="addGuideJumpButton">
+                    <span style="font-size:14px;">＋</span> 添加按钮
+                  </button>
+                  <span style="margin-left: 8px; font-size: 12px; color: rgba(0,0,0,.45);">*仅"发育测评"场景支持配置双按钮</span>
+                </div>
+
+                <div class="record-banner-grid">
+                  <div class="record-banner-field full">
+                    <div class="record-banner-label required">按钮跳转地址:</div>
+                    <div class="record-banner-control">
+                      <div class="record-banner-select" v-click-outside="() => rightsDetailGuideForm.jumpUrlOpen = false">
+                        <div class="select-trigger" :class="{ open: rightsDetailGuideForm.jumpUrlOpen }" @click="rightsDetailGuideForm.jumpUrlOpen = !rightsDetailGuideForm.jumpUrlOpen">
+                          <span :class="{ placeholder: !rightsDetailGuideForm.jumpUrl }">{{ rightsDetailGuideForm.jumpUrl || '请选择' }}</span>
+                        </div>
+                        <span class="select-arrow">▾</span>
+                        <div class="select-dropdown" v-show="rightsDetailGuideForm.jumpUrlOpen">
+                          <div class="select-option" :class="{ selected: rightsDetailGuideForm.jumpUrl === '' }" @click.stop="rightsDetailGuideForm.jumpUrl = ''; rightsDetailGuideForm.jumpUrlOpen = false">请选择</div>
+                          <div class="select-option" :class="{ selected: rightsDetailGuideForm.jumpUrl === '支付转化页' }" @click.stop="rightsDetailGuideForm.jumpUrl = '支付转化页'; rightsDetailGuideForm.jumpUrlOpen = false">支付转化页</div>
+                          <div class="select-option" :class="{ selected: rightsDetailGuideForm.jumpUrl === '会员中心页' }" @click.stop="rightsDetailGuideForm.jumpUrl = '会员中心页'; rightsDetailGuideForm.jumpUrlOpen = false">会员中心页</div>
+                          <div class="select-option" :class="{ selected: rightsDetailGuideForm.jumpUrl === '签约流程' }" @click.stop="rightsDetailGuideForm.jumpUrl = '签约流程'; rightsDetailGuideForm.jumpUrlOpen = false">签约流程</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 右侧示意图 + 记录目录 -->
+              <div class="record-banner-directory">
+                <div class="directory-header">
+                  <span class="directory-title">示意图</span>
+                </div>
+                <div style="padding: 16px; text-align: center; border-bottom: 1px solid #f0f0f0;">
+                  <div style="width: 100%; height: 160px; background: #fff; border: 1px dashed #d9d9d9; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
+                    <img v-if="rightsDetailGuideForm.previewImage" :src="rightsDetailGuideForm.previewImage" alt="示意图" style="width:100%;height:100%;object-fit:cover;" />
+                    <span v-else style="font-size: 12px; color: #ccc;">订阅引导示意图</span>
+                  </div>
+                </div>
+                <div class="directory-header" style="border-top: none;">
+                  <span class="directory-title">支持拖拽排序</span>
+                </div>
+                <div class="directory-list">
+                  <div
+                    v-for="(record, ri) in rightsDetailGuideForm.records"
+                    :key="record.id"
+                    class="directory-item"
+                    :class="{ active: ri === rightsDetailGuideForm.activeRecordIndex }"
+                    @click="rightsDetailGuideForm.activeRecordIndex = ri"
+                  >
+                    <div class="directory-item-header">
+                      <span class="directory-item-num" style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 12px; cursor: grab;">☰</span>
+                        记录{{ ri + 1 }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <template v-if="!isRecordBannerPath && !isFixedPriceCardPath && !isMyTabMemberCardPath && !isRightsDetailGuidePath">
               <button class="btn-dashed-block" @click="openCompModal" v-if="selectedComponents.length === 0">
                 <span style="font-size:14px;">＋</span> 从组件库选择
               </button>
@@ -2272,6 +2491,10 @@
         modules: [{ key: 'MY_TAB_MEMBER_CARD', name: '我tab会员卡片' }],
         locations: [{ key: 'MY_TAB_MEMBER_CARD_TEXT', name: '卡片文案', icon: '📝' }],
       },
+      RIGHTS_DETAIL: {
+        modules: [{ key: 'GUIDE', name: '订阅引导组件' }],
+        locations: [{ key: 'GUIDE', name: '订阅引导组件', icon: '🧭' }],
+      },
     };
 
     createApp({
@@ -2333,11 +2556,13 @@
             'MY_TAB_RIGHT_MARKETING': '右侧运营位', 'MY_TAB_BTN_BADGE': '按钮角标',
             'PRICE_TAG': '限时标签',
             'BANNER': '记录横幅', 'PERIOD_REPORT_BANNER': '经期今日密报模块横幅',
+            'GUIDE': '订阅引导组件',
           },
           locationNameMap: {
             'INFO_FLOW': '信息流', 'DEFAULT': '默认', 'PRICE_SORT_DISPLAY': '价格排序与展示', 'RECORD_BANNER': '记录横幅',
             'PERIOD_REPORT_BANNER': '经期今日密报模块横幅',
             'MY_TAB_MEMBER_CARD_TEXT': '卡片文案',
+            'GUIDE': '订阅引导组件',
           },
 
           planOptions: [
@@ -2357,6 +2582,7 @@
           form: {
             pageKey: '', moduleKey: '', locationKey: '',
             strategyName: '', subscriptionPlan: '', strategyType: 'normal',
+            vipStatus: ['never_opened', 'expired'],
           },
 
           conditionGroups: [],
@@ -2373,6 +2599,37 @@
             ],
             activeContentGroupIndex: 0,
           },
+
+          rightsDetailGuideForm: {
+            configMode: 'structured',
+            records: [
+              {
+                id: 1,
+                crowdConditions: [
+                  { selectedTag: '', tagOpen: false, relation: '', relationOpen: false, customTag: '' }
+                ],
+                titleText: '',
+                subtitleGray: '',
+                subtitlePink: '',
+                buttonText: '',
+                buttonTextOpen: false,
+              }
+            ],
+            activeRecordIndex: 0,
+            jumpUrl: '',
+            jumpUrlOpen: false,
+            jumpButtons: [],
+            previewImage: '',
+          },
+          availableCrowdTags: [
+            '孕期-营养计划人群标签',
+            '孕期-运动计划人群标签',
+            '备孕-排卵监测人群标签',
+            '经期-痛经缓解人群标签',
+            '新手妈妈人群标签',
+            '产后恢复人群标签',
+          ],
+          rightsDetailGuideVarList: ['$会员价', '$原价', '$节省金额', '$权益名称', '$到期时间'],
 
           // Component library
           compModalVisible: false,
@@ -2635,6 +2892,11 @@
           return this.form.pageKey === 'MY_TAB'
             && this.form.moduleKey === 'MY_TAB_MEMBER_CARD'
             && this.form.locationKey === 'MY_TAB_MEMBER_CARD_TEXT';
+        },
+        isRightsDetailGuidePath() {
+          return this.form.pageKey === 'RIGHTS_DETAIL'
+            && this.form.moduleKey === 'GUIDE'
+            && this.form.locationKey === 'GUIDE';
         },
         activeMyTabGroup() {
           return this.myTabMemberCardForm.contentGroups[this.myTabMemberCardForm.activeContentGroupIndex] || this.myTabMemberCardForm.contentGroups[0];
@@ -3184,6 +3446,40 @@
           const nextValue = Number(this.recordBannerForm.expireDays || 0) + delta;
           this.recordBannerForm.expireDays = Math.max(0, nextValue);
         },
+        mockUploadGuideImage() {
+          this.rightsDetailGuideForm.previewImage = 'https://via.placeholder.com/690x300/ff4d88/ffffff?text=订阅引导图';
+          this.showToast('图片上传成功');
+        },
+        addGuideRecord() {
+          const maxId = Math.max(0, ...this.rightsDetailGuideForm.records.map(r => r.id));
+          this.rightsDetailGuideForm.records.push({
+            id: maxId + 1,
+            crowdConditions: [
+              { selectedTag: '', tagOpen: false, relation: '', relationOpen: false, customTag: '' }
+            ],
+            titleText: '',
+            subtitleGray: '',
+            subtitlePink: '',
+            buttonText: '',
+            buttonTextOpen: false,
+          });
+          this.rightsDetailGuideForm.activeRecordIndex = this.rightsDetailGuideForm.records.length - 1;
+        },
+        copyGuideRecord(ri) {
+          const src = this.rightsDetailGuideForm.records[ri];
+          const maxId = Math.max(0, ...this.rightsDetailGuideForm.records.map(r => r.id));
+          const copy = JSON.parse(JSON.stringify(src));
+          copy.id = maxId + 1;
+          copy.buttonTextOpen = false;
+          this.rightsDetailGuideForm.records.splice(ri + 1, 0, copy);
+          this.rightsDetailGuideForm.activeRecordIndex = ri + 1;
+        },
+        addGuideJumpButton() {
+          this.rightsDetailGuideForm.jumpButtons.push({
+            id: Date.now(),
+            url: '',
+          });
+        },
         showToast(msg, isError = false) {
           this.toast = msg;
           this.toastError = isError;
@@ -3368,6 +3664,21 @@
                 jumpTarget: o.jumpTarget,
               })),
               expireDays: this.recordBannerForm.expireDays,
+            };
+          }
+
+          if (this.isRightsDetailGuidePath) {
+            payload.rightsDetailGuideContent = {
+              configMode: this.rightsDetailGuideForm.configMode,
+              records: this.rightsDetailGuideForm.records.map(r => ({
+                crowdConditions: r.crowdConditions,
+                titleText: r.titleText,
+                subtitleGray: r.subtitleGray,
+                subtitlePink: r.subtitlePink,
+                buttonText: r.buttonText,
+              })),
+              jumpUrl: this.rightsDetailGuideForm.jumpUrl,
+              jumpButtons: this.rightsDetailGuideForm.jumpButtons,
             };
           }
 
