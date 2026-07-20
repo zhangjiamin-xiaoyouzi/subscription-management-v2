@@ -1002,6 +1002,132 @@
     .fade-enter-active, .fade-leave-active { transition: opacity .3s; }
     .fade-enter-from, .fade-leave-to { opacity: 0; }
   </style>
+<style id="__req_tip_style2__">
+.req-anno-btn{display:inline-block;background:#e67e00;color:#fff;border:none;border-radius:3px;padding:1px 7px;font-size:11px;line-height:18px;cursor:pointer;margin-right:8px;vertical-align:middle;font-weight:600;opacity:.9}
+.req-anno-btn:hover{background:#cf6c00;opacity:1}
+.req-anno-box{display:none}
+#__req_modal__ *{box-sizing:border-box}
+#__req_modal__ .req-card{background:#fff;border-radius:8px;padding:0;max-width:520px;width:95%;box-shadow:0 8px 32px rgba(0,0,0,.22);position:relative;border-top:4px solid #e67e00;max-height:75vh;overflow:hidden;display:flex;flex-direction:column}
+#__req_modal__ .req-header{padding:16px 20px 12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+#__req_modal__ .req-title{font-size:15px;font-weight:700;color:#e67e00;letter-spacing:.5px}
+#__req_modal__ .req-close{background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:#aaa;padding:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all .2s}
+#__req_modal__ .req-close:hover{background:#f5f5f5;color:#666}
+#__req_modal__ .req-body{padding:16px 20px;overflow-y:auto;flex:1}
+#__req_modal__ .req-section{margin-bottom:16px}
+#__req_modal__ .req-section:last-child{margin-bottom:0}
+#__req_modal__ .req-section-header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(135deg,#fff7e6 0%,#fffbe6 100%);border-radius:6px;border-left:3px solid #e67e00;margin-bottom:10px}
+#__req_modal__ .req-section-icon{font-size:16px}
+#__req_modal__ .req-section-title{font-size:13px;font-weight:600;color:#5a4000}
+#__req_modal__ .req-desc{font-size:12px;color:#666;line-height:1.8;padding:0 4px}
+#__req_modal__ .req-divider{height:1px;background:linear-gradient(to right,transparent,#e8e8e8,transparent);margin:12px 0}
+#__req_modal__ .req-meta{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+#__req_modal__ .req-meta-item{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#f5f5f5;border-radius:4px;font-size:11px;color:#666}
+#__req_modal__ .req-meta-label{color:#999;font-weight:500}
+#__req_modal__ .req-enum-list{list-style:none;padding:0;margin:8px 0}
+#__req_modal__ .req-enum-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;font-size:12px;line-height:1.6}
+#__req_modal__ .req-enum-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+#__req_modal__ .req-enum-dot.red{background:#ff4d4f}
+#__req_modal__ .req-enum-dot.yellow{background:#faad14}
+#__req_modal__ .req-enum-dot.green{background:#52c41a}
+#__req_modal__ .req-enum-text{flex:1}
+#__req_modal__ .req-enum-label{font-weight:600;color:#333}
+#__req_modal__ .req-enum-desc{color:#666}
+#__req_modal__ .req-scene{background:#f9f9f9;border-radius:6px;padding:10px 12px;margin-top:8px}
+#__req_modal__ .req-scene-label{font-size:11px;color:#999;font-weight:500;margin-bottom:4px}
+#__req_modal__ .req-scene-text{font-size:12px;color:#555;line-height:1.7}
+</style>
+<script>
+function toggleReqAnno(btn){
+  var box=btn.parentElement.querySelector('.req-anno-box');
+  if(!box)return;
+  if(document.getElementById('__req_modal__'))return;
+  var ov=document.createElement('div');
+  ov.id='__req_modal__';
+  ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:999998;display:flex;align-items:center;justify-content:center';
+  var rawText=box.textContent.trim();
+  var html=parseReqText(rawText);
+  var card=document.createElement('div');
+  card.className='req-card';
+  var header=document.createElement('div');
+  header.className='req-header';
+  var ttl=document.createElement('div');
+  ttl.className='req-title';
+  ttl.textContent='📋 需求说明';
+  var cls=document.createElement('button');
+  cls.className='req-close';
+  cls.innerHTML='&times;';
+  cls.onclick=function(){ov.remove();};
+  header.appendChild(ttl);
+  header.appendChild(cls);
+  var body=document.createElement('div');
+  body.className='req-body';
+  body.innerHTML=html;
+  card.appendChild(header);
+  card.appendChild(body);
+  ov.appendChild(card);
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+function parseReqText(text){
+  var sections=text.split(/\n(?=【)/);
+  var html='';
+  sections.forEach(function(sec){
+    sec=sec.trim();
+    if(!sec)return;
+    var titleMatch=sec.match(/【([^】]+)】/);
+    if(!titleMatch)return;
+    var title=titleMatch[1];
+    var content=sec.replace(/【[^】]+】/, '').trim();
+    var icon='🏷️';
+    if(title.indexOf('测排')>-1||title.indexOf('同房')>-1||title.indexOf('验孕')>-1)icon='📊';
+    html+='<div class="req-section">';
+    html+='<div class="req-section-header"><span class="req-section-icon">'+icon+'</span><span class="req-section-title">【'+title+'】</span></div>';
+    var lines=content.split('\n').filter(function(l){return l.trim();});
+    var descLines=[];
+    var relationLine='';
+    var enumLines=[];
+    var sceneLine='';
+    lines.forEach(function(line){
+      line=line.trim();
+      if(line.indexOf('关系：')===0){relationLine=line;}
+      else if(line.indexOf('枚举值：')===0||line.indexOf('业务场景：')===0){}
+      else if(line.indexOf('- ')===0||line.indexOf('• ')===0){enumLines.push(line);}
+      else if(line.indexOf('业务场景')===0){sceneLine=line;}
+      else{descLines.push(line);}
+    });
+    if(descLines.length){
+      html+='<div class="req-desc">'+descLines.join('<br>')+'</div>';
+    }
+    if(relationLine){
+      var relVal=relationLine.replace('关系：','');
+      html+='<div class="req-meta"><span class="req-meta-item"><span class="req-meta-label">关系</span>'+relVal+'</span></div>';
+    }
+    if(enumLines.length){
+      html+='<ul class="req-enum-list">';
+      enumLines.forEach(function(item){
+        item=item.replace(/^-\s*/,'').replace(/^•\s*/,'');
+        var colorClass='red';
+        if(item.indexOf('建议调整')>-1||item.indexOf('良好')>-1)colorClass='green';
+        else if(item.indexOf('建议关注')>-1||item.indexOf('一般')>-1)colorClass='yellow';
+        var parts=item.split(/[：:]/);
+        var label=parts[0]||'';
+        var desc=parts.slice(1).join('：')||'';
+        html+='<li class="req-enum-item"><span class="req-enum-dot '+colorClass+'"></span><span class="req-enum-text"><span class="req-enum-label">'+label+'</span>'+(desc?'<span class="req-enum-desc">：'+desc+'</span>':'')+'</span></li>';
+      });
+      html+='</ul>';
+    }
+    if(sceneLine){
+      var sceneText=sceneLine.replace('业务场景：','');
+      html+='<div class="req-scene"><div class="req-scene-label">💡 业务场景</div><div class="req-scene-text">'+sceneText+'</div></div>';
+    }
+    html+='</div>';
+    if(sections.indexOf(sec)<sections.length-1){
+      html+='<div class="req-divider"></div>';
+    }
+  });
+  return html;
+}
+</script>
 </head>
 <body>
   <div id="app" v-cloak>
@@ -1823,6 +1949,7 @@
                     <!-- 人群标签 -->
                     <div class="record-banner-field full">
                       <div class="record-banner-label">
+                        <button class="req-anno-btn" onclick="toggleReqAnno(this)">需求说明</button>
                         人群标签
                         <span class="help-icon" data-tip="可添加多个人群标签，用于细分不同人群展示不同内容">?</span>:
                       </div>
@@ -1859,6 +1986,34 @@
                             <span v-if="record.crowdConditions.length > 1" @click="record.crowdConditions.splice(ci, 1)" style="cursor: pointer; color: #ff4d4f; font-size: 16px;"></span>
                           </div>
                         </div>
+                      </div>
+                      <div class="req-anno-box">
+【人群标签】
+用于细分不同人群展示不同订阅引导内容，支持多条件组合筛选。
+
+【黄金受孕期测排结果】
+关系：包含/等于
+枚举值：急需关注、建议关注、建议调整
+业务场景：针对备孕用户，根据测排结果精准推送订阅引导内容。
+- 急需关注：测排结果异常，需立即干预
+- 建议关注：测排结果一般，建议优化
+- 建议调整：测排结果良好，建议保持
+
+【黄金受孕期同房时机】
+关系：包含/等于
+枚举值：急需关注、建议关注、建议调整
+业务场景：根据同房时机评估结果，推送个性化订阅引导。
+- 急需关注：同房时机不佳，需调整
+- 建议关注：同房时机一般，建议优化
+- 建议调整：同房时机良好，建议保持
+
+【黄金受孕期验孕时间】
+关系：包含/等于
+枚举值：急需关注、建议关注、建议调整
+业务场景：根据验孕时间提醒，推送订阅引导内容。
+- 急需关注：验孕时间临近，需提醒
+- 建议关注：验孕时间适中，建议关注
+- 建议调整：验孕时间已过，建议调整
                       </div>
                     </div>
 
@@ -2628,6 +2783,9 @@
             '经期-痛经缓解人群标签',
             '新手妈妈人群标签',
             '产后恢复人群标签',
+            '黄金受孕期测排结果',
+            '黄金受孕期同房时机',
+            '黄金受孕期验孕时间',
           ],
           rightsDetailGuideVarList: ['$会员价', '$原价', '$节省金额', '$权益名称', '$到期时间'],
 

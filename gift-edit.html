@@ -115,6 +115,22 @@
     .add-col-btn { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 12px; font-size: 12px; color: #ff4d88; border: 1px dashed #ff4d88; border-radius: 4px; background: #fff; cursor: pointer; transition: all .15s; }
     .add-col-btn:hover { background: #fff0f6; }
     .ext-image-list { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* 规格表格 */
+    .spec-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .spec-table th { background: #fafafa; padding: 8px 10px; text-align: left; font-weight: 500; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+    .spec-table td { padding: 6px 10px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+    .spec-table .spec-input { height: 32px; padding: 0 8px; font-size: 13px; border: 1px solid #d9d9d9; border-radius: 4px; outline: none; width: 100%; }
+    .spec-table .spec-input:focus { border-color: #ff4d88; box-shadow: 0 0 0 2px rgba(255,77,136,.1); }
+    .spec-table .spec-input.stock-input { width: 100px; }
+    .spec-table .spec-del-btn { background: none; border: none; color: #ff4d4f; font-size: 13px; cursor: pointer; padding: 4px 8px; }
+    .spec-table .spec-del-btn:hover { color: #d9363e; }
+    .spec-total-stock { font-size: 12px; color: #999; margin-top: 6px; }
+    .spec-group-name-input { width: 120px; }
+    .form-hint { font-size: 12px; color: #999; margin-top: 4px; }
+    .checkbox-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+    .checkbox-inline input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; }
+
     .info-tip { display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 4px; font-size: 12px; color: #ad8b00; margin-bottom: 16px; }
     .info-tip .tip-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
     .form-actions { display: flex; justify-content: center; gap: 12px; padding: 20px 0; }
@@ -388,11 +404,52 @@ function toggleReqAnno(btn) {
                 <div class="form-control">
                   <div class="number-input-wrap">
                     <button @click="formData.stock > 0 && formData.stock--">−</button>
-                    <input type="text" v-model.number="formData.stock" />
-                    <button @click="formData.stock++">+</button>
+                    <input type="text" v-model.number="formData.stock" :disabled="formData.has_specs" />
+                    <button @click="formData.stock++" :disabled="formData.has_specs">+</button>
                   </div>
+                  <div class="form-hint">启用规格配置后，统一库存不生效，改为按规格管理库存</div>
                 </div>
               </div>
+
+              <!-- 规格库存配置 -->
+              <div class="form-row">
+                <div class="form-label" style="line-height:normal;padding-top:4px;">
+                  <button class="req-anno-btn" onclick="toggleReqAnno(this)" style="display:block;margin-bottom:3px;">需求说明</button>
+                  规格配置<span class="help-icon" data-tip="开启后可按规格（如尺码/型号/规格名）管理库存">?</span> :
+                  <div class="req-anno-box">【规格库存配置】勾选"启用规格配置"后，可自定义规格组名称（默认"尺码"），并按规格粒度管理库存。适用于实物、物流发货类赠礼。启用后统一库存字段将失效。配置后在用户领取时可选择具体规格。</div>
+                </div>
+                <div class="form-control">
+                  <label class="checkbox-inline" style="margin-bottom:12px;">
+                    <input type="checkbox" v-model="formData.has_specs" /> 启用规格配置
+                  </label>
+                  <template v-if="formData.has_specs">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                      <span style="font-size:13px;color:#666;white-space:nowrap;">规格名称：</span>
+                      <input class="input-field spec-group-name-input" type="text" v-model="formData.spec_group_name" placeholder="尺码" />
+                      <span style="font-size:12px;color:#999;">如：尺码、型号、规格</span>
+                    </div>
+                    <table class="spec-table">
+                      <thead>
+                        <tr>
+                          <th style="width:160px;">规格名</th>
+                          <th style="width:130px;">库存</th>
+                          <th>操作</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(spec, idx) in formData.specs" :key="idx">
+                          <td><input class="spec-input" type="text" v-model="spec.name" placeholder="如 S / 36 / 100g" /></td>
+                          <td><input class="spec-input stock-input" type="number" min="0" v-model.number="spec.stock" placeholder="0" /></td>
+                          <td><button class="spec-del-btn" @click="removeSpec(idx)" v-if="formData.specs.length > 1">删除</button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <button class="add-col-btn" @click="addSpec" style="margin-top:8px;">+ 添加一行</button>
+                    <div class="spec-total-stock">合计库存：{{ specTotalStock }}</div>
+                  </template>
+                </div>
+              </div>
+
               <div class="form-row">
                 <div class="form-label"><span class="required">*</span>有效期 :</div>
                 <div class="form-control">
@@ -560,6 +617,8 @@ function toggleReqAnno(btn) {
       { id: 253, name: '亲友卡兑换年卡*1', alias: '亲友卡兑换年卡*1', deliver_type: '', gift_type: '邀请码', source: 'self', cost_level: '低价值', value: 0, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
       { id: 252, name: '亲友卡兑换年卡*2', alias: '亲友卡兑换年卡2', deliver_type: '', gift_type: '邀请码', source: 'self', cost_level: '低价值', value: 0, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 1 },
       { id: 250, name: '测试赠礼-已失效', alias: '测试', deliver_type: '线上领取', gift_type: '实物', source: 'self', cost_level: '低价值', value: 1, stock: 0, expire_type: 'follow', intro_type: 'none', claim_page: '', privilege_tag: '', version_min: '', version_max: '', status: 2 },
+      // 带规格配置的测试数据
+      { id: 276, name: '定制礼盒套装', alias: '定制礼盒-测试规格', deliver_type: '物流发货', gift_type: '实物', source: 'self', cost_level: '高价值', value: 99, stock: 200, expire_type: 'follow', intro_type: 'none', claim_page: 'vip_center', privilege_tag: '', version_min: '', version_max: '', status: 1, has_specs: true, spec_group_name: '尺码', specs: [{ name: 'S', stock: 50 }, { name: 'M', stock: 80 }, { name: 'L', stock: 70 }] },
     ];
 
     async function apiPost(path, body) {
@@ -610,6 +669,10 @@ function toggleReqAnno(btn) {
           member_876: null,
           member_877: null,
           success_popup: null,
+          // 规格配置
+          has_specs: false,
+          spec_group_name: '尺码',
+          specs: [{ name: '', stock: 0 }],
         });
 
         const errors = reactive({ name: '', alias: '', value: '' });
@@ -635,6 +698,14 @@ function toggleReqAnno(btn) {
                 formData.privilege_tag = item.privilege_tag || '';
                 formData.version_min = item.version_min || '';
                 formData.version_max = item.version_max || '';
+                // 规格配置
+                if (item.has_specs) {
+                  formData.has_specs = true;
+                  formData.spec_group_name = item.spec_group_name || '尺码';
+                  formData.specs = item.specs && item.specs.length > 0
+                    ? item.specs.map(s => ({ ...s }))
+                    : [{ name: '', stock: 0 }];
+                }
               }
               loading.value = false;
             }, 200);
@@ -653,6 +724,14 @@ function toggleReqAnno(btn) {
         function decrementValue() { if (formData.value > 0) formData.value--; }
         function validateValue() { formData.value = Math.max(0, Number(formData.value) || 0); }
         function addExtImage() { formData.ext_images.push(null); }
+
+        // 规格配置
+        function addSpec() { formData.specs.push({ name: '', stock: 0 }); }
+        function removeSpec(idx) { if (formData.specs.length > 1) formData.specs.splice(idx, 1); }
+        const specTotalStock = Vue.computed(() => {
+          if (!formData.has_specs || !formData.specs) return 0;
+          return formData.specs.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+        });
 
         function handleIconUpload(e) {
           const file = e.target.files[0];
@@ -713,7 +792,7 @@ function toggleReqAnno(btn) {
         }
 
         function convertUrl(url) {
-          if (location.hostname.includes('github.io')) {
+          if (location.hostname.includes('github.io') || location.protocol === 'file:') {
             const [path, query] = url.split('?');
             const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
             return parts.join('-') + '.html' + (query ? '?' + query : '');
@@ -722,7 +801,7 @@ function toggleReqAnno(btn) {
         }
 
         function navigateTo(url) {
-          if (location.hostname.includes('github.io')) {
+          if (location.hostname.includes('github.io') || location.protocol === 'file:') {
             const [path, query] = url.split('?');
             const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
             window.location.href = parts.join('-') + '.html' + (query ? '?' + query : '');
@@ -733,7 +812,7 @@ function toggleReqAnno(btn) {
           siderCollapsed, opToolsOpen, deployOpen, priceManageOpen,
           productManageOpen, lotteryManageOpen, activeParent, subMenuMaxHeight,
           formData, errors, saving, loading,
-          incrementValue, decrementValue, validateValue, addExtImage,
+          incrementValue, decrementValue, validateValue, addExtImage, addSpec, removeSpec, specTotalStock,
           handleIconUpload, handleExtImageUpload,
           handleMember876Upload, handleMember877Upload, handleSuccessPopupUpload,
           handleSave, navigateTo, convertUrl,

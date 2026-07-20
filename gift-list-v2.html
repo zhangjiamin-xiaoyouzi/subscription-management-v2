@@ -41,16 +41,16 @@
     .sider-logo { height: 48px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; }
     .sider-logo .logo-icon { font-size: 22px; color: #ff4d88; }
     .sider-logo .logo-text { font-size: 14px; font-weight: 600; margin-left: 8px; white-space: nowrap; }
-    .sider-menu { padding: 8px 0; }
+    .sider-menu { padding: 8px 0; position: relative; }
     .sider-menu-item {
       display: flex; align-items: center; height: 44px; padding: 0 16px;
       font-size: 13px; color: rgba(0,0,0,.65); text-decoration: none;
       transition: all .2s ease; cursor: pointer; white-space: nowrap;
-      border-left: 3px solid transparent;
+      border-left: 3px solid transparent; position: relative;
     }
     .sider-menu-item:hover { background: linear-gradient(90deg,rgba(255,77,136,.06),transparent); color: #ff4d88; }
     .sider-menu-item.active { color: #ff4d88; background: linear-gradient(90deg,rgba(255,77,136,.08),rgba(255,77,136,.01)); border-left-color: #ff4d88; }
-    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; }
+    .sider-menu-item.parent-open { color: rgba(0,0,0,.8); font-weight: 500; z-index: 1; }
     .sider-submenu { overflow: hidden; transition: max-height .3s cubic-bezier(0.4,0,0.2,1); }
     .sider-submenu .sider-menu-item { padding-left: 40px; height: 36px; font-size: 12px; border-left: 3px solid transparent; }
     .sider-submenu .sider-menu-item.active { color: #ff4d88; background: #fff0f6; border-left-color: #ff4d88; font-weight: 500; }
@@ -440,7 +440,7 @@
         function convertUrl(url) {
             const [path, query] = url.split('?');
             const parts = path.replace(/^\//, '').replace(/\/$/, '').split('/');
-            return '/' + parts.join('-') + '-v2.html' + (query ? '?' + query : '');
+            return './' + parts.join('-') + '-v2.html' + (query ? '?' + query : '');
         }
         function getCreateUrl() { return convertUrl('/gift/create'); }
         function getEditUrl(row) { return convertUrl(`/gift/edit?id=${row.id}&coupon_biz=`); }
